@@ -104,6 +104,7 @@ class MeasurmentSheetView extends StatelessWidget {
                                           controller.viewMeasurementSheet(
                                             sheet,
                                           );
+                                          Get.toNamed(AppRoutes.pboqList);
                                         },
                                         child: Text(
                                           "View",
