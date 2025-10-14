@@ -1,5 +1,6 @@
 // lib/app/modules/home/home_view.dart
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
@@ -45,7 +46,9 @@ class _HomeViewState extends State<HomeView> {
                 _buildGridItem(
                   'Measurement Sheet',
                   "",
-                  () {},
+                  () {
+                    Get.toNamed(AppRoutes.measurmentSheetView);
+                  },
                   const Color.fromARGB(255, 132, 0, 255),
                   FontAwesomeIcons.solidHourglassHalf,
                 ),
@@ -177,10 +180,6 @@ class _HomeViewState extends State<HomeView> {
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
-      ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(0),
-        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
       ),
     );
   }

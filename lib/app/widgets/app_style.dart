@@ -373,15 +373,15 @@ class AppStyle {
     color: AppColors.grey,
   );
   //Report card text style
-  static TextStyle get reportCardTitle => GoogleFonts.inter(
-    fontSize: _fontSize16,
-    fontWeight: FontWeight.w600,
-    color: AppColors.defaultBlack,
-  );
-  static TextStyle get reportCardSubTitle => GoogleFonts.inter(
+  static TextStyle get reportCardTitle => GoogleFonts.poppins(
     fontSize: _fontSize13,
     fontWeight: FontWeight.w600,
-    color: AppColors.grey,
+    color: AppColors.darkBackground,
+  );
+  static TextStyle get reportCardSubTitle => GoogleFonts.poppins(
+    fontSize: _fontSize13,
+    fontWeight: FontWeight.w500,
+    color: AppColors.defaultBlack,
   );
   static TextStyle get reportCardRowTitle => GoogleFonts.poppins(
     fontSize: _fontSize14,
@@ -396,8 +396,8 @@ class AppStyle {
 
   //my team card text style
   static TextStyle get myTeamCardTitle => GoogleFonts.poppins(
-    fontSize: _fontSize14,
-    fontWeight: FontWeight.w600,
+    fontSize: _fontSize13,
+    fontWeight: FontWeight.w500,
     color: AppColors.defaultBlack,
   );
   static TextStyle get myTeamRowCount => GoogleFonts.poppins(
