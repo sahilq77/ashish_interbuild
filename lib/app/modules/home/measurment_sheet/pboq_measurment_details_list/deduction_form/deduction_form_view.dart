@@ -1,4 +1,4 @@
-import 'package:ashishinterbuild/app/modules/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';

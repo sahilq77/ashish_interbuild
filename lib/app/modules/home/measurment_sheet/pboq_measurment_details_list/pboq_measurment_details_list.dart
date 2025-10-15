@@ -1,5 +1,5 @@
 import 'package:ashishinterbuild/app/data/models/pboq/pboq_model.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -157,7 +157,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         style: AppButtonStyles.elevatedSmallPrimary(),
-                        onPressed: () => controller.viewPboqDetails(sheet),
+                        onPressed: () => Get.toNamed(AppRoutes.deductionForm),
                         child: Row(
                           children: [
                             Icon(Icons.add),

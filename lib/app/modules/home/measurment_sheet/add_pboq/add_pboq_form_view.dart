@@ -1,6 +1,6 @@
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/measurment_sheet_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -244,7 +244,7 @@ class AddPboqFormView extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Add PBOQ',
+        'Add PBOQ Measurement Details',
         style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,

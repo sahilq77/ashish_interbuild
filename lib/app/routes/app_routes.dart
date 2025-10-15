@@ -2,12 +2,15 @@ import 'package:ashishinterbuild/app/modules/home/home_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/home_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/login/login_binding.dart';
 import 'package:ashishinterbuild/app/modules/login/login_view.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list_binding.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/add_pboq/add_pboq_form_binding.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/add_pboq/add_pboq_form_view.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/measurment_sheet_binding.dart';
-import 'package:ashishinterbuild/app/modules/measurment_sheet/measurment_sheet_view.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_view.dart';
 import 'package:ashishinterbuild/app/modules/splash/splash_view.dart';
 import 'package:get/get.dart';
 
@@ -16,8 +19,9 @@ class AppRoutes {
   static const String login = '/login';
   static const String home = '/home';
   static const String measurmentSheetView = '/measurment-sheet-list';
-static const String addPBOQ = '/add-pboq';
-static const String pboqList = '/pboq-list';
+  static const String addPBOQ = '/add-pboq';
+  static const String pboqList = '/pboq-list';
+  static const String deductionForm = '/deduction-form';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -36,18 +40,21 @@ static const String pboqList = '/pboq-list';
       page: () => const MeasurmentSheetView(),
       binding: MeasurmentSheetBinding(),
     ),
-  GetPage(
+    GetPage(
       name: addPBOQ,
       page: () => const AddPboqFormView(),
       binding: AddPboqFormBinding(),
     ),
-     GetPage(
+    GetPage(
       name: pboqList,
       page: () => const PboqMeasurmentDetailsList(),
       binding: PboqMeasurmentDetailsListBinding(),
     ),
-
-    
+    GetPage(
+      name: deductionForm,
+      page: () => const DeductionFormView(),
+      binding: DeductionFormBinding(),
+    ),
   ];
 }
 
