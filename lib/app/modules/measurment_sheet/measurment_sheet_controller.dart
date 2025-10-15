@@ -1,9 +1,13 @@
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/measurment_sheet_model.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class MeasurementSheetController extends GetxController {
   // Reactive list of measurement sheets
   final RxList<MeasurementSheet> measurementSheets = <MeasurementSheet>[].obs;
+
+  // Reactive list for filtered measurement sheets
+  final RxList<MeasurementSheet> filteredMeasurementSheets = <MeasurementSheet>[].obs;
 
   // Reactive variable to track the index of the expanded card
   final RxInt expandedIndex = (-1).obs; // -1 means no card is expanded
@@ -11,11 +15,23 @@ class MeasurementSheetController extends GetxController {
   // Reactive variable to track loading state
   final RxBool isLoading = true.obs;
 
+  // TextEditingController for the search field
+  final TextEditingController searchController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
     // Load dummy data when controller is initialized
     loadDummyData();
+    // Initialize filtered list with all measurement sheets
+    filteredMeasurementSheets.assignAll(measurementSheets);
+  }
+
+  @override
+  void onClose() {
+    // Dispose of the search controller
+    searchController.dispose();
+    super.onClose();
   }
 
   // Function to load dummy data
@@ -52,6 +68,8 @@ class MeasurementSheetController extends GetxController {
         pboqQty: "12500",
       ),
     ]);
+    // Update filtered list after loading data
+    filteredMeasurementSheets.assignAll(measurementSheets);
     isLoading.value = false;
   }
 
@@ -60,9 +78,12 @@ class MeasurementSheetController extends GetxController {
     isLoading.value = true;
     // Clear existing data
     measurementSheets.clear();
+    filteredMeasurementSheets.clear();
     // Simulate network delay and reload data
     await Future.delayed(Duration(seconds: 2));
-    loadDummyData();
+    await loadDummyData();
+    // Reset search
+    searchController.clear();
   }
 
   // Function to handle view action
@@ -77,6 +98,23 @@ class MeasurementSheetController extends GetxController {
       expandedIndex.value = -1; // Collapse if the same card is clicked
     } else {
       expandedIndex.value = index; // Expand the clicked card
+    }
+  }
+
+  // Function to handle search
+  void searchSurveys(String query) {
+    if (query.isEmpty) {
+      // If search query is empty, show all measurement sheets
+      filteredMeasurementSheets.assignAll(measurementSheets);
+    } else {
+      // Filter measurement sheets based on packageName or cboqName
+      filteredMeasurementSheets.assignAll(
+        measurementSheets.where(
+          (sheet) =>
+              sheet.packageName.toLowerCase().contains(query.toLowerCase()) ||
+              sheet.cboqName.toLowerCase().contains(query.toLowerCase()),
+        ).toList(),
+      );
     }
   }
 }

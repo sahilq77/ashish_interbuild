@@ -1,4 +1,5 @@
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
+import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -59,8 +60,17 @@ class LoginController extends GetxController {
     if (!formKey.currentState!.validate()) {
       return;
     }
-    // Navigate with arguments
-    Get.offNamed(AppRoutes.home);
+    AppUtility.setUserInfo(
+      "Sahil",
+      "77798557656",
+      '',
+      'dummy_user_',
+      'dummy_plant_1',
+      1,
+    ).then((val) {
+      // Navigate with arguments
+      Get.offNamed(AppRoutes.home);
+    });
   }
 
   @override

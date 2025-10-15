@@ -1,11 +1,10 @@
-// pboq_measurment_details_list.dart
 import 'package:ashishinterbuild/app/data/models/pboq/pboq_model.dart';
-import 'package:ashishinterbuild/app/modules/login/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
+import 'package:ashishinterbuild/app/modules/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
-import 'package:ashishinterbuild/app/widgets/app_button_style.dart'
-    show AppButtonStyles;
-import 'package:ashishinterbuild/app/widgets/app_style.dart' show AppStyle;
+import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
+import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,12 +15,9 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialise / retrieve the controller (GetX)
     final PboqMeasurmentDetailController controller = Get.put(
       PboqMeasurmentDetailController(),
     );
-
-    // Init responsive helper (you already do this in your original code)
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -30,33 +26,64 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
         color: AppColors.primary,
-        child: Obx(() {
-          // -------------------------------------------------
-          // Loading state → show shimmer
-          // -------------------------------------------------
-          if (controller.isLoading.value) {
-            return _shimmerList();
-          }
-
-          // -------------------------------------------------
-          // Normal state → show real data
-          // -------------------------------------------------
-          return ListView.builder(
-            padding: ResponsiveHelper.padding(16),
-            itemCount: controller.pboqList.length,
-            itemBuilder: (context, index) {
-              final PboqModel sheet = controller.pboqList[index];
-              return _buildCard(controller, sheet, index);
-            },
-          );
-        }),
+        child: Column(
+          children: [
+            // Search bar
+            Padding(
+              padding: ResponsiveHelper.padding(16),
+              child: _buildSearchField(controller),
+            ),
+            // List view
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return _shimmerList();
+                }
+                return controller.filteredPboqList.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: ResponsiveHelper.padding(16),
+                        itemCount: controller.filteredPboqList.length,
+                        itemBuilder: (context, index) {
+                          final PboqModel sheet =
+                              controller.filteredPboqList[index];
+                          return _buildCard(controller, sheet, index);
+                        },
+                      );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // -------------------------------------------------------------------------
+  // Search field with clear button
+  Widget _buildSearchField(PboqMeasurmentDetailController controller) {
+    return TextFormField(
+      controller: controller.searchController,
+      decoration: InputDecoration(
+        hintText: 'Search by Package or CBOQ Name',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        suffixIcon: controller.searchController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  controller.searchController.clear();
+                  controller.searchPboq('');
+                },
+              )
+            : const Icon(Icons.search),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+      ),
+      onChanged: controller.searchPboq,
+    );
+  }
+
   // Card for a single PBOQ item
-  // -------------------------------------------------------------------------
   Widget _buildCard(
     PboqMeasurmentDetailController controller,
     PboqModel sheet,
@@ -81,14 +108,11 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
             padding: ResponsiveHelper.padding(16),
             child: Column(
               children: [
-                // Always visible rows
                 _detailRow('Package Name', sheet.packageName),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                 _detailRow('CBOQ Name', sheet.cboqName),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                 _detailRow('MS Qty', sheet.msQty.toString()),
-
-                // Expanded rows (appear only when the card is expanded)
                 if (controller.expandedIndex.value == index) ...[
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                   _detailRow('PBOQ Name', sheet.pboq),
@@ -126,20 +150,22 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                     '${sheet.updatedOn.year}-${sheet.updatedOn.month.toString().padLeft(2, '0')}-${sheet.updatedOn.day.toString().padLeft(2, '0')}',
                   ),
                 ],
-
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
                 const Divider(),
-
-                // Action buttons
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: AppButtonStyles.elevatedSmallPrimary(),
                         onPressed: () => controller.viewPboqDetails(sheet),
-                        child: Text(
-                          'View',
-                          style: AppStyle.labelPrimaryPoppinsWhite,
+                        child: Row(
+                          children: [
+                            Icon(Icons.add),
+                            Text(
+                              'Deduction',
+                              style: AppStyle.labelPrimaryPoppinsWhite,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -166,9 +192,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Helper: a single label-value row
-  // -------------------------------------------------------------------------
+  // Helper: Single label-value row
   Widget _detailRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,13 +215,11 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
   // Shimmer placeholder while loading
-  // -------------------------------------------------------------------------
   Widget _shimmerList() {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5, // arbitrary number of shimmer cards
+      itemCount: 5,
       itemBuilder: (_, __) => Shimmer.fromColors(
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
@@ -265,9 +287,21 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
+  // Empty state widget
+  Widget _buildEmptyState() {
+    return Center(
+      child: Text(
+        'No results found',
+        style: GoogleFonts.poppins(
+          color: AppColors.grey,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   // AppBar
-  // -------------------------------------------------------------------------
   AppBar _buildAppBar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.white),
@@ -284,8 +318,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            // Navigate to add-screen (replace with your route)
-            Get.toNamed('/addPBOQ');
+            Get.toNamed(AppRoutes.addPBOQ);
           },
           icon: const Icon(Icons.add),
         ),

@@ -2,6 +2,7 @@
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class _HomeViewState extends State<HomeView> {
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
+      //drawer: Drawer(),
       appBar: _buildAppbar(),
 
       body: Padding(
@@ -53,7 +55,7 @@ class _HomeViewState extends State<HomeView> {
                   FontAwesomeIcons.solidHourglassHalf,
                 ),
                 _buildGridItem(
-                  'DPR',
+                  'Daily Progress Report (DPR)',
                   "",
                   () {},
                   const Color.fromARGB(255, 255, 0, 162),
@@ -181,6 +183,39 @@ class _HomeViewState extends State<HomeView> {
           fontWeight: FontWeight.w600,
         ),
       ),
+      actions: [
+        IconButton(
+          onPressed: () {
+            // Show logout confirmation dialog
+            showDialog(
+              context: context, // Ensure context is available in your widget
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Logout"),
+                  content: Text("Are you sure you want to log out?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        AppUtility.clearUserInfo().then(
+                          (val) => Get.offAllNamed(AppRoutes.login),
+                        ); // Call the logout function
+                      },
+                      child: Text("Logout"),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          icon: Icon(Icons.logout_rounded),
+        ),
+      ],
     );
   }
 }

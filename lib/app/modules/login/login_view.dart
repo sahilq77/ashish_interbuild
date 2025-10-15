@@ -57,9 +57,8 @@ class _LoginViewState extends State<LoginView> {
                     alignment: Alignment.centerLeft,
                     child: ResponsiveHelper.safeText(
                       'Enter your username',
-                      style: AppStyle.bodyRegularPoppinsBlack.responsive.copyWith(
-                        fontSize: 15,
-                      ),
+                      style: AppStyle.bodyRegularPoppinsBlack.responsive
+                          .copyWith(fontSize: 15),
                     ),
                   ),
                   SizedBox(height: ResponsiveHelper.spacing(12)),
@@ -107,9 +106,8 @@ class _LoginViewState extends State<LoginView> {
                     alignment: Alignment.centerLeft,
                     child: ResponsiveHelper.safeText(
                       'Enter your password',
-                      style: AppStyle.bodyRegularPoppinsBlack.responsive.copyWith(
-                        fontSize: 15,
-                      ),
+                      style: AppStyle.bodyRegularPoppinsBlack.responsive
+                          .copyWith(fontSize: 15),
                     ),
                   ),
                   SizedBox(height: ResponsiveHelper.spacing(12)),

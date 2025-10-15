@@ -1,4 +1,4 @@
-import 'package:ashishinterbuild/app/modules/login/pboq_measurment_details_list/pboq_measurment_details_list.dart';
+import 'package:ashishinterbuild/app/modules/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -120,10 +120,9 @@ class MyApp extends StatelessWidget {
           color: AppColors.primary,
         ),
       ),
-      home: PboqMeasurmentDetailsList(),
 
-      // initialRoute: AppRoutes.splash,
-      // getPages: AppRoutes.routes,
+      initialRoute: AppRoutes.splash,
+      getPages: AppRoutes.routes,
       builder: (context, child) {
         return ColorfulSafeArea(
           color: AppColors.primary,
