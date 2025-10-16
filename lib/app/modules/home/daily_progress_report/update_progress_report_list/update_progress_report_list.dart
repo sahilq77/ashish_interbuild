@@ -28,8 +28,43 @@ class UpdateProgressReportList extends StatelessWidget {
         child: Column(
           children: [
             // Add search field
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  margin: ResponsiveHelper.padding(16),
+                  padding: ResponsiveHelper.padding(5),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.lightGrey),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Column(
+                    children: [
+                      Text("Package Name", style: AppStyle.reportCardTitle),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                      Text("Prime Package", style: AppStyle.reportCardSubTitle),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: ResponsiveHelper.padding(16),
+                  padding: ResponsiveHelper.padding(5),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.lightGrey),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Column(
+                    children: [
+                      Text("PBOQ Name", style: AppStyle.reportCardTitle),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                      Text("PBOQ ", style: AppStyle.reportCardSubTitle),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             Padding(
-              padding: ResponsiveHelper.padding(16),
+              padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
               child: _buildSearchField(controller),
             ),
             // Expanded to make ListView take remaining space
