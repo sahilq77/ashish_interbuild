@@ -1,9 +1,13 @@
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_dashboard/daily_progress_report_dashboard.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_dashboard/daily_progress_report_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_list.dart';
 import 'package:ashishinterbuild/app/modules/home/home_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/home_screen_view.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_inspection/daily_progress_report_dashboard/weekly_inspection_dashboard.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_inspection/daily_progress_report_dashboard/weekly_inspection_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/login/login_binding.dart';
 import 'package:ashishinterbuild/app/modules/login/login_view.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_binding.dart';
@@ -27,9 +31,11 @@ class AppRoutes {
   static const String pboqList = '/pboq-list';
   static const String deductionForm = '/deduction-form';
   static const String dailyProgressReport = '/daily-progress-report';
-  static const String updateDailyReportList = '/update-daily-progress-report-list';
-
-  
+  static const String updateDailyReportList =
+      '/update-daily-progress-report-list';
+  static const String dailyProgressDashboard = '/daily-progress-dashboard';
+  static const String weeklyInspectionDashboard =
+      '/weekly-inspection-dashboard';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -68,12 +74,21 @@ class AppRoutes {
       page: () => const DailyProgressReportViiew(),
       binding: DailyProgressReportBinding(),
     ),
-GetPage(
+    GetPage(
       name: updateDailyReportList,
       page: () => const UpdateProgressReportList(),
       binding: UpdateProgressReportBinding(),
     ),
-    
+    GetPage(
+      name: dailyProgressDashboard,
+      page: () => const DailyProgressReportDashboard(),
+      binding: DailyProgressReportDashboardBinding(),
+    ),
+    GetPage(
+      name: weeklyInspectionDashboard,
+      page: () => const WeeklyInspectionDashboard(),
+      binding: WeeklyInspectionDashboardBinding(),
+    ),
   ];
 }
 

@@ -412,4 +412,17 @@ class AppStyle {
     fontWeight: FontWeight.w500,
     color: AppColors.grey,
   );
+
+  //Daily progress report Dashboard style
+  static TextStyle get dashTitle => GoogleFonts.poppins(
+    fontSize: _fontSize14,
+    fontWeight: FontWeight.w500,
+    color: AppColors.defaultBlack,
+  );
+   static TextStyle get dashPercent => GoogleFonts.poppins(
+    fontSize: _fontSize12,
+    fontWeight: FontWeight.w500,
+    color: AppColors.defaultBlack,
+  );
+  
 }
