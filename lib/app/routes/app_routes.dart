@@ -1,3 +1,7 @@
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_view.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_list.dart';
 import 'package:ashishinterbuild/app/modules/home/home_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/home_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/login/login_binding.dart';
@@ -22,6 +26,10 @@ class AppRoutes {
   static const String addPBOQ = '/add-pboq';
   static const String pboqList = '/pboq-list';
   static const String deductionForm = '/deduction-form';
+  static const String dailyProgressReport = '/daily-progress-report';
+  static const String updateDailyReportList = '/update-daily-progress-report-list';
+
+  
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -55,6 +63,17 @@ class AppRoutes {
       page: () => const DeductionFormView(),
       binding: DeductionFormBinding(),
     ),
+    GetPage(
+      name: dailyProgressReport,
+      page: () => const DailyProgressReportViiew(),
+      binding: DailyProgressReportBinding(),
+    ),
+GetPage(
+      name: updateDailyReportList,
+      page: () => const UpdateProgressReportList(),
+      binding: UpdateProgressReportBinding(),
+    ),
+    
   ];
 }
 

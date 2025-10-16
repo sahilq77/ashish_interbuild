@@ -57,7 +57,9 @@ class _HomeViewState extends State<HomeView> {
                 _buildGridItem(
                   'Daily Progress Report (DPR)',
                   "",
-                  () {},
+                  () {
+                    Get.toNamed(AppRoutes.dailyProgressReport);
+                  },
                   const Color.fromARGB(255, 255, 0, 162),
                   FontAwesomeIcons.solidClock,
                 ),
