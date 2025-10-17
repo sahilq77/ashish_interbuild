@@ -6,8 +6,12 @@ import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_p
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_list.dart';
 import 'package:ashishinterbuild/app/modules/home/home_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/home_screen_view.dart';
-import 'package:ashishinterbuild/app/modules/home/weekly_inspection/daily_progress_report_dashboard/weekly_inspection_dashboard.dart';
-import 'package:ashishinterbuild/app/modules/home/weekly_inspection/daily_progress_report_dashboard/weekly_inspection_dashboard_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_list.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_view.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_work_inspection_dashboard/weekly_inspection_dashboard.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_work_inspection_dashboard/weekly_inspection_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/login/login_binding.dart';
 import 'package:ashishinterbuild/app/modules/login/login_view.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/deduction_form/deduction_form_binding.dart';
@@ -36,6 +40,8 @@ class AppRoutes {
   static const String dailyProgressDashboard = '/daily-progress-dashboard';
   static const String weeklyInspectionDashboard =
       '/weekly-inspection-dashboard';
+  static const String weeklyInspection = '/weekly-inspection';
+  static const String updateWeeklyInspection = '/update-weekly-inspection';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -88,6 +94,16 @@ class AppRoutes {
       name: weeklyInspectionDashboard,
       page: () => const WeeklyInspectionDashboard(),
       binding: WeeklyInspectionDashboardBinding(),
+    ),
+    GetPage(
+      name: weeklyInspection,
+      page: () => const WeeklyInspectionView(),
+      binding: WeeklyInspectionBinding(),
+    ),
+    GetPage(
+      name: updateWeeklyInspection,
+      page: () => const UpdateWeeklyInspectionList(),
+      binding: UpdateWeeklyInspectionBinding(),
     ),
   ];
 }

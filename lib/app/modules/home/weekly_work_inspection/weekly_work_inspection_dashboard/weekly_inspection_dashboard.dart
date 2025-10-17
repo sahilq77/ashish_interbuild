@@ -1,4 +1,4 @@
-import 'package:ashishinterbuild/app/modules/home/weekly_inspection/daily_progress_report_dashboard/weekly_inspection_dashboard_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_work_inspection_dashboard/weekly_inspection_dashboard_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -96,7 +96,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
   ) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.dailyProgressReport);
+        Get.toNamed(AppRoutes.weeklyInspection);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -117,7 +117,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () {
-              Get.toNamed(AppRoutes.dailyProgressReport);
+              Get.toNamed(AppRoutes.weeklyInspection);
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -171,7 +171,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
       ),
     );
   }
- 
+
   AppBar _buildAppbar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.white),

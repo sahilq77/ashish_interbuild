@@ -1,4 +1,5 @@
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -8,12 +9,14 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class UpdateProgressReportList extends StatelessWidget {
-  const UpdateProgressReportList({super.key});
+class UpdateWeeklyInspectionList extends StatelessWidget {
+  const UpdateWeeklyInspectionList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final UpdateProgressReportController controller = Get.find();
+    final UpdateWeeklyInspectionController controller = Get.put(
+      UpdateWeeklyInspectionController(),
+    );
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -391,7 +394,7 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
-  TextFormField _buildSearchField(UpdateProgressReportController controller) {
+  TextFormField _buildSearchField(UpdateWeeklyInspectionController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
@@ -510,7 +513,7 @@ class UpdateProgressReportList extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Daily Progress Report Details',
+        'Weekly Inspection Details',
         style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,

@@ -28,9 +28,53 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
         color: AppColors.primary,
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: ResponsiveHelper.padding(16),
+                    padding: ResponsiveHelper.padding(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        Text("Package Name", style: AppStyle.reportCardTitle),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                        Text(
+                          "Prime Package",
+                          style: AppStyle.reportCardSubTitle,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: ResponsiveHelper.padding(16),
+                    padding: ResponsiveHelper.padding(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        Text("PBOQ Name", style: AppStyle.reportCardTitle),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                        Text("PBOQ ", style: AppStyle.reportCardSubTitle),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             // Search bar
             Padding(
-              padding: ResponsiveHelper.padding(16),
+              padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
               child: _buildSearchField(controller),
             ),
             // List view
@@ -108,16 +152,20 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
             padding: ResponsiveHelper.padding(16),
             child: Column(
               children: [
-                _detailRow('Package Name', sheet.packageName),
+                _detailRow('PBOA', sheet.pboa),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                _detailRow('CBOQ Name', sheet.cboqName),
+                _detailRow('Zone', sheet.zone),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                _detailRow('Location', sheet.location),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                 _detailRow('MS Qty', sheet.msQty.toString()),
                 if (controller.expandedIndex.value == index) ...[
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('PBOQ Name', sheet.pboq),
+                  _detailRow('Package Name', sheet.packageName),
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Zone', sheet.zone),
+                  _detailRow('CBOQ Name', sheet.cboqName),
+                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                  _detailRow('PBOQ Name', sheet.pboq),
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                   _detailRow('UOM', sheet.uom),
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
@@ -136,10 +184,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                   _detailRow('Source', sheet.source),
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                   _detailRow('CBOQ Code', sheet.cboqCode),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('PBOA', sheet.pboa),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Location', sheet.location),
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                   _detailRow('Sub-Location', sheet.subLocation),
                   SizedBox(height: ResponsiveHelper.screenHeight * 0.002),

@@ -1,4 +1,8 @@
-import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_controller.dart';
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -8,12 +12,12 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class UpdateProgressReportList extends StatelessWidget {
-  const UpdateProgressReportList({super.key});
+class WeeklyInspectionView extends StatelessWidget {
+  const WeeklyInspectionView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final UpdateProgressReportController controller = Get.find();
+    final WeeklyInspectionController controller = Get.find();
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -23,54 +27,12 @@ class UpdateProgressReportList extends StatelessWidget {
         color: AppColors.primary,
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    margin: ResponsiveHelper.padding(16),
-                    padding: ResponsiveHelper.padding(5),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightGrey),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      children: [
-                        Text("Package Name", style: AppStyle.reportCardTitle),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
-                        Text(
-                          "Prime Package",
-                          style: AppStyle.reportCardSubTitle,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    margin: ResponsiveHelper.padding(16),
-                    padding: ResponsiveHelper.padding(5),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightGrey),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      children: [
-                        Text("PBOQ Name", style: AppStyle.reportCardTitle),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
-                        Text("PBOQ ", style: AppStyle.reportCardSubTitle),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // Add search field
             Padding(
-              padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
+              padding: ResponsiveHelper.padding(16),
               child: _buildSearchField(controller),
             ),
+            // Expanded to make ListView take remaining space
             Expanded(
               child: Obx(
                 () => controller.isLoading.value
@@ -105,28 +67,49 @@ class UpdateProgressReportList extends StatelessWidget {
                                   padding: ResponsiveHelper.padding(16),
                                   child: Column(
                                     children: [
-                                      _buildDetailRow("PBOA", sheet.pboa),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
+                                      _buildDetailRow(
+                                        "Package Name",
+                                        sheet.packageName,
                                       ),
-                                      _buildDetailRow("Zone", sheet.zone),
+
                                       SizedBox(
                                         height:
                                             ResponsiveHelper.screenHeight *
                                             0.002,
                                       ),
                                       _buildDetailRow(
-                                        "Location",
-                                        sheet.location,
+                                        "PBOQ Name",
+                                        sheet.pboqName,
                                       ),
                                       SizedBox(
                                         height:
                                             ResponsiveHelper.screenHeight *
                                             0.002,
                                       ),
-                                      _buildDetailRow("MS Qty", sheet.msQty),
+                                      _buildDetailRow("PBOA", sheet.pboa),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
+                                      _buildDetailRow(
+                                        "Today\`s Target PBOA Qty",
+                                        sheet.todaysTargetPboaQuantity,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
+                                      _buildDetailRow(
+                                        "Today\`s Achieve Qty",
+                                        sheet.todaysAchieveQuantity,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
                                       if (controller.expandedIndex.value ==
                                           index) ...[
                                         SizedBox(
@@ -134,138 +117,36 @@ class UpdateProgressReportList extends StatelessWidget {
                                               ResponsiveHelper.screenHeight *
                                               0.002,
                                         ),
-                                        _buildDetailRow("Sr. No.", sheet.srNo),
+                                        _buildDetailRow(
+                                          "CBOQ Name",
+                                          sheet.cboqName,
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow("MS Qty", sheet.msQty),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow("Zones", sheet.zones),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow("UOM", sheet.uom),
                                         SizedBox(
                                           height:
                                               ResponsiveHelper.screenHeight *
                                               0.002,
                                         ),
                                         _buildDetailRow(
-                                          "System ID",
-                                          sheet.systemId,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Source", sheet.source),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Sub Location",
-                                          sheet.subLocation,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "CBOQ Code",
-                                          sheet.cboqCode,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("PBOQ", sheet.pboq),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "PBOA Qty",
-                                          sheet.pboaQty,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "PBOA Amount",
-                                          sheet.pboaAmount,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Revised Start Date",
-                                          sheet.revisedStartDate,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Revised End Date",
-                                          sheet.revisedEndDate,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Length", sheet.length),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Breadth",
-                                          sheet.breadth,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Height", sheet.height),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Uploaded File",
-                                          sheet.uploadedFile,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Progress",
-                                          sheet.progress,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Execution",
-                                          sheet.execution,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Updated On",
-                                          sheet.updatedOn,
+                                          "PBOQ Qty",
+                                          sheet.pboqQty,
                                         ),
                                       ],
                                       SizedBox(
@@ -281,9 +162,9 @@ class UpdateProgressReportList extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                _showConfirmationDialog(
-                                                  context,
-                                                  sheet,
+                                                Get.toNamed(
+                                                  AppRoutes
+                                                      .updateWeeklyInspection,
                                                 );
                                               },
                                               child: Text(
@@ -337,61 +218,7 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context, dynamic sheet) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Confirm Update',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: ResponsiveHelper.getResponsiveFontSize(18),
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to update the progress report for ${sheet.pboa}?',
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(14),
-            ),
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: AppButtonStyles.outlinedSmallBlack(),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Cancel',
-                      style: AppStyle.labelPrimaryPoppinsBlack,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: AppButtonStyles.elevatedSmallPrimary(),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Confirm',
-                      style: AppStyle.labelPrimaryPoppinsWhite,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  TextFormField _buildSearchField(UpdateProgressReportController controller) {
+  TextFormField _buildSearchField(WeeklyInspectionController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
@@ -410,7 +237,7 @@ class UpdateProgressReportList extends StatelessWidget {
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5,
+      itemCount: 5, // Show 5 shimmer cards
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -503,6 +330,17 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
+  Text _sectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        color: AppColors.grey,
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+      ),
+    );
+  }
+
   AppBar _buildAppbar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.white),
@@ -510,12 +348,21 @@ class UpdateProgressReportList extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Daily Progress Report Details',
+        'Weekly Inspection',
         style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
       ),
+      // actions: [
+      //   IconButton(
+      //     onPressed: () {
+      //       Get.toNamed(AppRoutes.addPBOQ);
+      //       // Add functionality to add a new measurement sheet
+      //     },
+      //     icon: Icon(Icons.add),
+      //   ),
+      // ],
     );
   }
 }

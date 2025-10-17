@@ -4,7 +4,7 @@ import 'package:ashishinterbuild/app/data/models/daily_progress_report/update_da
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
-class UpdateProgressReportController extends GetxController {
+class UpdateWeeklyInspectionController extends GetxController {
   final RxList<UpdateDailyProgressReportModel> measurementSheets = <UpdateDailyProgressReportModel>[].obs;
   final RxList<UpdateDailyProgressReportModel> filteredMeasurementSheets = <UpdateDailyProgressReportModel>[].obs;
   final RxInt expandedIndex = (-1).obs;
