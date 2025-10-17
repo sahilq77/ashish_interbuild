@@ -130,13 +130,17 @@ class MeasurmentSheetView extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                controller.viewMeasurementSheet(
-                                                  sheet,
+                                                controller.toggleExpanded(
+                                                  index,
                                                 );
-                                                Get.toNamed(AppRoutes.pboqList);
                                               },
                                               child: Text(
-                                                "View",
+                                                controller
+                                                            .expandedIndex
+                                                            .value ==
+                                                        index
+                                                    ? "Less"
+                                                    : "Read",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsWhite,
                                               ),
@@ -152,17 +156,13 @@ class MeasurmentSheetView extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
+                                                controller.viewMeasurementSheet(
+                                                  sheet,
                                                 );
+                                                Get.toNamed(AppRoutes.pboqList);
                                               },
                                               child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Collapse"
-                                                    : "Read",
+                                                "View",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsWhite,
                                               ),
@@ -311,13 +311,13 @@ class MeasurmentSheetView extends StatelessWidget {
 
   AppBar _buildAppbar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
-      backgroundColor: AppColors.primary,
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
       title: Text(
         'Measurement Sheet',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
@@ -331,6 +331,10 @@ class MeasurmentSheetView extends StatelessWidget {
           icon: Icon(Icons.add),
         ),
       ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
+      ),
     );
   }
 }

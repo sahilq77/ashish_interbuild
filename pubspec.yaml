@@ -44,6 +44,7 @@ dependencies:
   image_picker: ^1.1.2
   shimmer: ^3.0.0
   font_awesome_flutter: ^10.9.1
+  animate_do: ^3.3.0          # for entrance animations
 
 dev_dependencies:
   flutter_test:

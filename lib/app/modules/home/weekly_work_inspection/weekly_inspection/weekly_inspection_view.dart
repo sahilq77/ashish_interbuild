@@ -162,13 +162,17 @@ class WeeklyInspectionView extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                Get.toNamed(
-                                                  AppRoutes
-                                                      .updateWeeklyInspection,
+                                                controller.toggleExpanded(
+                                                  index,
                                                 );
                                               },
                                               child: Text(
-                                                "Update",
+                                                controller
+                                                            .expandedIndex
+                                                            .value ==
+                                                        index
+                                                    ? "Collapse"
+                                                    : "Read",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsWhite,
                                               ),
@@ -184,17 +188,13 @@ class WeeklyInspectionView extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
+                                                Get.toNamed(
+                                                  AppRoutes
+                                                      .updateWeeklyInspection,
                                                 );
                                               },
                                               child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Collapse"
-                                                    : "Read",
+                                                "Update",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsWhite,
                                               ),
@@ -343,26 +343,22 @@ class WeeklyInspectionView extends StatelessWidget {
 
   AppBar _buildAppbar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
-      backgroundColor: AppColors.primary,
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
       title: Text(
         'Weekly Inspection',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
       ),
-      // actions: [
-      //   IconButton(
-      //     onPressed: () {
-      //       Get.toNamed(AppRoutes.addPBOQ);
-      //       // Add functionality to add a new measurement sheet
-      //     },
-      //     icon: Icon(Icons.add),
-      //   ),
-      // ],
+
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
+      ),
     );
   }
 }

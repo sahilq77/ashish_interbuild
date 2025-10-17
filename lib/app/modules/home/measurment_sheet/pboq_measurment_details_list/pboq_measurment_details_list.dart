@@ -22,7 +22,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: _buildAppBar(),
+      appBar: _buildAppbar(),
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
         color: AppColors.primary,
@@ -201,6 +201,20 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         style: AppButtonStyles.elevatedSmallPrimary(),
+                        onPressed: () => controller.toggleExpanded(index),
+                        child: Text(
+                          controller.expandedIndex.value == index
+                              ? 'Less'
+                              : 'Read',
+                          style: AppStyle.labelPrimaryPoppinsWhite,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
+
+                    Expanded(
+                      child: ElevatedButton(
+                        style: AppButtonStyles.elevatedSmallPrimary(),
                         onPressed: () => Get.toNamed(AppRoutes.deductionForm),
                         child: Row(
                           children: [
@@ -210,19 +224,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                               style: AppStyle.labelPrimaryPoppinsWhite,
                             ),
                           ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: AppButtonStyles.elevatedSmallPrimary(),
-                        onPressed: () => controller.toggleExpanded(index),
-                        child: Text(
-                          controller.expandedIndex.value == index
-                              ? 'Collapse'
-                              : 'Read',
-                          style: AppStyle.labelPrimaryPoppinsWhite,
                         ),
                       ),
                     ),
@@ -346,15 +347,15 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
   }
 
   // AppBar
-  AppBar _buildAppBar() {
+  AppBar _buildAppbar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
-      backgroundColor: AppColors.primary,
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
       title: Text(
         'PBOQ Details',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
@@ -367,6 +368,10 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
           icon: const Icon(Icons.add),
         ),
       ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
+      ),
     );
   }
 }

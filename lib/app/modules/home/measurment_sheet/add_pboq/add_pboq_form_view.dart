@@ -239,16 +239,21 @@ class AddPboqFormView extends StatelessWidget {
 
   AppBar _buildAppbar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
-      backgroundColor: AppColors.primary,
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
       title: Text(
         'Add PBOQ Measurement Details',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
+      ),
+
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
       ),
     );
   }

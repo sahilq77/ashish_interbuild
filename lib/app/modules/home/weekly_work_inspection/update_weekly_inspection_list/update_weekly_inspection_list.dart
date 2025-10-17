@@ -284,18 +284,23 @@ class UpdateWeeklyInspectionList extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                _showConfirmationDialog(
-                                                  context,
-                                                  sheet,
+                                                controller.toggleExpanded(
+                                                  index,
                                                 );
                                               },
                                               child: Text(
-                                                "Update",
+                                                controller
+                                                            .expandedIndex
+                                                            .value ==
+                                                        index
+                                                    ? "Less"
+                                                    : "Read",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsWhite,
                                               ),
                                             ),
                                           ),
+
                                           SizedBox(
                                             width:
                                                 ResponsiveHelper.screenWidth *
@@ -306,17 +311,13 @@ class UpdateWeeklyInspectionList extends StatelessWidget {
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
                                               onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
+                                                _showConfirmationDialog(
+                                                  context,
+                                                  sheet,
                                                 );
                                               },
                                               child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Collapse"
-                                                    : "Read",
+                                                "Update",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsWhite,
                                               ),
@@ -508,16 +509,21 @@ class UpdateWeeklyInspectionList extends StatelessWidget {
 
   AppBar _buildAppbar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
-      backgroundColor: AppColors.primary,
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
       title: Text(
         'Weekly Inspection Details',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
+      ),
+
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
       ),
     );
   }

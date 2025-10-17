@@ -276,7 +276,33 @@ class UpdateProgressReportList extends StatelessWidget {
                                       Divider(),
                                       Row(
                                         children: [
-                                          Expanded(
+                                            Expanded(
+                                            child: ElevatedButton(
+                                              style:
+                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                              onPressed: () {
+                                                controller.toggleExpanded(
+                                                  index,
+                                                );
+                                              },
+                                              child: Text(
+                                                controller
+                                                            .expandedIndex
+                                                            .value ==
+                                                        index
+                                                    ? "Less"
+                                                    : "Read",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsWhite,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width:
+                                                ResponsiveHelper.screenWidth *
+                                                0.05,
+                                          ),
+                                           Expanded(
                                             child: ElevatedButton(
                                               style:
                                                   AppButtonStyles.elevatedSmallPrimary(),
@@ -293,32 +319,7 @@ class UpdateProgressReportList extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(
-                                            width:
-                                                ResponsiveHelper.screenWidth *
-                                                0.05,
-                                          ),
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
-                                              onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
-                                                );
-                                              },
-                                              child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Collapse"
-                                                    : "Read",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
-                                              ),
-                                            ),
-                                          ),
+                                        
                                         ],
                                       ),
                                     ],
@@ -505,16 +506,20 @@ class UpdateProgressReportList extends StatelessWidget {
 
   AppBar _buildAppbar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
-      backgroundColor: AppColors.primary,
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
       title: Text(
         'Daily Progress Report Details',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
       ),
     );
   }

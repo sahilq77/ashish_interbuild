@@ -1,5 +1,5 @@
 class AppImages {
-  static const String appLogo = 'assets/images/rudra_logo.png';
+  static const String appLogo = 'assets/images/logo.png';
   static const String splash = 'assets/images/logo.png';
   // static const String onboarding1 = 'assets/images/no_data.svg';
   // static const String onboarding2 = 'assets/images/no_data.svg';

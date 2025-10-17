@@ -1,7 +1,8 @@
-// lib/app/modules/home/home_view.dart
+import 'dart:ui'; // Added for ImageFilter
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:ashishinterbuild/app/utils/app_images.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -24,202 +26,275 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     ResponsiveHelper.init(context);
+    final double topPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
-      backgroundColor: AppColors.white,
-      //drawer: Drawer(),
-      appBar: _buildAppbar(),
+      extendBodyBehindAppBar: true,
+      appBar: _buildAppBar(),
+      body: Stack(
+        children: [
+          // ---------- WAVE BACKGROUND ----------
 
-      body: Padding(
-        padding: ResponsiveHelper.padding(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //  _sectionTitle("Critical Operation Analysis"),
-            //Divider(),
-            SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
-            GridView.count(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-              mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-              childAspectRatio: 1.1,
-              children: [
-                _buildGridItem(
-                  'Measurement Sheet',
-                  "",
-                  () {
-                    Get.toNamed(AppRoutes.measurmentSheetView);
-                  },
-                  const Color.fromARGB(255, 132, 0, 255),
-                  FontAwesomeIcons.solidHourglassHalf,
-                ),
-                _buildGridItem(
-                  'Daily Progress Report (DPR)',
-                  "",
-                  () {
-                    Get.toNamed(AppRoutes.dailyProgressDashboard);
-                  },
-                  const Color.fromARGB(255, 255, 0, 162),
-                  FontAwesomeIcons.solidClock,
-                ),
-                _buildGridItem(
-                  'Weekly Inspection',
-                  "",
-                  () {
-                    Get.toNamed(AppRoutes.weeklyInspectionDashboard);
-                  },
-                  const Color.fromARGB(255, 0, 165, 253),
-                  FontAwesomeIcons.userSlash,
-                ),
-                _buildGridItem(
-                  'ACC',
-                  "",
-                  () {},
-                  const Color.fromARGB(255, 253, 135, 0),
-                  FontAwesomeIcons.userSlash,
-                ),
-                _buildGridItem(
-                  'CC',
-                  "",
-                  () {},
-                  const Color.fromARGB(255, 0, 102, 255),
-                  FontAwesomeIcons.solidClock,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Text _sectionTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.poppins(
-        color: AppColors.grey,
-        fontWeight: FontWeight.w600,
-        fontSize: 18,
-      ),
-    );
-  }
-
-  Widget _buildGridItem(
-    String title,
-    String count,
-    VoidCallback onTap,
-    Color gradientColor,
-    IconData icon,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              gradientColor.withOpacity(0.9),
-              gradientColor.withOpacity(0.6),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: onTap,
+          // ---------- MAIN CONTENT ----------
+          SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: ResponsiveHelper.padding(16),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(icon, size: 32, color: Colors.white.withOpacity(0.95)),
-                  const SizedBox(height: 8),
-                  Text(
-                    count,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppStyle.accentSecondaryPoppinsBlack,
-                    textAlign: TextAlign.center,
+                  SizedBox(height: topPadding + 12),
+
+                  // ---------- HERO TITLE ----------
+                  FadeInDown(
+                    duration: const Duration(milliseconds: 600),
+                    child: Text(
+                      "Welcome back!",
+                      style: GoogleFonts.poppins(
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(26),
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withOpacity(0.95),
+                  FadeInDown(
+                    delay: const Duration(milliseconds: 200),
+                    child: Text(
+                      "Select a module to continue",
+                      style: GoogleFonts.poppins(
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(16),
+                        color: AppColors.grey,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ---------- GRID ----------
+                  Expanded(
+                    child: GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                        mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                        childAspectRatio: 1.1,
+                      ),
+                      itemCount: _gridItems.length,
+                      itemBuilder: (context, index) {
+                        final item = _gridItems[index];
+                        return FadeInUp(
+                          delay: Duration(milliseconds: 100 * index),
+                          child: _buildGlassCard(item),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  AppBar _buildAppbar() {
+  // -------------------------------------------------------------------------
+  // MARK: - AppBar
+  // -------------------------------------------------------------------------
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      iconTheme: const IconThemeData(color: AppColors.white),
       backgroundColor: AppColors.primary,
       elevation: 0,
-      centerTitle: false,
+      leading: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(
+              color: Colors.red,
+              width: 1.2,
+            ), // Added red border
+          ),
+          child: Image.asset(AppImages.appLogo, fit: BoxFit.contain),
+        ),
+      ),
       title: Text(
-        'Dashboard',
+        'Ashish Interbuild',
         style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
       ),
+
       actions: [
         IconButton(
+          icon: const Icon(
+            Icons.menu_rounded,
+            color: AppColors.white, // Set drawer icon color to white
+          ),
           onPressed: () {
-            // Show logout confirmation dialog
-            showDialog(
-              context: context, // Ensure context is available in your widget
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text("Logout"),
-                  content: Text("Are you sure you want to log out?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      child: Text("Cancel"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        AppUtility.clearUserInfo().then(
-                          (val) => Get.offAllNamed(AppRoutes.login),
-                        ); // Call the logout function
-                      },
-                      child: Text("Logout"),
-                    ),
-                  ],
-                );
-              },
-            );
+            Scaffold.of(context).openEndDrawer();
           },
-          icon: Icon(Icons.logout_rounded),
         ),
+        // IconButton(
+        //   icon: const Icon(Icons.logout_rounded, color: AppColors.white),
+        //   onPressed: _showLogoutDialog,
+        // ),
       ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
+      ),
     );
   }
+
+  // -------------------------------------------------------------------------
+  // MARK: - Logout Dialog
+  // -------------------------------------------------------------------------
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to log out?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await AppUtility.clearUserInfo();
+              Get.offAllNamed(AppRoutes.login);
+            },
+            child: const Text("Logout", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // MARK: - Grid Data Model
+  // -------------------------------------------------------------------------
+  static const List<GridItem> _gridItems = [
+    GridItem(
+      title: 'Measurement Sheet',
+      route: AppRoutes.measurmentSheetView,
+      gradientColor: Color.fromARGB(255, 132, 0, 255),
+      icon: FontAwesomeIcons.solidHourglassHalf,
+    ),
+    GridItem(
+      title: 'Daily Progress Report (DPR)',
+      route: AppRoutes.dailyProgressDashboard,
+      gradientColor: Color.fromARGB(255, 255, 0, 162),
+      icon: FontAwesomeIcons.solidClock,
+    ),
+    GridItem(
+      title: 'Weekly Inspection',
+      route: AppRoutes.weeklyInspectionDashboard,
+      gradientColor: Color.fromARGB(255, 0, 165, 253),
+      icon: FontAwesomeIcons.userSlash,
+    ),
+    GridItem(
+      title: 'Access and Manage (ACC)',
+      route: null,
+      gradientColor: Color.fromARGB(255, 253, 135, 0),
+      icon: FontAwesomeIcons.userSlash,
+    ),
+    GridItem(
+      title: 'Client Commitment (CC)',
+      route: null,
+      gradientColor: Color.fromARGB(255, 0, 102, 255),
+      icon: FontAwesomeIcons.solidClock,
+    ),
+  ];
+
+  // -------------------------------------------------------------------------
+  // MARK: - Glass Card
+  // -------------------------------------------------------------------------
+  Widget _buildGlassCard(GridItem item) {
+    return GestureDetector(
+      onTap: item.route != null ? () => Get.toNamed(item.route!) : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // Set solid white background
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.red, // Keep red border
+              width: 1.2,
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Optional subtle inner glow (can be removed if not needed)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.2),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        item.icon,
+                        size: 36,
+                        color: Colors.red, // Keep red icon
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        item.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black.withOpacity(
+                            0.95,
+                          ), // Consider changing to a darker color
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// -------------------------------------------------------------------------
+// MARK: - Simple Data Class
+// -------------------------------------------------------------------------
+class GridItem {
+  final String title;
+  final String? route;
+  final Color gradientColor;
+  final IconData icon;
+
+  const GridItem({
+    required this.title,
+    this.route,
+    required this.gradientColor,
+    required this.icon,
+  });
 }
