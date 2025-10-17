@@ -24,12 +24,27 @@ class MeasurmentSheetView extends StatelessWidget {
         onRefresh: controller.refreshData,
         color: AppColors.primary,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
+              child: Text(
+                "Skyline Towers ➔ Measurement Sheet",
+                style: AppStyle.bodySmallPoppinsPrimary,
+              ),
+            ),
             // Add search field
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: _buildSearchField(controller),
             ),
+            // Padding(
+            //   padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
+            //   child: Text(
+            //     "Skyline Towers ➔ Measurement Sheet",
+            //     style: AppStyle.bodySmallPoppinsPrimary,
+            //   ),
+            // ),
             // Expanded to make ListView take remaining space
             Expanded(
               child: Obx(
@@ -53,12 +68,12 @@ class MeasurmentSheetView extends StatelessWidget {
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border(
-                                  left: BorderSide(
-                                    color: AppColors.primary,
-                                    width: 5,
-                                  ),
-                                ),
+                                // border: Border(
+                                //   left: BorderSide(
+                                //     color: AppColors.primary,
+                                //     width: 5,
+                                //   ),
+                                // ),
                               ),
                               child: Obx(
                                 () => Padding(
@@ -128,7 +143,7 @@ class MeasurmentSheetView extends StatelessWidget {
                                           Expanded(
                                             child: ElevatedButton(
                                               style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                                  AppButtonStyles.elevatedSmallBlack(),
                                               onPressed: () {
                                                 controller.toggleExpanded(
                                                   index,
@@ -152,9 +167,9 @@ class MeasurmentSheetView extends StatelessWidget {
                                                 0.05,
                                           ),
                                           Expanded(
-                                            child: ElevatedButton(
+                                            child: OutlinedButton(
                                               style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                                  AppButtonStyles.outlinedSmallBlack(),
                                               onPressed: () {
                                                 controller.viewMeasurementSheet(
                                                   sheet,
@@ -164,7 +179,7 @@ class MeasurmentSheetView extends StatelessWidget {
                                               child: Text(
                                                 "View",
                                                 style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
+                                                    .labelPrimaryPoppinsBlack,
                                               ),
                                             ),
                                           ),

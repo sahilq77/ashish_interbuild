@@ -103,7 +103,7 @@ class _HomeViewState extends State<HomeView> {
   // -------------------------------------------------------------------------
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.white,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -122,7 +122,7 @@ class _HomeViewState extends State<HomeView> {
       ),
       title: Text(
         'Ashish Interbuild',
-        style: AppStyle.heading1PoppinsWhite.responsive.copyWith(
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
@@ -183,7 +183,7 @@ class _HomeViewState extends State<HomeView> {
   static const List<GridItem> _gridItems = [
     GridItem(
       title: 'Measurement Sheet',
-      route: AppRoutes.measurmentSheetView,
+      route: AppRoutes.measurmentProjectNameList,
       gradientColor: Color.fromARGB(255, 132, 0, 255),
       icon: FontAwesomeIcons.solidHourglassHalf,
     ),

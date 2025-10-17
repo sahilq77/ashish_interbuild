@@ -28,13 +28,20 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
         color: AppColors.primary,
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
+              child: Text(
+                "Skyline Towers ➔ Measurement Sheet ➔ Measurement Detail",
+                style: AppStyle.bodySmallPoppinsPrimary,
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Container(
                     width: double.infinity,
-                    margin: ResponsiveHelper.padding(16),
+                    margin: ResponsiveHelper.paddingSymmetric(horizontal: 16),
                     padding: ResponsiveHelper.padding(5),
                     decoration: BoxDecoration(
                       border: Border.all(color: AppColors.lightGrey),
@@ -52,6 +59,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 Expanded(
                   child: Container(
                     width: double.infinity,
@@ -77,6 +85,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
               padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
               child: _buildSearchField(controller),
             ),
+
             // List view
             Expanded(
               child: Obx(() {
@@ -144,9 +153,9 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(10),
-            border: Border(
-              left: BorderSide(color: AppColors.primary, width: 5),
-            ),
+            // border: Border(
+            //   left: BorderSide(color: AppColors.primary, width: 5),
+            // ),
           ),
           child: Padding(
             padding: ResponsiveHelper.padding(16),
@@ -200,7 +209,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        style: AppButtonStyles.elevatedSmallPrimary(),
+                        style: AppButtonStyles.elevatedSmallBlack(),
                         onPressed: () => controller.toggleExpanded(index),
                         child: Text(
                           controller.expandedIndex.value == index
@@ -213,15 +222,15 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                     SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
 
                     Expanded(
-                      child: ElevatedButton(
-                        style: AppButtonStyles.elevatedSmallPrimary(),
+                      child: OutlinedButton(
+                        style: AppButtonStyles.outlinedSmallBlack(),
                         onPressed: () => Get.toNamed(AppRoutes.deductionForm),
                         child: Row(
                           children: [
                             Icon(Icons.add),
                             Text(
                               'Deduction',
-                              style: AppStyle.labelPrimaryPoppinsWhite,
+                              style: AppStyle.labelPrimaryPoppinsBlack,
                             ),
                           ],
                         ),

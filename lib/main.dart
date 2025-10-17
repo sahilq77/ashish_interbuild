@@ -88,7 +88,6 @@ class MyApp extends StatelessWidget {
           labelStyle: GoogleFonts.poppins(color: AppColors.grey),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
-          
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
@@ -126,7 +125,7 @@ class MyApp extends StatelessWidget {
       getPages: AppRoutes.routes,
       builder: (context, child) {
         return ColorfulSafeArea(
-          color: AppColors.primary,
+          color: AppColors.white.withOpacity(0.9),
           top: true,
           bottom: true,
           left: false,

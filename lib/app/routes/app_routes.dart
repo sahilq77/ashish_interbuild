@@ -6,6 +6,8 @@ import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_p
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_list.dart';
 import 'package:ashishinterbuild/app/modules/home/home_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/home_screen_view.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_project_name/measurment_project_name_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_project_name/measurment_project_name_list.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_list.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_binding.dart';
@@ -42,6 +44,8 @@ class AppRoutes {
       '/weekly-inspection-dashboard';
   static const String weeklyInspection = '/weekly-inspection';
   static const String updateWeeklyInspection = '/update-weekly-inspection';
+ static const String measurmentProjectNameList = '/measurment-projectName-list';
+  
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -105,6 +109,12 @@ class AppRoutes {
       page: () => const UpdateWeeklyInspectionList(),
       binding: UpdateWeeklyInspectionBinding(),
     ),
+  GetPage(
+      name: measurmentProjectNameList,
+      page: () => const MeasurmentProjectNameList(),
+      binding: MeasurmentProjectNameBinding(),
+    ),
+    
   ];
 }
 
