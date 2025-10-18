@@ -311,7 +311,7 @@ class _HomeViewState extends State<HomeView> {
     ),
     GridItem(
       title: 'Daily Progress Report (DPR)',
-      route: AppRoutes.dailyProgressDashboard,
+      route: AppRoutes.dprProjectList,
       gradientColor: Color.fromARGB(255, 255, 0, 162),
       icon: AppImages.dprIcon,
     ),

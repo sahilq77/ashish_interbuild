@@ -1,7 +1,7 @@
 import 'package:ashishinterbuild/app/data/models/notification/notification_model.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-
 
 import '../../utils/app_colors.dart';
 import '../../utils/responsive_utils.dart';
@@ -111,11 +111,11 @@ class _NotificationViewState extends State<NotificationView> {
               width: ResponsiveHelper.spacing(40),
               height: ResponsiveHelper.spacing(40),
               decoration: BoxDecoration(
-                color: AppColors.lightGrey.withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.1 ),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.notifications_outlined,
+                FontAwesomeIcons.bell,
                 color: AppColors.defaultBlack,
                 size: ResponsiveHelper.spacing(20),
               ),

@@ -18,75 +18,81 @@ class DailyProgressReportDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
-      body: Padding(
-        padding: ResponsiveHelper.padding(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Skyline Towers ➔ DPR Dashboard",
-              style: AppStyle.bodySmallPoppinsPrimary,
+      body: RefreshIndicator(
+        onRefresh: controller.refreshData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: ResponsiveHelper.padding(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Skyline Towers ➔ DPR Dashboard",
+                  style: AppStyle.bodySmallPoppinsPrimary,
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
+                Obx(
+                  () => GridView.count(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    crossAxisCount: 2,
+                    crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                    mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                    childAspectRatio: 1.3,
+                    children: [
+                      _buildGridItem(
+                        'Monthly Target',
+                        controller.formatCurrency(controller.monthlyTarget.value),
+                        controller.formatPercentage(
+                          controller.monthlyPercent.value,
+                        ),
+                        AppColors.grey,
+                        false,
+                      ),
+                      _buildGridItem(
+                        'Monthly Achieve',
+                        controller.formatCurrency(controller.monthlyAchieve.value),
+                        controller.formatPercentage(
+                          controller.monthlyPercent.value,
+                        ),
+                        AppColors.grey,
+                        false,
+                      ),
+                      _buildGridItem(
+                        'Weekly Target',
+                        controller.formatCurrency(controller.weeklyTarget.value),
+                        controller.formatPercentage(controller.weeklyPercent.value),
+                        AppColors.grey,
+                        false,
+                      ),
+                      _buildGridItem(
+                        'Weekly Achieve',
+                        controller.formatCurrency(controller.weeklyAchieve.value),
+                        controller.formatPercentage(controller.weeklyPercent.value),
+                        AppColors.grey,
+                        false,
+                      ),
+                      _buildGridItem(
+                        'Today\'s Target',
+                        controller.formatCurrency(controller.dailyTarget.value),
+                        controller.formatPercentage(controller.dailyPercent.value),
+                        AppColors.grey,
+                        false,
+                      ),
+                      _buildGridItem(
+                        'Today\'s Achieve',
+                        controller.formatCurrency(controller.dailyAchieve.value),
+                        controller.formatPercentage(controller.dailyPercent.value),
+                        AppColors.grey,
+                        false,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
-            Obx(
-              () => GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                childAspectRatio: 1.3,
-                children: [
-                  _buildGridItem(
-                    'Monthly Target',
-                    controller.formatCurrency(controller.monthlyTarget.value),
-                    controller.formatPercentage(
-                      controller.monthlyPercent.value,
-                    ),
-                    AppColors.grey,
-                    false,
-                  ),
-                  _buildGridItem(
-                    'Monthly Achieve',
-                    controller.formatCurrency(controller.monthlyAchieve.value),
-                    controller.formatPercentage(
-                      controller.monthlyPercent.value,
-                    ),
-                    AppColors.grey,
-                    false,
-                  ),
-                  _buildGridItem(
-                    'Weekly Target',
-                    controller.formatCurrency(controller.weeklyTarget.value),
-                    controller.formatPercentage(controller.weeklyPercent.value),
-                    AppColors.grey,
-                    false,
-                  ),
-                  _buildGridItem(
-                    'Weekly Achieve',
-                    controller.formatCurrency(controller.weeklyAchieve.value),
-                    controller.formatPercentage(controller.weeklyPercent.value),
-                    AppColors.grey,
-                    false,
-                  ),
-                  _buildGridItem(
-                    'Today\'s Target',
-                    controller.formatCurrency(controller.dailyTarget.value),
-                    controller.formatPercentage(controller.dailyPercent.value),
-                    AppColors.grey,
-                    false,
-                  ),
-                  _buildGridItem(
-                    'Today\'s Achieve',
-                    controller.formatCurrency(controller.dailyAchieve.value),
-                    controller.formatPercentage(controller.dailyPercent.value),
-                    AppColors.grey,
-                    false,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

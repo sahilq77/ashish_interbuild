@@ -2,6 +2,8 @@ import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_pr
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_dashboard/daily_progress_report_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_dashboard/daily_progress_report_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_view.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_project_list/dpr_project_list.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_project_list/dpr_project_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_list.dart';
 import 'package:ashishinterbuild/app/modules/home/home_binding.dart';
@@ -46,10 +48,10 @@ class AppRoutes {
       '/weekly-inspection-dashboard';
   static const String weeklyInspection = '/weekly-inspection';
   static const String updateWeeklyInspection = '/update-weekly-inspection';
- static const String measurmentProjectNameList = '/measurment-projectName-list';
- static const String notifications = '/notifications';
-
-  
+  static const String measurmentProjectNameList =
+      '/measurment-projectName-list';
+  static const String notifications = '/notifications';
+  static const String dprProjectList = '/dpr-project-list';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -113,15 +115,20 @@ class AppRoutes {
       page: () => const UpdateWeeklyInspectionList(),
       binding: UpdateWeeklyInspectionBinding(),
     ),
-  GetPage(
+    GetPage(
       name: measurmentProjectNameList,
       page: () => const MeasurmentProjectNameList(),
       binding: MeasurmentProjectNameBinding(),
     ),
-       GetPage(
+    GetPage(
       name: notifications,
       page: () => const NotificationView(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: dprProjectList,
+      page: () => const DprProjectList(),
+      binding: DprProjectListBinding(),
     ),
   ];
 }

@@ -12,8 +12,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class MeasurmentProjectNameList extends StatelessWidget {
-  const MeasurmentProjectNameList({super.key});
+class DprProjectList extends StatelessWidget {
+  const DprProjectList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class MeasurmentProjectNameList extends StatelessWidget {
                             final project = controller.filteredProjects[index];
                             return GestureDetector(
                               onTap: () =>
-                                  Get.toNamed(AppRoutes.measurmentSheetView),
+                                  Get.toNamed(AppRoutes.dailyProgressDashboard),
                               child: Card(
                                 margin: EdgeInsets.only(
                                   bottom: ResponsiveHelper.screenHeight * 0.02,
@@ -182,7 +182,7 @@ class MeasurmentProjectNameList extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Measurement Project List',
+        'DPR Project List',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,

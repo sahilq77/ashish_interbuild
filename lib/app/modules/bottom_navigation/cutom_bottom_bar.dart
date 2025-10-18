@@ -2,6 +2,7 @@ import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigatio
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 class CustomBottomBar extends StatefulWidget {
@@ -38,25 +39,25 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       children: [
         _buildNavItem(
           index: 0,
-          icon: Icons.home,
+          icon: FontAwesomeIcons.home,
           label: 'Home',
           controller: controller,
         ),
         _buildNavItem(
           index: 1,
-          icon: Icons.scale,
+          icon: FontAwesomeIcons.weightScale,
           label: 'MS',
           controller: controller,
         ),
         _buildNavItem(
           index: 2,
-          icon: Icons.perm_device_info_outlined,
+          icon: FontAwesomeIcons.chartLine,
           label: 'DPR',
           controller: controller,
         ),
         _buildNavItem(
           index: 3,
-          icon: Icons.person,
+          icon: FontAwesomeIcons.solidUser,
           label: 'Profile',
           controller: controller,
         ),
@@ -82,7 +83,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon),
+            Icon(icon, color: iconColor),
             // Image.asset(
             //   assetPath,
             //   width: 20.0,

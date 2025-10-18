@@ -1,4 +1,4 @@
-import 'package:ashishinterbuild/app/routes/app_routes.dart' show AppRoutes;
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart' show AppUtility;
 import 'package:get/get.dart';
 
@@ -12,7 +12,7 @@ class BottomNavigationController extends GetxController {
   void onInit() {
     super.onInit();
     // Initialize routes based on userType
-    routes = _getRoutesForUserType(AppUtility.userRole.toString());
+    routes = _getRoutesForUserType(AppUtility.userRole);
     // Sync initial index with current route
     syncIndexWithRoute(Get.currentRoute);
     // Listen for route changes
@@ -24,28 +24,30 @@ class BottomNavigationController extends GetxController {
   }
 
   // Determine routes based on userType
-  List<String> _getRoutesForUserType(String? userType) {
+  List<String> _getRoutesForUserType(int? userType) {
     switch (userType) {
-      case "0":
+      case 0:
         return [
-          // AppRoutes.home,
-          // AppRoutes.scheduleAppinmentAME,
-          // AppRoutes.scheduleAppinment,
-          // AppRoutes.myReportlist,
+          AppRoutes.home,
+          AppRoutes.measurmentProjectNameList,
+          AppRoutes.dailyProgressDashboard,
+
+          AppRoutes.notifications,
         ];
-      case "1":
+      case 1:
         return [
-          // AppRoutes.home,
-          // AppRoutes.pendingAppoinmentMedical,
-          // AppRoutes.notification,
-          // AppRoutes.logout,
+          AppRoutes.home,
+          AppRoutes.measurmentProjectNameList,
+          AppRoutes.dprProjectList,
+          AppRoutes.notifications,
         ];
-      case "2":
+      case 2:
         return [
-          // AppRoutes.home,
-          // AppRoutes.pendingAppoinmentAuth,
-          // AppRoutes.notification,
-          // AppRoutes.logout,
+          AppRoutes.home,
+          AppRoutes.measurmentProjectNameList,
+          AppRoutes.dailyProgressDashboard,
+
+          AppRoutes.notifications,
         ];
       default:
         // Fallback routes in case userType is invalid
@@ -54,7 +56,8 @@ class BottomNavigationController extends GetxController {
           AppRoutes.home,
           AppRoutes.measurmentProjectNameList,
           AppRoutes.dailyProgressDashboard,
-          AppRoutes.dailyProgressDashboard,
+
+          AppRoutes.notifications,
         ];
     }
   }
@@ -90,7 +93,15 @@ class BottomNavigationController extends GetxController {
 
   void goToHome() {
     selectedIndex.value = 0;
-    Get.offAllNamed(AppRoutes.home);
+    if (AppUtility.userRole == 0) {
+      Get.offAllNamed(AppRoutes.home);
+    } else if (AppUtility.userRole == 1) {
+      Get.offAllNamed(AppRoutes.home);
+    } else if (AppUtility.userRole == 2) {
+      Get.offAllNamed(AppRoutes.home);
+    } else {
+      Get.offAllNamed(AppRoutes.home);
+    }
   }
 
   Future<bool> onWillPop() async {
