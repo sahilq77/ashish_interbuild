@@ -22,7 +22,11 @@ class WeeklyInspectionDashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
+            Text(
+              "Skyline Towers ➔ Weekly Inspection Dashboard",
+              style: AppStyle.bodySmallPoppinsPrimary,
+            ),
+            SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
             Obx(
               () => GridView.count(
                 physics: const NeverScrollableScrollPhysics(),
@@ -54,29 +58,29 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                     'Weekly Target',
                     controller.formatCurrency(controller.weeklyTarget.value),
                     controller.formatPercentage(controller.weeklyPercent.value),
-                    AppColors.blue,
-                    true,
+                    AppColors.grey,
+                    false,
                   ),
                   _buildGridItem(
                     'Weekly Achieve',
                     controller.formatCurrency(controller.weeklyAchieve.value),
                     controller.formatPercentage(controller.weeklyPercent.value),
-                    AppColors.greenColor,
-                    true,
+                    AppColors.grey,
+                    false,
                   ),
                   _buildGridItem(
                     'Today\'s Target',
                     controller.formatCurrency(controller.dailyTarget.value),
                     controller.formatPercentage(controller.dailyPercent.value),
-                    AppColors.accentOrange,
-                    true,
+                    AppColors.grey,
+                    false,
                   ),
                   _buildGridItem(
                     'Today\'s Achieve',
                     controller.formatCurrency(controller.dailyAchieve.value),
                     controller.formatPercentage(controller.dailyPercent.value),
-                    AppColors.greenColor,
-                    true,
+                    AppColors.grey,
+                    false,
                   ),
                 ],
               ),
@@ -102,7 +106,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: gradientColor.withOpacity(0.5)),
+          border: Border.all(color: gradientColor),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),

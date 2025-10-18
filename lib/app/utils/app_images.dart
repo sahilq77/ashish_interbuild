@@ -12,12 +12,12 @@ class AppImages {
   // static const String autoRefresh = 'assets/images/autorefresh.svg';
   // static const String thanks = 'assets/images/thanks.png';
 
-  //Profile screen Icons
-  // static const String userIcon = 'assets/icons/user-icon.svg';
-  // static const String bellIcon = 'assets/icons/bell-icon.svg';
-  // static const String myTeamIcon = 'assets/icons/myteam-icon.svg';
-  // static const String mySurveyIcon = 'assets/icons/my-survey-icon.svg';
-  // static const String logoutIcon = 'assets/icons/logout-icon.svg';
+  //Dashboard Icon
+  static const String measurmentIcon = 'assets/icons/measurment-icon.svg';
+  static const String dprIcon = 'assets/icons/dpr-icon.svg';
+  static const String inspectionIcon = 'assets/icons/inspection-icon.svg';
+  static const String accIcon = 'assets/icons/acc-icon.svg';
+  static const String clientIcon = 'assets/icons/client-icon.svg';
 
   // //Bottom Navigation screen Icons
   // static const String homeIcon = 'assets/icons/home-i.svg';

@@ -25,7 +25,15 @@ class DailyProgressReportViiew extends StatelessWidget {
         onRefresh: controller.refreshData,
         color: AppColors.primary,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
+              child: Text(
+                "Skyline Towers ➔ DPR Dashboard ➔ DPR",
+                style: AppStyle.bodySmallPoppinsPrimary,
+              ),
+            ),
             // Add search field
             Padding(
               padding: ResponsiveHelper.padding(16),
@@ -54,12 +62,12 @@ class DailyProgressReportViiew extends StatelessWidget {
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border(
-                                  left: BorderSide(
-                                    color: AppColors.primary,
-                                    width: 5,
-                                  ),
-                                ),
+                                // border: Border(
+                                //   left: BorderSide(
+                                //     color: AppColors.primary,
+                                //     width: 5,
+                                //   ),
+                                // ),
                               ),
                               child: Obx(
                                 () => Padding(
@@ -159,7 +167,7 @@ class DailyProgressReportViiew extends StatelessWidget {
                                           Expanded(
                                             child: ElevatedButton(
                                               style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                                  AppButtonStyles.elevatedSmallBlack(),
                                               onPressed: () {
                                                 controller.toggleExpanded(
                                                   index,
@@ -183,9 +191,9 @@ class DailyProgressReportViiew extends StatelessWidget {
                                                 0.05,
                                           ),
                                           Expanded(
-                                            child: ElevatedButton(
+                                            child: OutlinedButton(
                                               style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                                  AppButtonStyles.outlinedSmallBlack(),
                                               onPressed: () {
                                                 Get.toNamed(
                                                   AppRoutes
@@ -195,7 +203,7 @@ class DailyProgressReportViiew extends StatelessWidget {
                                               child: Text(
                                                 "Update",
                                                 style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
+                                                    .labelPrimaryPoppinsBlack,
                                               ),
                                             ),
                                           ),

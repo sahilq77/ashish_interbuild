@@ -25,6 +25,8 @@ import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_view.dart';
+import 'package:ashishinterbuild/app/modules/notification/notification_binding.dart';
+import 'package:ashishinterbuild/app/modules/notification/notification_view.dart';
 import 'package:ashishinterbuild/app/modules/splash/splash_view.dart';
 import 'package:get/get.dart';
 
@@ -45,6 +47,8 @@ class AppRoutes {
   static const String weeklyInspection = '/weekly-inspection';
   static const String updateWeeklyInspection = '/update-weekly-inspection';
  static const String measurmentProjectNameList = '/measurment-projectName-list';
+ static const String notifications = '/notifications';
+
   
 
   static List<GetPage> routes = [
@@ -114,7 +118,11 @@ class AppRoutes {
       page: () => const MeasurmentProjectNameList(),
       binding: MeasurmentProjectNameBinding(),
     ),
-    
+       GetPage(
+      name: notifications,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+    ),
   ];
 }
 

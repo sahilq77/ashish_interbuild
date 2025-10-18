@@ -22,7 +22,15 @@ class UpdateProgressReportList extends StatelessWidget {
         onRefresh: controller.refreshData,
         color: AppColors.primary,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
+              child: Text(
+                "Skyline Towers ➔ DPR Dashboard ➔ DPR ➔ DPR Detail",
+                style: AppStyle.bodySmallPoppinsPrimary,
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -93,12 +101,12 @@ class UpdateProgressReportList extends StatelessWidget {
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border(
-                                  left: BorderSide(
-                                    color: AppColors.primary,
-                                    width: 5,
-                                  ),
-                                ),
+                                // border: Border(
+                                //   left: BorderSide(
+                                //     color: AppColors.primary,
+                                //     width: 5,
+                                //   ),
+                                // ),
                               ),
                               child: Obx(
                                 () => Padding(
@@ -276,10 +284,10 @@ class UpdateProgressReportList extends StatelessWidget {
                                       Divider(),
                                       Row(
                                         children: [
-                                            Expanded(
+                                          Expanded(
                                             child: ElevatedButton(
                                               style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                                  AppButtonStyles.elevatedSmallBlack(),
                                               onPressed: () {
                                                 controller.toggleExpanded(
                                                   index,
@@ -302,10 +310,10 @@ class UpdateProgressReportList extends StatelessWidget {
                                                 ResponsiveHelper.screenWidth *
                                                 0.05,
                                           ),
-                                           Expanded(
-                                            child: ElevatedButton(
+                                          Expanded(
+                                            child: OutlinedButton(
                                               style:
-                                                  AppButtonStyles.elevatedSmallPrimary(),
+                                                  AppButtonStyles.outlinedSmallBlack(),
                                               onPressed: () {
                                                 _showConfirmationDialog(
                                                   context,
@@ -315,11 +323,10 @@ class UpdateProgressReportList extends StatelessWidget {
                                               child: Text(
                                                 "Update",
                                                 style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
+                                                    .labelPrimaryPoppinsBlack,
                                               ),
                                             ),
                                           ),
-                                        
                                         ],
                                       ),
                                     ],

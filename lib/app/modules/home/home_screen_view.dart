@@ -1,4 +1,5 @@
 import 'dart:ui'; // Added for ImageFilter
+import 'package:ashishinterbuild/app/modules/bottom_navigation/cutom_bottom_bar.dart';
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
@@ -30,71 +31,192 @@ class _HomeViewState extends State<HomeView> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(),
+      // appBar: _buildAppBar(), // Uncomment if you want to use the AppBar
       body: Stack(
         children: [
           // ---------- WAVE BACKGROUND ----------
+          // Add your wave background widget here if needed
+          // Ensure it’s constrained to avoid interfering with the layout
 
           // ---------- MAIN CONTENT ----------
           SafeArea(
-            child: Padding(
-              padding: ResponsiveHelper.padding(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: topPadding + 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Fixed Header
+                Padding(
+                  padding: ResponsiveHelper.padding(16),
+                  child: _buildHeader(),
+                ),
+                // Scrollable Content
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: ResponsiveHelper.padding(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: topPadding + 12),
 
-                  // ---------- HERO TITLE ----------
-                  FadeInDown(
-                    duration: const Duration(milliseconds: 600),
-                    child: Text(
-                      "Welcome back!",
-                      style: GoogleFonts.poppins(
-                        fontSize: ResponsiveHelper.getResponsiveFontSize(26),
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                          // ---------- HERO TITLE ----------
+                          FadeInDown(
+                            duration: const Duration(milliseconds: 600),
+                            child: Text(
+                              "Welcome back!",
+                              style: GoogleFonts.poppins(
+                                fontSize:
+                                    ResponsiveHelper.getResponsiveFontSize(26),
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          FadeInDown(
+                            delay: const Duration(milliseconds: 200),
+                            child: Text(
+                              "Select a module to continue",
+                              style: GoogleFonts.poppins(
+                                fontSize:
+                                    ResponsiveHelper.getResponsiveFontSize(16),
+                                color: AppColors.grey,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          // ---------- GRID ----------
+                          GridView.builder(
+                            physics: const ClampingScrollPhysics(),
+                            shrinkWrap:
+                                true, // Ensure GridView takes only needed space
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing:
+                                      ResponsiveHelper.screenWidth * 0.04,
+                                  mainAxisSpacing:
+                                      ResponsiveHelper.screenWidth * 0.04,
+                                  childAspectRatio: 1.1,
+                                ),
+                            itemCount: _gridItems.length,
+                            itemBuilder: (context, index) {
+                              final item = _gridItems[index];
+                              return FadeInUp(
+                                delay: Duration(milliseconds: 100 * index),
+                                child: _buildGlassCard(item),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  FadeInDown(
-                    delay: const Duration(milliseconds: 200),
-                    child: Text(
-                      "Select a module to continue",
-                      style: GoogleFonts.poppins(
-                        fontSize: ResponsiveHelper.getResponsiveFontSize(16),
-                        color: AppColors.grey,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ---------- GRID ----------
-                  Expanded(
-                    child: GridView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                        mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                        childAspectRatio: 1.1,
-                      ),
-                      itemCount: _gridItems.length,
-                      itemBuilder: (context, index) {
-                        final item = _gridItems[index];
-                        return FadeInUp(
-                          delay: Duration(milliseconds: 100 * index),
-                          child: _buildGlassCard(item),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+      bottomNavigationBar: CustomBottomBar(),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Container(
+          width: ResponsiveHelper.spacing(44),
+          height: ResponsiveHelper.spacing(44),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.white,
+            border: Border.all(
+              color: AppColors.lightGrey.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: Image.asset(
+              AppImages.appLogo,
+              height: ResponsiveHelper.spacing(24),
+              width: ResponsiveHelper.spacing(24),
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+        SizedBox(width: ResponsiveHelper.spacing(12)),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ResponsiveHelper.safeText(
+                "Ashish Interbuild",
+                style: AppStyle.bodyBoldPoppinsBlack.responsive.copyWith(
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(16),
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+              ),
+              // ResponsiveHelper.safeText(
+              //   "d",
+              //   style: AppStyle.bodySmallPoppinsPrimary.responsive.copyWith(
+              //     fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+              //     color: AppColors.primary,
+              //   ),
+              //   maxLines: 1,
+              // ),
+            ],
+          ),
+        ),
+        SizedBox(width: ResponsiveHelper.spacing(12)),
+        // Container(
+        //   width: ResponsiveHelper.spacing(40),
+        //   height: ResponsiveHelper.spacing(40),
+        //   decoration: BoxDecoration(
+        //     shape: BoxShape.circle,
+        //     color: AppColors.white,
+        //     border: Border.all(
+        //       color: AppColors.lightGrey.withOpacity(0.3),
+        //       width: 1,
+        //     ),
+        //   ),
+        //   child: IconButton(
+        //     padding: EdgeInsets.zero,
+        //     icon: SvgPicture.asset(
+        //       AppImages.autoRefresh,
+        //       width: ResponsiveHelper.spacing(20),
+        //       height: ResponsiveHelper.spacing(20),
+        //       fit: BoxFit.contain,
+        //     ),
+        //     onPressed: () async {
+        //       await Future.delayed(const Duration(seconds: 1));
+        //       controller.refreshData();
+        //     },
+        //   ),
+        // ),
+        // SizedBox(width: ResponsiveHelper.spacing(8)),
+        Container(
+          width: ResponsiveHelper.spacing(40),
+          height: ResponsiveHelper.spacing(40),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.white,
+            border: Border.all(
+              color: AppColors.lightGrey.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(FontAwesomeIcons.bell, color: AppColors.defaultBlack),
+            onPressed: () {
+              Get.toNamed(AppRoutes.notifications);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -185,31 +307,31 @@ class _HomeViewState extends State<HomeView> {
       title: 'Measurement Sheet',
       route: AppRoutes.measurmentProjectNameList,
       gradientColor: Color.fromARGB(255, 132, 0, 255),
-      icon: FontAwesomeIcons.solidHourglassHalf,
+      icon: AppImages.measurmentIcon,
     ),
     GridItem(
       title: 'Daily Progress Report (DPR)',
       route: AppRoutes.dailyProgressDashboard,
       gradientColor: Color.fromARGB(255, 255, 0, 162),
-      icon: FontAwesomeIcons.solidClock,
+      icon: AppImages.dprIcon,
     ),
     GridItem(
       title: 'Weekly Inspection',
       route: AppRoutes.weeklyInspectionDashboard,
       gradientColor: Color.fromARGB(255, 0, 165, 253),
-      icon: FontAwesomeIcons.userSlash,
+      icon: AppImages.inspectionIcon,
     ),
     GridItem(
       title: 'Access and Manage (ACC)',
       route: null,
       gradientColor: Color.fromARGB(255, 253, 135, 0),
-      icon: FontAwesomeIcons.userSlash,
+      icon: AppImages.accIcon,
     ),
     GridItem(
       title: 'Client Commitment (CC)',
       route: null,
       gradientColor: Color.fromARGB(255, 0, 102, 255),
-      icon: FontAwesomeIcons.solidClock,
+      icon: AppImages.clientIcon,
     ),
   ];
 
@@ -251,11 +373,7 @@ class _HomeViewState extends State<HomeView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        item.icon,
-                        size: 36,
-                        color: Colors.red, // Keep red icon
-                      ),
+                      SvgPicture.asset(item.icon),
                       const SizedBox(height: 20),
                       Text(
                         item.title,
@@ -289,7 +407,7 @@ class GridItem {
   final String title;
   final String? route;
   final Color gradientColor;
-  final IconData icon;
+  final String icon;
 
   const GridItem({
     required this.title,
