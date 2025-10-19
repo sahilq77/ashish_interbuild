@@ -317,7 +317,7 @@ class _HomeViewState extends State<HomeView> {
     ),
     GridItem(
       title: 'Weekly Inspection',
-      route: AppRoutes.weeklyInspectionDashboard,
+      route: AppRoutes.weeklyInspectionProjectList,
       gradientColor: Color.fromARGB(255, 0, 165, 253),
       icon: AppImages.inspectionIcon,
     ),
