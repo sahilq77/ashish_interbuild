@@ -32,14 +32,14 @@ class BottomNavigationController extends GetxController {
           AppRoutes.measurmentProjectNameList,
           AppRoutes.dailyProgressDashboard,
 
-          AppRoutes.notifications,
+          AppRoutes.profile,
         ];
       case 1:
         return [
           AppRoutes.home,
           AppRoutes.measurmentProjectNameList,
           AppRoutes.dprProjectList,
-          AppRoutes.notifications,
+          AppRoutes.profile,
         ];
       case 2:
         return [
@@ -47,7 +47,7 @@ class BottomNavigationController extends GetxController {
           AppRoutes.measurmentProjectNameList,
           AppRoutes.dailyProgressDashboard,
 
-          AppRoutes.notifications,
+          AppRoutes.profile,
         ];
       default:
         // Fallback routes in case userType is invalid

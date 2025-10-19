@@ -152,14 +152,20 @@ class AddPboqFormView extends StatelessWidget {
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               ElevatedButton(
                 onPressed: controller.addFieldSet,
-                style: AppButtonStyles.elevatedLargePrimary(),
-                child: const Text("Add More"),
+                style: AppButtonStyles.elevatedLargeBlack(),
+                child: Text(
+                  "Add More",
+                  style: AppStyle.buttonTextPoppinsWhite.responsive,
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
                 onPressed: controller.submitForm,
-                style: AppButtonStyles.elevatedLargePrimary(),
-                child: const Text("Submit"),
+                style: AppButtonStyles.elevatedLargeBlack(),
+                child: Text(
+                  "Submit",
+                  style: AppStyle.buttonTextPoppinsWhite.responsive,
+                ),
               ),
             ],
           ),

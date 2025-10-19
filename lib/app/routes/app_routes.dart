@@ -1,3 +1,5 @@
+import 'package:ashishinterbuild/app/modules/profile/profile_binding.dart';
+import 'package:ashishinterbuild/app/modules/profile/profile_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_dashboard/daily_progress_report_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_dashboard/daily_progress_report_dashboard_binding.dart';
@@ -56,7 +58,8 @@ class AppRoutes {
   static const String dprProjectList = '/dpr-project-list';
   static const String weeklyInspectionProjectList =
       '/weekly-inspection-project-list';
-
+  static const String profile =
+      '/profile';
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
 
@@ -139,6 +142,13 @@ class AppRoutes {
       page: () => const WeeklyInspectionProjectList(),
       binding: WeeklyInspectionProjectListBinding(),
     ),
+
+ GetPage(
+      name: profile,
+      page: () => const ProfileScreenView(),
+      binding: ProfileBinding(),
+    ),
+    
   ];
 }
 

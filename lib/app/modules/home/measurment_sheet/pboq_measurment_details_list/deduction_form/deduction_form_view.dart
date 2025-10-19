@@ -50,8 +50,11 @@ class DeductionFormView extends StatelessWidget {
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
                 onPressed: controller.submitForm,
-                style: AppButtonStyles.elevatedLargePrimary(),
-                child: const Text("Submit"),
+                style: AppButtonStyles.elevatedLargeBlack(),
+                child: Text(
+                  "Submit",
+                  style: AppStyle.buttonTextPoppinsWhite.responsive,
+                ),
               ),
             ],
           ),

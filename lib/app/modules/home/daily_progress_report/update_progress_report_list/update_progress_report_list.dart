@@ -350,6 +350,9 @@ class UpdateProgressReportList extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // Reduced border radius
+          ),
           title: Text(
             'Confirm Update',
             style: GoogleFonts.poppins(
@@ -381,7 +384,7 @@ class UpdateProgressReportList extends StatelessWidget {
                 SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    style: AppButtonStyles.elevatedSmallPrimary(),
+                    style: AppButtonStyles.elevatedSmallBlack(),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },

@@ -43,49 +43,67 @@ class DailyProgressReportDashboard extends StatelessWidget {
                     children: [
                       _buildGridItem(
                         'Monthly Target',
-                        controller.formatCurrency(controller.monthlyTarget.value),
+                        controller.formatCurrency(
+                          controller.monthlyTarget.value,
+                        ),
                         controller.formatPercentage(
                           controller.monthlyPercent.value,
                         ),
-                        AppColors.grey,
-                        false,
+                        Colors.indigo,
+                        true,
                       ),
                       _buildGridItem(
                         'Monthly Achieve',
-                        controller.formatCurrency(controller.monthlyAchieve.value),
+                        controller.formatCurrency(
+                          controller.monthlyAchieve.value,
+                        ),
                         controller.formatPercentage(
                           controller.monthlyPercent.value,
                         ),
-                        AppColors.grey,
-                        false,
+                        Colors.teal,
+                        true,
                       ),
                       _buildGridItem(
                         'Weekly Target',
-                        controller.formatCurrency(controller.weeklyTarget.value),
-                        controller.formatPercentage(controller.weeklyPercent.value),
-                        AppColors.grey,
-                        false,
+                        controller.formatCurrency(
+                          controller.weeklyTarget.value,
+                        ),
+                        controller.formatPercentage(
+                          controller.weeklyPercent.value,
+                        ),
+                        Colors.deepOrange,
+                        true,
                       ),
                       _buildGridItem(
                         'Weekly Achieve',
-                        controller.formatCurrency(controller.weeklyAchieve.value),
-                        controller.formatPercentage(controller.weeklyPercent.value),
-                        AppColors.grey,
-                        false,
+                        controller.formatCurrency(
+                          controller.weeklyAchieve.value,
+                        ),
+                        controller.formatPercentage(
+                          controller.weeklyPercent.value,
+                        ),
+                        Colors.deepPurple,
+                        true,
                       ),
                       _buildGridItem(
                         'Today\'s Target',
                         controller.formatCurrency(controller.dailyTarget.value),
-                        controller.formatPercentage(controller.dailyPercent.value),
-                        AppColors.grey,
-                        false,
+                        controller.formatPercentage(
+                          controller.dailyPercent.value,
+                        ),
+                        Colors.amber,
+                        true,
                       ),
                       _buildGridItem(
                         'Today\'s Achieve',
-                        controller.formatCurrency(controller.dailyAchieve.value),
-                        controller.formatPercentage(controller.dailyPercent.value),
-                        AppColors.grey,
-                        false,
+                        controller.formatCurrency(
+                          controller.dailyAchieve.value,
+                        ),
+                        controller.formatPercentage(
+                          controller.dailyPercent.value,
+                        ),
+                        Colors.green,
+                        true,
                       ),
                     ],
                   ),
@@ -113,7 +131,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: gradientColor),
+          border: Border.all(color: AppColors.grey),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),

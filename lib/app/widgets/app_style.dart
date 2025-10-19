@@ -297,7 +297,7 @@ class AppStyle {
 
   // Button Text Styles (Poppins - White)
   static TextStyle get buttonTextPoppinsWhite => GoogleFonts.poppins(
-    fontSize: _fontSize18,
+    fontSize: _fontSize16,
     fontWeight: FontWeight.w600,
     color: AppColors.white,
   );
@@ -419,10 +419,9 @@ class AppStyle {
     fontWeight: FontWeight.w500,
     color: AppColors.defaultBlack,
   );
-   static TextStyle get dashPercent => GoogleFonts.poppins(
+  static TextStyle get dashPercent => GoogleFonts.poppins(
     fontSize: _fontSize12,
     fontWeight: FontWeight.w500,
     color: AppColors.defaultBlack,
   );
-  
 }

@@ -73,12 +73,12 @@ class WeeklyInspectionProjectList extends StatelessWidget {
                                       end: Alignment.bottomRight,
                                     ),
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border(
-                                      left: BorderSide(
-                                        color: AppColors.primary,
-                                        width: 5,
-                                      ),
-                                    ),
+                                    // border: Border(
+                                    //   left: BorderSide(
+                                    //     color: AppColors.primary,
+                                    //     width: 5,
+                                    //   ),
+                                    // ),
                                   ),
                                   child: Padding(
                                     padding: ResponsiveHelper.padding(16),
