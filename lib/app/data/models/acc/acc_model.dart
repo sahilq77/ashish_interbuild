@@ -5,10 +5,10 @@ class AccModel {
   final String affectedMilestone;
   final bool keyDelayEvents;
   final String priority;
-  final DateTime issueOpenDate;
+  final String issueOpenDate;
   final int overdue;
   final String delay;
-  final DateTime? issueCloseDate;
+  final String? issueCloseDate;
   final String role;
   final String attachment;
   final String statusUpdate;
@@ -31,21 +31,19 @@ class AccModel {
 
   factory AccModel.fromMap(Map<String, dynamic> map) {
     return AccModel(
-      srNo: map['Sr.No'] ?? 0,
-      accCategory: map['ACC Category'] ?? '',
-      briefDetail: map['Brief Detail about Issue'] ?? '',
-      affectedMilestone: map['Affected Milestone'] ?? '',
+      srNo: map['Sr.No'] as int,
+      accCategory: map['ACC Category'] as String,
+      briefDetail: map['Brief Detail about Issue'] as String,
+      affectedMilestone: map['Affected Milestone'] as String,
       keyDelayEvents: map['Key Delay Events'] == 'Yes',
-      priority: map['Priority'] ?? '',
-      issueOpenDate: DateTime.parse(map['Issue Open Date'] ?? ''),
-      overdue: map['overdue'] ?? 0,
-      delay: map['Delay'] ?? '',
-      issueCloseDate: map['Issue close Date'] != null
-          ? DateTime.parse(map['Issue close Date'])
-          : null,
-      role: map['Role'] ?? '',
-      attachment: map['Attachment'] ?? '',
-      statusUpdate: map['Status Update'] ?? '',
+      priority: map['Priority'] as String,
+      issueOpenDate: map['Issue Open Date'] as String,
+      overdue: map['overdue'] as int,
+      delay: map['Delay'] as String,
+      issueCloseDate: map['Issue close Date'] as String,
+      role: map['Role'] as String,
+      attachment: map['Attachment'] as String,
+      statusUpdate: map['Status Update'] as String,
     );
   }
 }

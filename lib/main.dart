@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,10 @@ import 'app/utils/app_utility.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppUtility.initialize();
+  Get.lazyPut<BottomNavigationController>(
+    () => BottomNavigationController(),
+    fenix: true,
+  );
   runApp(const MyApp());
 }
 
@@ -121,7 +126,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      initialRoute: AppRoutes.profile,
+      initialRoute: AppRoutes.splash,
       getPages: AppRoutes.routes,
       builder: (context, child) {
         return ColorfulSafeArea(

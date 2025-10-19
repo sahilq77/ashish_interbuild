@@ -30,8 +30,7 @@ class BottomNavigationController extends GetxController {
         return [
           AppRoutes.home,
           AppRoutes.measurmentProjectNameList,
-          AppRoutes.dailyProgressDashboard,
-
+          AppRoutes.dprProjectList,
           AppRoutes.profile,
         ];
       case 1:
@@ -45,8 +44,7 @@ class BottomNavigationController extends GetxController {
         return [
           AppRoutes.home,
           AppRoutes.measurmentProjectNameList,
-          AppRoutes.dailyProgressDashboard,
-
+          AppRoutes.dprProjectList,
           AppRoutes.profile,
         ];
       default:
@@ -55,9 +53,8 @@ class BottomNavigationController extends GetxController {
         return [
           AppRoutes.home,
           AppRoutes.measurmentProjectNameList,
-          AppRoutes.dailyProgressDashboard,
-
-          AppRoutes.notifications,
+          AppRoutes.dprProjectList,
+          AppRoutes.profile,
         ];
     }
   }

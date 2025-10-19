@@ -1,3 +1,11 @@
+import 'package:ashishinterbuild/app/modules/home/acc/acc_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/acc_screen_view.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/update_acc/update_acc_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/update_acc/update_acc_form_view.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_binding.dart';
@@ -58,8 +66,13 @@ class AppRoutes {
   static const String dprProjectList = '/dpr-project-list';
   static const String weeklyInspectionProjectList =
       '/weekly-inspection-project-list';
-  static const String profile =
-      '/profile';
+  static const String profile = '/profile';
+  static const String accProjects = '/acc-projects';
+  static const String accScreenList = '/acc-list';
+  static const String addAccForm = '/add-acc-form';
+  static const String updateAccForm = '/update-acc-form';
+  
+
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
 
@@ -143,12 +156,34 @@ class AppRoutes {
       binding: WeeklyInspectionProjectListBinding(),
     ),
 
- GetPage(
+    GetPage(
       name: profile,
       page: () => const ProfileScreenView(),
       binding: ProfileBinding(),
     ),
+    GetPage(
+      name: accProjects,
+      page: () => const AccProjectList(),
+      binding: AccProjectListBinding(),
+    ),
+
+    GetPage(
+      name: accScreenList,
+      page: () => const AccScreenView(),
+      binding: AccBinding(),
+    ),
+
+    GetPage(
+      name: addAccForm,
+      page: () => const AddAccIssueFormView(),
+      binding: AddAccFormBinding(),
+    ),
     
+    GetPage(
+      name: updateAccForm,
+      page: () => const UpdateAccFormView(),
+      binding: UpdateAccFormBinding(),
+    ),
   ];
 }
 

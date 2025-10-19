@@ -1,4 +1,5 @@
 import 'dart:ui'; // Added for ImageFilter
+import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart';
 import 'package:ashishinterbuild/app/modules/bottom_navigation/cutom_bottom_bar.dart';
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
@@ -26,99 +27,115 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    ResponsiveHelper.init(context);
     final double topPadding = MediaQuery.of(context).padding.top;
+    final bottomController = Get.put(BottomNavigationController());
+    ResponsiveHelper.init(context);
+    return PopScope(
+      canPop: false, // Prevent default back navigation
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          // Call the same onWillPop logic from BottomNavigationController
+          bool shouldPop = await bottomController.onWillPop();
+          if (shouldPop && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        }
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        // appBar: _buildAppBar(), // Uncomment if you want to use the AppBar
+        body: Stack(
+          children: [
+            // ---------- WAVE BACKGROUND ----------
+            // Add your wave background widget here if needed
+            // Ensure it’s constrained to avoid interfering with the layout
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      // appBar: _buildAppBar(), // Uncomment if you want to use the AppBar
-      body: Stack(
-        children: [
-          // ---------- WAVE BACKGROUND ----------
-          // Add your wave background widget here if needed
-          // Ensure it’s constrained to avoid interfering with the layout
+            // ---------- MAIN CONTENT ----------
+            SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Fixed Header
+                  Padding(
+                    padding: ResponsiveHelper.padding(16),
+                    child: _buildHeader(),
+                  ),
+                  // Scrollable Content
+                  Divider(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: ResponsiveHelper.padding(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: topPadding + 12),
 
-          // ---------- MAIN CONTENT ----------
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Fixed Header
-                Padding(
-                  padding: ResponsiveHelper.padding(16),
-                  child: _buildHeader(),
-                ),
-                // Scrollable Content
-                Divider(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: ResponsiveHelper.padding(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: topPadding + 12),
-
-                          // ---------- HERO TITLE ----------
-                          FadeInDown(
-                            duration: const Duration(milliseconds: 600),
-                            child: Text(
-                              "Welcome back!",
-                              style: GoogleFonts.poppins(
-                                fontSize:
-                                    ResponsiveHelper.getResponsiveFontSize(26),
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          FadeInDown(
-                            delay: const Duration(milliseconds: 200),
-                            child: Text(
-                              "Select a module to continue",
-                              style: GoogleFonts.poppins(
-                                fontSize:
-                                    ResponsiveHelper.getResponsiveFontSize(16),
-                                color: AppColors.grey,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          // ---------- GRID ----------
-                          GridView.builder(
-                            physics: const ClampingScrollPhysics(),
-                            shrinkWrap:
-                                true, // Ensure GridView takes only needed space
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing:
-                                      ResponsiveHelper.screenWidth * 0.04,
-                                  mainAxisSpacing:
-                                      ResponsiveHelper.screenWidth * 0.04,
-                                  childAspectRatio: 1.1,
+                            // ---------- HERO TITLE ----------
+                            FadeInDown(
+                              duration: const Duration(milliseconds: 600),
+                              child: Text(
+                                "Welcome back!",
+                                style: GoogleFonts.poppins(
+                                  fontSize:
+                                      ResponsiveHelper.getResponsiveFontSize(
+                                        26,
+                                      ),
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
                                 ),
-                            itemCount: _gridItems.length,
-                            itemBuilder: (context, index) {
-                              final item = _gridItems[index];
-                              return FadeInUp(
-                                delay: Duration(milliseconds: 100 * index),
-                                child: _buildGlassCard(item),
-                              );
-                            },
-                          ),
-                        ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            FadeInDown(
+                              delay: const Duration(milliseconds: 200),
+                              child: Text(
+                                "Select a module to continue",
+                                style: GoogleFonts.poppins(
+                                  fontSize:
+                                      ResponsiveHelper.getResponsiveFontSize(
+                                        16,
+                                      ),
+                                  color: AppColors.grey,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            // ---------- GRID ----------
+                            GridView.builder(
+                              physics: const ClampingScrollPhysics(),
+                              shrinkWrap:
+                                  true, // Ensure GridView takes only needed space
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing:
+                                        ResponsiveHelper.screenWidth * 0.04,
+                                    mainAxisSpacing:
+                                        ResponsiveHelper.screenWidth * 0.04,
+                                    childAspectRatio: 1.1,
+                                  ),
+                              itemCount: _gridItems.length,
+                              itemBuilder: (context, index) {
+                                final item = _gridItems[index];
+                                return FadeInUp(
+                                  delay: Duration(milliseconds: 100 * index),
+                                  child: _buildGlassCard(item),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        bottomNavigationBar: CustomBottomBar(),
       ),
-      bottomNavigationBar: CustomBottomBar(),
     );
   }
 
@@ -323,7 +340,7 @@ class _HomeViewState extends State<HomeView> {
     ),
     GridItem(
       title: 'Access and Manage (ACC)',
-      route: null,
+      route: AppRoutes.accProjects,
       gradientColor: Color.fromARGB(255, 253, 135, 0),
       icon: AppImages.accIcon,
     ),
