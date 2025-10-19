@@ -13,7 +13,9 @@ class ClientCommitmentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ClientCommitmentController controller = Get.put(ClientCommitmentController());
+    final ClientCommitmentController controller = Get.put(
+      ClientCommitmentController(),
+    );
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -57,87 +59,232 @@ class ClientCommitmentScreen extends StatelessWidget {
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Padding(
-                                padding: ResponsiveHelper.padding(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildDetailRow("Sr. No.", commitment.srNo.toString()),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Task Assigned To", commitment.taskAssignedTo),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("HOD", commitment.hod),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Task Details", commitment.taskDetails),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Affected Milestone", commitment.affectedMilestone),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Priority", commitment.priority ?? "-"),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Milestone Target Date", commitment.milestoneTargetDate.toString()),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Initial Target Date", commitment.initialTargetDate.toString()),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("CC Category", commitment.ccCategory),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Overdue Days", commitment.overdueDays.toString()),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Delay", commitment.delay ?? "-"),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Revised Completion Date", commitment.revisedCompletionDate?.toString() ?? "-"),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Close Date", commitment.closeDate?.toString() ?? "-"),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Status Update", commitment.statusUpdate),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Attachment", commitment.attachment ?? "-"),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                                    _buildDetailRow("Remark", commitment.remark ?? "-"),
-                                    SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
-                                    Divider(),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            style: AppButtonStyles.elevatedSmallBlack(),
-                                            onPressed: () {
-                                              controller.toggleExpanded(index);
-                                            },
-                                            child: Text(
-                                              controller.expandedIndex.value == index ? "Less" : "Read",
-                                              style: AppStyle.labelPrimaryPoppinsWhite,
-                                            ),
-                                          ),
+                              child: Obx(
+                                () => Padding(
+                                  padding: ResponsiveHelper.padding(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _buildDetailRow(
+                                        "Sr. No.",
+                                        commitment.srNo.toString(),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
+                                      _buildDetailRow(
+                                        "Task Assigned To",
+                                        commitment.taskAssignedTo,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
+                                      _buildDetailRow("HOD", commitment.hod),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
+                                      _buildDetailRow(
+                                        "Task Details",
+                                        commitment.taskDetails,
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            ResponsiveHelper.screenHeight *
+                                            0.002,
+                                      ),
+                                      if (controller.expandedIndex.value ==
+                                          index) ...[
+                                        _buildDetailRow(
+                                          "Affected Milestone",
+                                          commitment.affectedMilestone,
                                         ),
-                                        SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
-                                        Expanded(
-                                          child: OutlinedButton(
-                                            style: AppButtonStyles.outlinedSmallBlack(),
-                                            onPressed: () {
-                                              Get.toNamed(AppRoutes.updateAccForm);
-                                            },
-                                            child: Text(
-                                              "Update",
-                                              style: AppStyle.labelPrimaryPoppinsBlack,
-                                            ),
-                                          ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
                                         ),
-                                        SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
-                                        Expanded(
-                                          child: OutlinedButton(
-                                            style: AppButtonStyles.outlinedSmallBlack(),
-                                            onPressed: () {
-                                              // _showConfirmationDialog(context, sheet);
-                                            },
-                                            child: Text(
-                                              "Delete",
-                                              style: AppStyle.labelPrimaryPoppinsBlack,
-                                            ),
-                                          ),
+                                        _buildDetailRow(
+                                          "Priority",
+                                          commitment.priority ?? "-",
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Milestone Target Date",
+                                          commitment.milestoneTargetDate
+                                              .toString(),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Initial Target Date",
+                                          commitment.initialTargetDate
+                                              .toString(),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "CC Category",
+                                          commitment.ccCategory,
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Overdue Days",
+                                          commitment.overdueDays.toString(),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Delay",
+                                          commitment.delay ?? "-",
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Revised Completion Date",
+                                          commitment.revisedCompletionDate
+                                                  ?.toString() ??
+                                              "-",
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Close Date",
+                                          commitment.closeDate?.toString() ??
+                                              "-",
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Status Update",
+                                          commitment.statusUpdate,
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Attachment",
+                                          commitment.attachment ?? "-",
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.002,
+                                        ),
+                                        _buildDetailRow(
+                                          "Remark",
+                                          commitment.remark ?? "-",
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.01,
                                         ),
                                       ],
-                                    ),
-                                  ],
+                                      Divider(),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              style:
+                                                  AppButtonStyles.elevatedSmallBlack(),
+                                              onPressed: () {
+                                                controller.toggleExpanded(
+                                                  index,
+                                                );
+                                              },
+                                              child: Text(
+                                                controller
+                                                            .expandedIndex
+                                                            .value ==
+                                                        index
+                                                    ? "Less"
+                                                    : "Read",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsWhite,
+                                              ),
+                                            ),
+                                          ),
+
+                                          SizedBox(
+                                            width:
+                                                ResponsiveHelper.screenWidth *
+                                                0.05,
+                                          ),
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              style:
+                                                  AppButtonStyles.outlinedSmallBlack(),
+                                              onPressed: () {
+                                                Get.toNamed(
+                                                  AppRoutes
+                                                      .updateClientCommitment,
+                                                );
+                                              },
+                                              child: Text(
+                                                "Update",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width:
+                                                ResponsiveHelper.screenWidth *
+                                                0.05,
+                                          ),
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              style:
+                                                  AppButtonStyles.outlinedSmallBlack(),
+                                              onPressed: () {
+                                                // _showConfirmationDialog(context, sheet);
+                                              },
+                                              child: Text(
+                                                "Delete",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -159,7 +306,10 @@ class ClientCommitmentScreen extends StatelessWidget {
         hintText: 'Search....',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         suffixIcon: const Icon(Icons.search),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       onChanged: controller.searchCommitments,
     );
@@ -174,7 +324,9 @@ class ClientCommitmentScreen extends StatelessWidget {
           baseColor: Colors.grey.shade300,
           highlightColor: Colors.grey.shade100,
           child: Card(
-            margin: EdgeInsets.only(bottom: ResponsiveHelper.screenHeight * 0.02),
+            margin: EdgeInsets.only(
+              bottom: ResponsiveHelper.screenHeight * 0.02,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -220,7 +372,12 @@ class ClientCommitmentScreen extends StatelessWidget {
           child: Text(label, style: AppStyle.reportCardTitle),
         ),
         const SizedBox(width: 8),
-        Text(': ', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppStyle.reportCardSubTitle),
+        Text(
+          ': ',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppStyle.reportCardSubTitle,
+        ),
         Expanded(child: Text(value, style: AppStyle.reportCardSubTitle)),
       ],
     );
@@ -242,7 +399,7 @@ class ClientCommitmentScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            Get.toNamed(AppRoutes.addAccForm);
+            Get.toNamed(AppRoutes.addClientCommitment);
           },
           icon: const Icon(Icons.add),
         ),

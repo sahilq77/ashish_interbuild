@@ -6,6 +6,14 @@ import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_bindi
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/update_acc/update_acc_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/update_acc/update_acc_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/add_client_commitment/add_client_commitment_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/add_client_commitment/add_client_commitment_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_screen.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_binding.dart';
@@ -71,6 +79,10 @@ class AppRoutes {
   static const String accScreenList = '/acc-list';
   static const String addAccForm = '/add-acc-form';
   static const String updateAccForm = '/update-acc-form';
+  static const String clientCommitmentProject = '/client-commitment-project';
+  static const String clientCommitmentList = '/client-commitment-list';
+  static const String addClientCommitment = '/add-client-commitment';
+  static const String updateClientCommitment = '/update-client-commitment';
   
 
   static List<GetPage> routes = [
@@ -178,12 +190,36 @@ class AppRoutes {
       page: () => const AddAccIssueFormView(),
       binding: AddAccFormBinding(),
     ),
-    
+
     GetPage(
       name: updateAccForm,
       page: () => const UpdateAccFormView(),
       binding: UpdateAccFormBinding(),
     ),
+    GetPage(
+      name: clientCommitmentProject,
+      page: () => const ClientCommitmentProject(),
+      binding: ClientCommitmentProjectBinding(),
+    ),
+    GetPage(
+      name: clientCommitmentList,
+      page: () => const ClientCommitmentScreen(),
+      binding: ClientCommitmentBinding(),
+    ),
+
+    GetPage(
+      name: addClientCommitment,
+      page: () => const AddClientCommitmentFormView(),
+      binding: AddClientCommitmentFormBinding(),
+    ),
+  GetPage(
+      name: updateClientCommitment,
+      page: () => const UpdateClientCommitmentFormView(),
+      binding: UpdateClientCommitmentFormBinding(),
+    ),
+
+
+    
   ];
 }
 

@@ -12,14 +12,12 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class AccProjectList extends StatelessWidget {
-  const AccProjectList({super.key});
+class ClientCommitmentProject extends StatelessWidget {
+  const ClientCommitmentProject({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final MeasurmentProjectNameController controller = Get.put(
-      MeasurmentProjectNameController(),
-    );
+    final MeasurmentProjectNameController controller = Get.find();
     final bottomController = Get.put(BottomNavigationController());
     ResponsiveHelper.init(context);
     return PopScope(
@@ -57,7 +55,8 @@ class AccProjectList extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final project = controller.filteredProjects[index];
                             return GestureDetector(
-                              onTap: () => Get.toNamed(AppRoutes.accScreenList),
+                              onTap: () =>
+                                  Get.toNamed(AppRoutes.clientCommitmentList),
                               child: Card(
                                 margin: EdgeInsets.only(
                                   bottom: ResponsiveHelper.screenHeight * 0.02,
@@ -182,7 +181,7 @@ class AccProjectList extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'ACC Project List',
+        'CC Project List',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,

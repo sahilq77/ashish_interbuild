@@ -346,7 +346,7 @@ class _HomeViewState extends State<HomeView> {
     ),
     GridItem(
       title: 'Client Commitment (CC)',
-      route: null,
+      route:  AppRoutes.clientCommitmentProject,
       gradientColor: Color.fromARGB(255, 0, 102, 255),
       icon: AppImages.clientIcon,
     ),
