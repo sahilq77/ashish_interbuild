@@ -72,9 +72,13 @@ class ProfileScreenView extends StatelessWidget {
                               child: Column(
                                 children: [
                                   ListTile(
+ onTap: () {
+                                      Get.toNamed(AppRoutes.updateProfile);
+                                    },
+                                    
                                     leading: Icon(FontAwesomeIcons.user),
                                     title: Text(
-                                      "Profile",
+                                      "Update Profile",
                                       style: AppStyle.bodyRegularPoppinsBlack,
                                     ),
                                     trailing: Icon(
@@ -195,7 +199,7 @@ class ProfileScreenView extends StatelessWidget {
                           child:
                               controller.user.value!.profilePictureUrl != null
                               ? ClipOval(
-                                  child: Image.network(
+                                  child: Image.asset(
                                     controller.user.value!.profilePictureUrl!,
                                     width: ResponsiveHelper.spacing(100),
                                     height: ResponsiveHelper.spacing(100),
@@ -215,39 +219,39 @@ class ProfileScreenView extends StatelessWidget {
                                   color: AppColors.grey,
                                 ),
                         ),
-                        Positioned(
-                          bottom: ResponsiveHelper.spacing(4),
-                          right: ResponsiveHelper.spacing(4),
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.snackbar(
-                                'Info',
-                                'Edit Profile Picture not implemented',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            },
-                            child: Container(
-                              width: ResponsiveHelper.spacing(32),
-                              height: ResponsiveHelper.spacing(32),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.edit,
-                                size: ResponsiveHelper.spacing(16),
-                                color: AppColors.defaultBlack,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Positioned(
+                        //   bottom: ResponsiveHelper.spacing(4),
+                        //   right: ResponsiveHelper.spacing(4),
+                        //   child: GestureDetector(
+                        //     onTap: () {
+                        //       Get.snackbar(
+                        //         'Info',
+                        //         'Edit Profile Picture not implemented',
+                        //         snackPosition: SnackPosition.BOTTOM,
+                        //       );
+                        //     },
+                        //     child: Container(
+                        //       width: ResponsiveHelper.spacing(32),
+                        //       height: ResponsiveHelper.spacing(32),
+                        //       decoration: BoxDecoration(
+                        //         color: AppColors.white,
+                        //         shape: BoxShape.circle,
+                        //         boxShadow: [
+                        //           BoxShadow(
+                        //             color: Colors.black.withOpacity(0.1),
+                        //             blurRadius: 4,
+                        //             offset: const Offset(0, 2),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //       child: Icon(
+                        //         Icons.edit,
+                        //         size: ResponsiveHelper.spacing(16),
+                        //         color: AppColors.defaultBlack,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

@@ -49,6 +49,8 @@ import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sh
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_view.dart';
 import 'package:ashishinterbuild/app/modules/notification/notification_binding.dart';
 import 'package:ashishinterbuild/app/modules/notification/notification_view.dart';
+import 'package:ashishinterbuild/app/modules/profile/update_profile/update_profile_binding.dart';
+import 'package:ashishinterbuild/app/modules/profile/update_profile/update_profile_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/splash/splash_view.dart';
 import 'package:get/get.dart';
 
@@ -83,7 +85,7 @@ class AppRoutes {
   static const String clientCommitmentList = '/client-commitment-list';
   static const String addClientCommitment = '/add-client-commitment';
   static const String updateClientCommitment = '/update-client-commitment';
-  
+  static const String updateProfile = '/update-profile';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -212,14 +214,16 @@ class AppRoutes {
       page: () => const AddClientCommitmentFormView(),
       binding: AddClientCommitmentFormBinding(),
     ),
-  GetPage(
+    GetPage(
       name: updateClientCommitment,
       page: () => const UpdateClientCommitmentFormView(),
       binding: UpdateClientCommitmentFormBinding(),
     ),
-
-
-    
+    GetPage(
+      name: updateProfile,
+      page: () => const UpdateProfileScreenView(),
+      binding: UpdateProfileBinding(),
+    ),
   ];
 }
 

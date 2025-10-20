@@ -19,6 +19,7 @@ class AppImages {
   static const String accIcon = 'assets/icons/acc-icon.svg';
   static const String clientIcon = 'assets/icons/client-icon.svg';
   static const String bellIcon = 'assets/icons/bell-icon.svg';
+  static const String profile = 'assets/images/profile_pic.jpg';
 
   // //Bottom Navigation screen Icons
   // static const String homeIcon = 'assets/icons/home-i.svg';

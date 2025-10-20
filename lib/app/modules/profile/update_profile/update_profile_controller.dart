@@ -2,7 +2,7 @@ import 'package:ashishinterbuild/app/data/models/profile/profile_model.dart';
 import 'package:ashishinterbuild/app/utils/app_images.dart';
 import 'package:get/get.dart';
 
-class ProfileController extends GetxController {
+class UpdateProfileController extends GetxController {
   // Reactive variables
   final Rx<User?> user = Rx<User?>(null);
   final RxBool isLoading = true.obs;
@@ -24,17 +24,18 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Mock fetching user data (replace with actual API call or local storage)
+  // Fetch user data (mock, replace with actual API call)
   Future<void> fetchUser() async {
     try {
       isLoading.value = true;
-      // Simulate network delay
       await Future.delayed(const Duration(seconds: 1));
-      user.value = const User(
+      user.value = User(
         id: '1',
         name: 'John Doe',
         email: 'john.doe@example.com',
-        profilePictureUrl: AppImages.profile, // No profile picture for now
+        phone: '+1 123-456-7890',
+        address: '123 Main St, City, Country',
+        profilePictureUrl: AppImages.profile,
       );
     } catch (e) {
       Get.snackbar(
@@ -46,20 +47,22 @@ class ProfileController extends GetxController {
       isLoading.value = false;
     }
   }
+}
 
-  // Handle logout logic (replace with actual auth service logout)
-  Future<void> logout() async {
-    try {
-      // Simulate logout process
-      await Future.delayed(const Duration(seconds: 1));
-      // Navigate to login screen and remove all previous routes
-      Get.offAllNamed('/login');
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Logout failed: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
+class User {
+  final String id;
+  final String name;
+  final String email;
+  final String? phone;
+  final String? address;
+  final String? profilePictureUrl;
+
+  const User({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.phone,
+    this.address,
+    this.profilePictureUrl,
+  });
 }

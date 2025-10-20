@@ -69,7 +69,7 @@ class LoginController extends GetxController {
       1,
     ).then((val) {
       // Navigate with arguments
-      Get.offNamed(AppRoutes.home);
+      Get.offAllNamed(AppRoutes.home);
     });
   }
 
