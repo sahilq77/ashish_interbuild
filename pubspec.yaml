@@ -45,6 +45,9 @@ dependencies:
   shimmer: ^3.0.0
   font_awesome_flutter: ^10.9.1
   animate_do: ^3.3.0          # for entrance animations
+  firebase_core: ^3.14.0
+  firebase_messaging: ^15.2.7
+  flutter_local_notifications: ^19.3.0
 
 dev_dependencies:
   flutter_test:

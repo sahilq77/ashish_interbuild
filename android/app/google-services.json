@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "892279917255",
+    "project_id": "ashish-interbuild",
+    "storage_bucket": "ashish-interbuild.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892279917255:android:bf063902d1f8cf96ed4ce2",
+        "android_client_info": {
+          "package_name": "com.quick.ashishinterbuild"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnhl-tn5i6bjvSvPANuw7pjtrvcmfHYCo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,8 @@
+import 'package:ashishinterbuild/app/data/service/notfication_services.dart';
 import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart';
-import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_details_list.dart';
+import 'package:ashishinterbuild/firebase_options.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,11 +12,16 @@ import 'app/utils/app_utility.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await AppUtility.initialize();
   Get.lazyPut<BottomNavigationController>(
     () => BottomNavigationController(),
     fenix: true,
   );
+   final NotificationServices notificationServices = NotificationServices();
+   
+  notificationServices.requestNotificationPermission();
+  notificationServices.isTokenRefresh();
   runApp(const MyApp());
 }
 
