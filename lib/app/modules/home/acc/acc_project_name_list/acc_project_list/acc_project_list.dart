@@ -82,13 +82,9 @@ class AccProjectList extends StatelessWidget {
                                   ),
                                   child: Padding(
                                     padding: ResponsiveHelper.padding(16),
-                                    child: Column(
-                                      children: [
-                                        _buildDetailRow(
-                                          "Project Name",
-                                          project.projectName,
-                                        ),
-                                      ],
+                                    child: _buildDetailRow(
+                                      "Project Name",
+                                      project.projectName,
                                     ),
                                   ),
                                 ),
@@ -165,14 +161,11 @@ class AccProjectList extends StatelessWidget {
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 130,
-          child: Text(value, style: AppStyle.reportCardTitle),
-        ),
-      ],
+    return Text(
+      value,
+      style: AppStyle.reportCardTitle.responsive.copyWith(
+        fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+      ),
     );
   }
 

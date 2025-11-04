@@ -346,7 +346,7 @@ class _HomeViewState extends State<HomeView> {
     ),
     GridItem(
       title: 'Client Commitment (CC)',
-      route:  AppRoutes.clientCommitmentProject,
+      route: AppRoutes.clientCommitmentProject,
       gradientColor: Color.fromARGB(255, 0, 102, 255),
       icon: AppImages.clientIcon,
     ),
@@ -395,7 +395,7 @@ class _HomeViewState extends State<HomeView> {
                       Text(
                         item.title,
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(13),
                           fontWeight: FontWeight.w500,
                           color: Colors.black.withOpacity(
                             0.95,
