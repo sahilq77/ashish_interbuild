@@ -335,16 +335,28 @@ class AccScreenView extends StatelessWidget {
       children: [
         SizedBox(
           width: 130,
-          child: Text(label, style: AppStyle.reportCardTitle),
+          child: Text(
+            label,
+            style: AppStyle.reportCardTitle.responsive.copyWith(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+            ),
+          ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           ': ',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppStyle.reportCardSubTitle,
         ),
-        Expanded(child: Text(value, style: AppStyle.reportCardSubTitle)),
+        Expanded(
+          child: Text(
+            value,
+            style: AppStyle.reportCardSubTitle.responsive.copyWith(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+            ),
+          ),
+        ),
       ],
     );
   }
