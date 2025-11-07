@@ -43,6 +43,7 @@ class MyApp extends StatelessWidget {
           primary: AppColors.primary,
         ),
         appBarTheme: AppBarTheme(
+          
           actionsIconTheme: IconThemeData(size: 30),
           scrolledUnderElevation: 0.0,
           backgroundColor: AppColors.primary,
