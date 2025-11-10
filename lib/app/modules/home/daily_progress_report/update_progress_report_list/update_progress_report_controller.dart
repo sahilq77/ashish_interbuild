@@ -1,12 +1,13 @@
-
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/daily_progress_report_model.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/update_daily_progress_report_model.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class UpdateProgressReportController extends GetxController {
-  final RxList<UpdateDailyProgressReportModel> measurementSheets = <UpdateDailyProgressReportModel>[].obs;
-  final RxList<UpdateDailyProgressReportModel> filteredMeasurementSheets = <UpdateDailyProgressReportModel>[].obs;
+  final RxList<UpdateDailyProgressReportModel> measurementSheets =
+      <UpdateDailyProgressReportModel>[].obs;
+  final RxList<UpdateDailyProgressReportModel> filteredMeasurementSheets =
+      <UpdateDailyProgressReportModel>[].obs;
   final RxInt expandedIndex = (-1).obs;
   final RxBool isLoading = true.obs;
   final TextEditingController searchController = TextEditingController();
@@ -152,10 +153,12 @@ class UpdateProgressReportController extends GetxController {
     } else {
       filteredMeasurementSheets.assignAll(
         measurementSheets
-            .where((sheet) =>
-                sheet.pboa.toLowerCase().contains(query.toLowerCase()) ||
-                sheet.zone.toLowerCase().contains(query.toLowerCase()) ||
-                sheet.location.toLowerCase().contains(query.toLowerCase()))
+            .where(
+              (sheet) =>
+                  sheet.pboa.toLowerCase().contains(query.toLowerCase()) ||
+                  sheet.zone.toLowerCase().contains(query.toLowerCase()) ||
+                  sheet.location.toLowerCase().contains(query.toLowerCase()),
+            )
             .toList(),
       );
     }

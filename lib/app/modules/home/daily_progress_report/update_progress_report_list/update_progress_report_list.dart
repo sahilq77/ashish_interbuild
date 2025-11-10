@@ -89,247 +89,329 @@ class UpdateProgressReportList extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final sheet =
                               controller.filteredMeasurementSheets[index];
-                          return Card(
-                            margin: EdgeInsets.only(
-                              bottom: ResponsiveHelper.screenHeight * 0.02,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.white, Colors.grey.shade50],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                // border: Border(
-                                //   left: BorderSide(
-                                //     color: AppColors.primary,
-                                //     width: 5,
-                                //   ),
-                                // ),
+                          return GestureDetector(
+                            onTap: () {
+                              // Handle card tap if needed
+                              controller.toggleExpanded(index);
+                            },
+                            child: Card(
+                              margin: EdgeInsets.only(
+                                bottom: ResponsiveHelper.screenHeight * 0.02,
                               ),
-                              child: Obx(
-                                () => Padding(
-                                  padding: ResponsiveHelper.padding(16),
-                                  child: Column(
-                                    children: [
-                                      _buildDetailRow("PBOA", sheet.pboa),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow("Zone", sheet.zone),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow(
-                                        "Location",
-                                        sheet.location,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow("MS Qty", sheet.msQty),
-                                      if (controller.expandedIndex.value ==
-                                          index) ...[
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Sr. No.", sheet.srNo),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "System ID",
-                                          sheet.systemId,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Source", sheet.source),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Sub Location",
-                                          sheet.subLocation,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "CBOQ Code",
-                                          sheet.cboqCode,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("PBOQ", sheet.pboq),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "PBOA Qty",
-                                          sheet.pboaQty,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "PBOA Amount",
-                                          sheet.pboaAmount,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Revised Start Date",
-                                          sheet.revisedStartDate,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Revised End Date",
-                                          sheet.revisedEndDate,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Length", sheet.length),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Breadth",
-                                          sheet.breadth,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Height", sheet.height),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Uploaded File",
-                                          sheet.uploadedFile,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Progress",
-                                          sheet.progress,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Execution",
-                                          sheet.execution,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Updated On",
-                                          sheet.updatedOn,
-                                        ),
-                                      ],
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.01,
-                                      ),
-                                      Divider(),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              style:
-                                                  AppButtonStyles.elevatedSmallBlack(),
-                                              onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
-                                                );
-                                              },
-                                              child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Less"
-                                                    : "Read",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
-                                              ),
-                                            ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.white, Colors.grey.shade50],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  // border: Border(
+                                  //   left: BorderSide(
+                                  //     color: AppColors.primary,
+                                  //     width: 5,
+                                  //   ),
+                                  // ),
+                                ),
+                                child: Obx(
+                                  () => Padding(
+                                    padding: ResponsiveHelper.padding(16),
+                                    child: Column(
+                                      children: [
+                                        _buildDetailRow("PBOA", sheet.pboa),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow("Zone", sheet.zone),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "Location",
+                                        //   sheet.location,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow("MS Qty", sheet.msQty),
+                                        if (controller.expandedIndex.value ==
+                                            index) ...[
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow("Zone", sheet.zone),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Location",
+                                            sheet.location,
                                           ),
                                           SizedBox(
-                                            width:
-                                                ResponsiveHelper.screenWidth *
-                                                0.05,
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
                                           ),
-                                          Expanded(
-                                            child: OutlinedButton(
-                                              style:
-                                                  AppButtonStyles.outlinedSmallBlack(),
-                                              onPressed: () {
-                                                _showConfirmationDialog(
-                                                  context,
-                                                  sheet,
-                                                );
-                                              },
-                                              child: Text(
-                                                "Update",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack,
-                                              ),
-                                            ),
+                                          _buildDetailRow(
+                                            "MS Qty",
+                                            sheet.msQty,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "System ID",
+                                            sheet.systemId,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Source",
+                                            sheet.source,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Sub Location",
+                                            sheet.subLocation,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "CBOQ Code",
+                                            sheet.cboqCode,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow("PBOQ", sheet.pboq),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "PBOA Qty",
+                                            sheet.pboaQty,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "PBOA Amount",
+                                            sheet.pboaAmount,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Revised Start Date",
+                                            sheet.revisedStartDate,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Revised End Date",
+                                            sheet.revisedEndDate,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Length",
+                                            sheet.length,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Breadth",
+                                            sheet.breadth,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Height",
+                                            sheet.height,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Uploaded File",
+                                            sheet.uploadedFile,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Progress",
+                                            sheet.progress,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Execution",
+                                            sheet.execution,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Updated On",
+                                            sheet.updatedOn,
                                           ),
                                         ],
-                                      ),
-                                    ],
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.01,
+                                        ),
+                                        //  Divider(),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                textAlign: TextAlign.start,
+                                                "Qty: ${sheet.msQty}",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack
+                                                    .responsive
+                                                    .copyWith(fontSize: 13),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.01,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                textAlign: TextAlign.start,
+                                                "Amt: ${sheet.msQty}",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack
+                                                    .responsive
+                                                    .copyWith(fontSize: 13),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.01,
+                                            ),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style:
+                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                onPressed: () {
+                                                  _showConfirmationDialog(
+                                                    context,
+                                                    sheet,
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "Update",
+                                                  style: AppStyle
+                                                      .labelPrimaryPoppinsBlack
+                                                      .responsive
+                                                      .copyWith(fontSize: 10),
+                                                ),
+                                              ),
+                                            ),
+                                            // Expanded(
+                                            //   child: ElevatedButton(
+                                            //     style:
+                                            //         AppButtonStyles.elevatedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       controller.toggleExpanded(
+                                            //         index,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       controller
+                                            //                   .expandedIndex
+                                            //                   .value ==
+                                            //               index
+                                            //           ? "Less"
+                                            //           : "Read",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsWhite,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            // SizedBox(
+                                            //   width:
+                                            //       ResponsiveHelper.screenWidth *
+                                            //       0.05,
+                                            // ),
+                                            // Expanded(
+                                            //   child: OutlinedButton(
+                                            //     style:
+                                            //         AppButtonStyles.outlinedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       _showConfirmationDialog(
+                                            //         context,
+                                            //         sheet,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       "Update",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsBlack,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -499,7 +581,7 @@ class UpdateProgressReportList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 130,
+          width: 100,
           child: Text(
             label,
             style: AppStyle.reportCardTitle.responsive.copyWith(

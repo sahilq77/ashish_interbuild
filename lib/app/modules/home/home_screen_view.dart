@@ -372,18 +372,18 @@ class _HomeViewState extends State<HomeView> {
           child: Stack(
             children: [
               // Optional subtle inner glow (can be removed if not needed)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.2),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              // Positioned.fill(
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //       gradient: RadialGradient(
+              //         colors: [
+              //           Colors.white.withOpacity(0.2),
+              //           Colors.transparent,
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(14.0),
