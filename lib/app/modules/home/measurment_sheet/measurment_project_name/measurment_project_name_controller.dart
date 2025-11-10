@@ -16,6 +16,12 @@ class MeasurmentProjectNameController extends GetxController {
   // TextEditingController for the search field
   final TextEditingController searchController = TextEditingController();
 
+  // Filter variables
+  final RxnString selectedProjectFilter = RxnString(null);
+
+  // Sorting variables
+  final RxBool isAscending = true.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -98,6 +104,61 @@ class MeasurmentProjectNameController extends GetxController {
               project.clientName.toLowerCase().contains(query.toLowerCase()),
         ).toList(),
       );
+    }
+    applySorting();
+  }
+
+  // Get unique project names for filter
+  List<String> getProjectNames() {
+    return projects.map((p) => p.projectName).toSet().toList();
+  }
+
+  // Apply filters
+  void applyFilters() {
+    var filtered = projects.toList();
+
+    if (selectedProjectFilter.value != null) {
+      filtered = filtered
+          .where((p) => p.projectName == selectedProjectFilter.value)
+          .toList();
+    }
+
+    if (searchController.text.isNotEmpty) {
+      filtered = filtered
+          .where((p) =>
+              p.projectName
+                  .toLowerCase()
+                  .contains(searchController.text.toLowerCase()) ||
+              p.clientName
+                  .toLowerCase()
+                  .contains(searchController.text.toLowerCase()))
+          .toList();
+    }
+
+    filteredProjects.assignAll(filtered);
+    applySorting();
+  }
+
+  // Clear filters
+  void clearFilters() {
+    selectedProjectFilter.value = null;
+    searchController.clear();
+    filteredProjects.assignAll(projects);
+    applySorting();
+  }
+
+  // Toggle sorting
+  void toggleSorting() {
+    isAscending.value = !isAscending.value;
+    applySorting();
+  }
+
+  // Apply sorting
+  void applySorting() {
+    if (isAscending.value) {
+      filteredProjects.sort((a, b) => a.projectName.compareTo(b.projectName));
+    } else {
+      filteredProjects.sort((a, b) => b.projectName.compareTo(a.projectName));
     }
   }
 }

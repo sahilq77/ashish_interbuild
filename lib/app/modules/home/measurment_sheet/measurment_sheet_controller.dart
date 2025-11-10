@@ -7,7 +7,8 @@ class MeasurementSheetController extends GetxController {
   final RxList<MeasurementSheet> measurementSheets = <MeasurementSheet>[].obs;
 
   // Reactive list for filtered measurement sheets
-  final RxList<MeasurementSheet> filteredMeasurementSheets = <MeasurementSheet>[].obs;
+  final RxList<MeasurementSheet> filteredMeasurementSheets =
+      <MeasurementSheet>[].obs;
 
   // Reactive variable to track the index of the expanded card
   final RxInt expandedIndex = (-1).obs; // -1 means no card is expanded
@@ -109,11 +110,15 @@ class MeasurementSheetController extends GetxController {
     } else {
       // Filter measurement sheets based on packageName or cboqName
       filteredMeasurementSheets.assignAll(
-        measurementSheets.where(
-          (sheet) =>
-              sheet.packageName.toLowerCase().contains(query.toLowerCase()) ||
-              sheet.cboqName.toLowerCase().contains(query.toLowerCase()),
-        ).toList(),
+        measurementSheets
+            .where(
+              (sheet) =>
+                  sheet.packageName.toLowerCase().contains(
+                    query.toLowerCase(),
+                  ) ||
+                  sheet.cboqName.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList(),
       );
     }
   }

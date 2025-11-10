@@ -143,102 +143,144 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
     int index,
   ) {
     return Obx(
-      () => Card(
-        margin: EdgeInsets.only(bottom: ResponsiveHelper.screenHeight * 0.02),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.white, Colors.grey.shade50],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      () => GestureDetector(
+        onTap: () => controller.toggleExpanded(index),
+        child: Card(
+          margin: EdgeInsets.only(bottom: ResponsiveHelper.screenHeight * 0.02),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.white, Colors.grey.shade50],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+              // border: Border(
+              //   left: BorderSide(color: AppColors.primary, width: 5),
+              // ),
             ),
-            borderRadius: BorderRadius.circular(10),
-            // border: Border(
-            //   left: BorderSide(color: AppColors.primary, width: 5),
-            // ),
-          ),
-          child: Padding(
-            padding: ResponsiveHelper.padding(16),
-            child: Column(
-              children: [
-                _detailRow('PBOA', sheet.pboa),
-                SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                _detailRow('Zone', sheet.zone),
-                SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                _detailRow('Location', sheet.location),
-                SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                _detailRow('MS Qty', sheet.msQty.toString()),
-                if (controller.expandedIndex.value == index) ...[
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Package Name', sheet.packageName),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('CBOQ Name', sheet.cboqName),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+            child: Padding(
+              padding: ResponsiveHelper.padding(16),
+              child: Column(
+                children: [
                   _detailRow('PBOQ Name', sheet.pboq),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('UOM', sheet.uom),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('PBOQ Qty', sheet.pboqQty),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Length', sheet.length.toString()),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Breadth', sheet.breadth.toString()),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Height', sheet.height.toString()),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Deduction', sheet.deduction.toString()),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Nos.', sheet.nos.toString()),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Source', sheet.source),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('CBOQ Code', sheet.cboqCode),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Sub-Location', sheet.subLocation),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow('Remark', sheet.remark),
-                  SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                  _detailRow(
-                    'Updated On',
-                    '${sheet.updatedOn.year}-${sheet.updatedOn.month.toString().padLeft(2, '0')}-${sheet.updatedOn.day.toString().padLeft(2, '0')}',
-                  ),
-                ],
-                SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
-                const Divider(),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: AppButtonStyles.elevatedSmallBlack(),
-                        onPressed: () => controller.toggleExpanded(index),
-                        child: Text(
-                          controller.expandedIndex.value == index
-                              ? 'Less'
-                              : 'Read',
-                          style: AppStyle.labelPrimaryPoppinsWhite,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
+                  // _detailRow('PBOA', sheet.pboa),
+                  // SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                  // _detailRow('Zone', sheet.zone),
+                  // SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                  // _detailRow('Location', sheet.location),
+                  // SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                  // _detailRow('MS Qty', sheet.msQty.toString()),
+                  if (controller.expandedIndex.value == index) ...[
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Package Name', sheet.packageName),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('CBOQ Name', sheet.cboqName),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('MS Qty', sheet.msQty.toString()),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    // _detailRow('PBOQ Name', sheet.pboq),
+                    // SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('UOM', sheet.uom),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('PBOQ Qty', sheet.pboqQty),
+                    _detailRow('PBOA', sheet.pboa),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Zone', sheet.zone),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Location', sheet.location),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Length', sheet.length.toString()),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Breadth', sheet.breadth.toString()),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Height', sheet.height.toString()),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Deduction', sheet.deduction.toString()),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Nos.', sheet.nos.toString()),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Source', sheet.source),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('CBOQ Code', sheet.cboqCode),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Sub-Location', sheet.subLocation),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _detailRow('Remark', sheet.remark),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
 
-                    Expanded(
-                      child: OutlinedButton(
-                        style: AppButtonStyles.outlinedSmallBlack(),
-                        onPressed: () => Get.toNamed(AppRoutes.deductionForm),
-                        child: Row(
-                          children: [
-                            Icon(Icons.add),
-                            Text(
-                              'Deduction',
-                              style: AppStyle.labelPrimaryPoppinsBlack,
-                            ),
-                          ],
-                        ),
-                      ),
+                    _detailRow(
+                      'Updated On',
+                      '${sheet.updatedOn.year}-${sheet.updatedOn.month.toString().padLeft(2, '0')}-${sheet.updatedOn.day.toString().padLeft(2, '0')}',
                     ),
                   ],
-                ),
-              ],
+                  // SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
+                  //   const Divider(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          textAlign: TextAlign.start,
+                          "Qty: ${sheet.msQty}",
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                              .copyWith(fontSize: 13),
+                        ),
+                      ),
+                      SizedBox(width: ResponsiveHelper.screenWidth * 0.01),
+                      Expanded(
+                        child: Text(
+                          textAlign: TextAlign.start,
+                          "Ms Qty: ${sheet.msQty}",
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                              .copyWith(fontSize: 13),
+                        ),
+                      ),
+                      Expanded(
+                        child: OutlinedButton(
+                          style: AppButtonStyles.outlinedExtraSmallPrimary(),
+                          onPressed: () {
+                            Get.toNamed(AppRoutes.deductionForm);
+                          },
+                          child: Text(
+                            "Deduction: ${sheet.deduction}",
+                            style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                                .copyWith(fontSize: 10),
+                          ),
+                        ),
+                      ),
+                      // Expanded(
+                      //   child: ElevatedButton(
+                      //     style: AppButtonStyles.elevatedSmallBlack(),
+                      //     onPressed: () => controller.toggleExpanded(index),
+                      //     child: Text(
+                      //       controller.expandedIndex.value == index
+                      //           ? 'Less'
+                      //           : 'Read',
+                      //       style: AppStyle.labelPrimaryPoppinsWhite,
+                      //     ),
+                      //   ),
+                      // ),
+                      // SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
+
+                      // Expanded(
+                      //   child: OutlinedButton(
+                      //     style: AppButtonStyles.outlinedSmallBlack(),
+                      //     onPressed: () => Get.toNamed(AppRoutes.deductionForm),
+                      //     child: Row(
+                      //       children: [
+                      //         Icon(Icons.add),
+                      //         Text(
+                      //           'Deduction',
+                      //           style: AppStyle.labelPrimaryPoppinsBlack,
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -252,7 +294,7 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 130,
+          width: 100,
           child: Text(
             label,
             style: AppStyle.reportCardTitle.responsive.copyWith(
@@ -384,7 +426,17 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
           onPressed: () {
             Get.toNamed(AppRoutes.addPBOQ);
           },
-          icon: const Icon(Icons.add),
+          icon: Row(
+            children: [
+              Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
+              Text(
+                'Add',
+                style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
       bottom: PreferredSize(

@@ -56,136 +56,189 @@ class MeasurmentSheetView extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final sheet =
                               controller.filteredMeasurementSheets[index];
-                          return Card(
-                            margin: EdgeInsets.only(
-                              bottom: ResponsiveHelper.screenHeight * 0.02,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.white, Colors.grey.shade50],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                // border: Border(
-                                //   left: BorderSide(
-                                //     color: AppColors.primary,
-                                //     width: 5,
-                                //   ),
-                                // ),
+                          return GestureDetector(
+                            onTap: () {
+                              controller.toggleExpanded(index);
+                            },
+                            child: Card(
+                              margin: EdgeInsets.only(
+                                bottom: ResponsiveHelper.screenHeight * 0.02,
                               ),
-                              child: Obx(
-                                () => Padding(
-                                  padding: ResponsiveHelper.padding(16),
-                                  child: Column(
-                                    children: [
-                                      _buildDetailRow(
-                                        "Package Name",
-                                        sheet.packageName,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow(
-                                        "CBOQ Name",
-                                        sheet.cboqName,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow("MS Qty", sheet.msQty),
-                                      if (controller.expandedIndex.value ==
-                                          index) ...[
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.white, Colors.grey.shade50],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  // border: Border(
+                                  //   left: BorderSide(
+                                  //     color: AppColors.primary,
+                                  //     width: 5,
+                                  //   ),
+                                  // ),
+                                ),
+                                child: Obx(
+                                  () => Padding(
+                                    padding: ResponsiveHelper.padding(16),
+                                    child: Column(
+                                      children: [
+                                        // _buildDetailRow(
+                                        //   "Package Name",
+                                        //   sheet.packageName,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
                                         _buildDetailRow(
-                                          "PBOQ Name",
-                                          sheet.pboqName,
+                                          "CBOQ Name",
+                                          sheet.cboqName,
                                         ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Zones", sheet.zones),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("UOM", sheet.uom),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "PBOQ Qty",
-                                          sheet.pboqQty,
-                                        ),
-                                      ],
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.01,
-                                      ),
-                                      Divider(),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              style:
-                                                  AppButtonStyles.elevatedSmallBlack(),
-                                              onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
-                                                );
-                                              },
-                                              child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Less"
-                                                    : "Read",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
-                                              ),
-                                            ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow("MS Qty", sheet.msQty),
+                                        if (controller.expandedIndex.value ==
+                                            index) ...[
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "PBOQ Name",
+                                            sheet.pboqName,
                                           ),
                                           SizedBox(
-                                            width:
-                                                ResponsiveHelper.screenWidth *
-                                                0.05,
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
                                           ),
-                                          Expanded(
-                                            child: OutlinedButton(
-                                              style:
-                                                  AppButtonStyles.outlinedSmallBlack(),
-                                              onPressed: () {
-                                                controller.viewMeasurementSheet(
-                                                  sheet,
-                                                );
-                                                Get.toNamed(AppRoutes.pboqList);
-                                              },
-                                              child: Text(
-                                                "View",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack,
-                                              ),
-                                            ),
+                                          _buildDetailRow("Zones", sheet.zones),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow("UOM", sheet.uom),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "PBOQ Qty",
+                                            sheet.pboqQty,
                                           ),
                                         ],
-                                      ),
-                                    ],
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.01,
+                                        // ),
+                                        // Divider(),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                textAlign: TextAlign.start,
+                                                "Qty: ${sheet.msQty}",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack
+                                                    .responsive
+                                                    .copyWith(fontSize: 13),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.01,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                textAlign: TextAlign.start,
+                                                "Amt: ${sheet.msQty}" + "00000",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack
+                                                    .responsive
+                                                    .copyWith(fontSize: 13),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.01,
+                                            ),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style:
+                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                onPressed: () {
+                                                  Get.toNamed(
+                                                    AppRoutes.pboqList,
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "Ms Qty: ${sheet.msQty}",
+                                                  style: AppStyle
+                                                      .labelPrimaryPoppinsBlack
+                                                      .responsive
+                                                      .copyWith(fontSize: 10),
+                                                ),
+                                              ),
+                                            ),
+                                            // Expanded(
+                                            //   child: ElevatedButton(
+                                            //     style:
+                                            //         AppButtonStyles.elevatedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       controller.toggleExpanded(
+                                            //         index,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       controller
+                                            //                   .expandedIndex
+                                            //                   .value ==
+                                            //               index
+                                            //           ? "Less"
+                                            //           : "Read",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsWhite,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            // SizedBox(
+                                            //   width:
+                                            //       ResponsiveHelper.screenWidth *
+                                            //       0.05,
+                                            // ),
+                                            // Expanded(
+                                            //   child: OutlinedButton(
+                                            //     style:
+                                            //         AppButtonStyles.outlinedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       controller.viewMeasurementSheet(
+                                            //         sheet,
+                                            //       );
+                                            //       Get.toNamed(AppRoutes.pboqList);
+                                            //     },
+                                            //     child: Text(
+                                            //       "View",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsBlack,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -355,7 +408,17 @@ class MeasurmentSheetView extends StatelessWidget {
             Get.toNamed(AppRoutes.addPBOQ);
             // Add functionality to add a new measurement sheet
           },
-          icon: Icon(Icons.add),
+          icon: Row(
+            children: [
+              Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
+              Text(
+                'Add',
+                style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
       bottom: PreferredSize(
