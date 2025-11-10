@@ -7,6 +7,7 @@ import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,8 +39,20 @@ class WeeklyInspectionView extends StatelessWidget {
             ),
             Padding(
               padding: ResponsiveHelper.padding(16),
-              child: _buildSearchField(controller),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSearchField(controller)),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildFilterButton(context, controller),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildSortButton(controller),
+                ],
+              ),
             ),
+            // Padding(
+            //   padding: ResponsiveHelper.padding(16),
+            //   child: _buildSearchField(controller),
+            // ),
             // Expanded to make ListView take remaining space
             Expanded(
               child: Obx(
@@ -51,166 +64,268 @@ class WeeklyInspectionView extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final sheet =
                               controller.filteredMeasurementSheets[index];
-                          return Card(
-                            margin: EdgeInsets.only(
-                              bottom: ResponsiveHelper.screenHeight * 0.02,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.white, Colors.grey.shade50],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                // border: Border(
-                                //   left: BorderSide(
-                                //     color: AppColors.primary,
-                                //     width: 5,
-                                //   ),
-                                // ),
+                          return GestureDetector(
+                            onTap: () => controller.toggleExpanded(index),
+                            child: Card(
+                              margin: EdgeInsets.only(
+                                bottom: ResponsiveHelper.screenHeight * 0.02,
                               ),
-                              child: Obx(
-                                () => Padding(
-                                  padding: ResponsiveHelper.padding(16),
-                                  child: Column(
-                                    children: [
-                                      _buildDetailRow(
-                                        "Package Name",
-                                        sheet.packageName,
-                                      ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.white, Colors.grey.shade50],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  // border: Border(
+                                  //   left: BorderSide(
+                                  //     color: AppColors.primary,
+                                  //     width: 5,
+                                  //   ),
+                                  // ),
+                                ),
+                                child: Obx(
+                                  () => Padding(
+                                    padding: ResponsiveHelper.padding(16),
+                                    child: Column(
+                                      children: [
+                                        _buildDetailRow(
+                                          "PBOQ Name",
+                                          sheet.pboqName,
+                                        ),
+                                        // _buildDetailRow(
+                                        //   "Package Name",
+                                        //   sheet.packageName,
+                                        // ),
 
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow(
-                                        "PBOQ Name",
-                                        sheet.pboqName,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow("PBOA", sheet.pboa),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow(
-                                        "Today\`s Target PBOA Qty",
-                                        sheet.todaysTargetPboaQuantity,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      _buildDetailRow(
-                                        "Today\`s Achieve Qty",
-                                        sheet.todaysAchieveQuantity,
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.002,
-                                      ),
-                                      if (controller.expandedIndex.value ==
-                                          index) ...[
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "CBOQ Name",
-                                          sheet.cboqName,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("MS Qty", sheet.msQty),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Zones", sheet.zones),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("UOM", sheet.uom),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "PBOQ Qty",
-                                          sheet.pboqQty,
-                                        ),
-                                      ],
-                                      SizedBox(
-                                        height:
-                                            ResponsiveHelper.screenHeight *
-                                            0.01,
-                                      ),
-                                      Divider(),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              style:
-                                                  AppButtonStyles.elevatedSmallBlack(),
-                                              onPressed: () {
-                                                controller.toggleExpanded(
-                                                  index,
-                                                );
-                                              },
-                                              child: Text(
-                                                controller
-                                                            .expandedIndex
-                                                            .value ==
-                                                        index
-                                                    ? "Collapse"
-                                                    : "Read",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsWhite,
-                                              ),
-                                            ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "PBOQ Name",
+                                        //   sheet.pboqName,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow("PBOA", sheet.pboa),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "Today\`s Target PBOA Qty",
+                                        //   sheet.todaysTargetPboaQuantity,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "Today\`s Achieve Qty",
+                                        //   sheet.todaysAchieveQuantity,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        if (controller.expandedIndex.value ==
+                                            index) ...[
+                                          _buildDetailRow(
+                                            "Package Name",
+                                            sheet.packageName,
+                                          ),
+
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          // _buildDetailRow(
+                                          //   "PBOQ Name",
+                                          //   sheet.pboqName,
+                                          // ),
+                                          // SizedBox(
+                                          //   height:
+                                          //       ResponsiveHelper.screenHeight *
+                                          //       0.002,
+                                          // ),
+                                          _buildDetailRow("PBOA", sheet.pboa),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Today\`s Target PBOA Qty",
+                                            sheet.todaysTargetPboaQuantity,
                                           ),
                                           SizedBox(
-                                            width:
-                                                ResponsiveHelper.screenWidth *
-                                                0.05,
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
                                           ),
-                                          Expanded(
-                                            child: OutlinedButton(
-                                              style:
-                                                  AppButtonStyles.outlinedSmallBlack(),
-                                              onPressed: () {
-                                                Get.toNamed(
-                                                  AppRoutes
-                                                      .updateWeeklyInspection,
-                                                );
-                                              },
-                                              child: Text(
-                                                "Update",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack,
-                                              ),
-                                            ),
+                                          _buildDetailRow(
+                                            "Today\`s Achieve Qty",
+                                            sheet.todaysAchieveQuantity,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "CBOQ Name",
+                                            sheet.cboqName,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "MS Qty",
+                                            sheet.msQty,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow("Zones", sheet.zones),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow("UOM", sheet.uom),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "PBOQ Qty",
+                                            sheet.pboqQty,
                                           ),
                                         ],
-                                      ),
-                                    ],
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.01,
+                                        // ),
+                                        // Divider(),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                textAlign: TextAlign.start,
+                                                "Qty: ${sheet.msQty}",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack
+                                                    .responsive
+                                                    .copyWith(fontSize: 13),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.01,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                textAlign: TextAlign.start,
+                                                "Amt: ${sheet.msQty}",
+                                                style: AppStyle
+                                                    .labelPrimaryPoppinsBlack
+                                                    .responsive
+                                                    .copyWith(fontSize: 13),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.01,
+                                            ),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style:
+                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                onPressed: () {
+                                                  Get.toNamed(
+                                                    AppRoutes
+                                                        .updateWeeklyInspection,
+                                                  );
+                                                },
+                                                child: Text(
+                                                  "Ms Qty: ${sheet.msQty}",
+                                                  style: AppStyle
+                                                      .labelPrimaryPoppinsBlack
+                                                      .responsive
+                                                      .copyWith(fontSize: 10),
+                                                ),
+                                              ),
+                                            ),
+                                            // Expanded(
+                                            //   child: ElevatedButton(
+                                            //     style:
+                                            //         AppButtonStyles.elevatedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       controller.toggleExpanded(
+                                            //         index,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       controller
+                                            //                   .expandedIndex
+                                            //                   .value ==
+                                            //               index
+                                            //           ? "Collapse"
+                                            //           : "Read",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsWhite,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            // SizedBox(
+                                            //   width:
+                                            //       ResponsiveHelper.screenWidth *
+                                            //       0.05,
+                                            // ),
+                                            // Expanded(
+                                            //   child: OutlinedButton(
+                                            //     style:
+                                            //         AppButtonStyles.outlinedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       Get.toNamed(
+                                            //         AppRoutes
+                                            //             .updateWeeklyInspection,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       "Update",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsBlack,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -315,6 +430,187 @@ class WeeklyInspectionView extends StatelessWidget {
         Text(': ', style: AppStyle.reportCardSubTitle),
         Expanded(child: Container(height: 16, color: Colors.grey.shade300)),
       ],
+    );
+  }
+
+  Widget _buildFilterButton(
+    BuildContext context,
+    WeeklyInspectionController controller,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context, controller),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  // Filter Dialog
+  void _showFilterDialog(
+    BuildContext context,
+    WeeklyInspectionController controller,
+  ) {
+    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filter Measurement Sheets',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.padding(20),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        labelText: 'Search Package',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  items: controller.getPackageNames(),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Package',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.business,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      tempSelectedPackage = value;
+                    });
+                  },
+                  selectedItem: tempSelectedPackage,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.selectedPackageFilter.value =
+                              tempSelectedPackage;
+                          controller.applyFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Sort Button
+  Widget _buildSortButton(WeeklyInspectionController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
+      ),
     );
   }
 

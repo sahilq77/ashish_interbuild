@@ -7,6 +7,7 @@ import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,7 +45,15 @@ class AccProjectList extends StatelessWidget {
               // Add search field
               Padding(
                 padding: ResponsiveHelper.padding(16),
-                child: _buildSearchField(controller),
+                child: Row(
+                  children: [
+                    Expanded(child: _buildSearchField(controller)),
+                    SizedBox(width: ResponsiveHelper.spacing(8)),
+                    _buildFilterButton(context, controller),
+                    SizedBox(width: ResponsiveHelper.spacing(8)),
+                    _buildSortButton(controller),
+                  ],
+                ),
               ),
               // Expanded to make ListView take remaining space
               Expanded(
@@ -101,19 +110,206 @@ class AccProjectList extends StatelessWidget {
     );
   }
 
-  TextFormField _buildSearchField(MeasurmentProjectNameController controller) {
+  Widget _buildSearchField(MeasurmentProjectNameController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
-        hintText: 'Search projects...',
+        hintText: 'Search...',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        suffixIcon: const Icon(Icons.search),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
+        suffixIcon: const Icon(Icons.search, size: 20),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: ResponsiveHelper.spacing(12),
+          vertical: ResponsiveHelper.spacing(12),
         ),
       ),
       onChanged: controller.searchProjects,
+    );
+  }
+
+  Widget _buildFilterButton(
+    BuildContext context,
+    MeasurmentProjectNameController controller,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context, controller),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(MeasurmentProjectNameController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+  }
+
+  void _showFilterDialog(
+    BuildContext context,
+    MeasurmentProjectNameController controller,
+  ) {
+    String? tempSelectedProject = controller.selectedProjectFilter.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filter Projects',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.padding(20),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        labelText: 'Search Project',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  items: controller.getProjectNames(),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Project',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveHelper.spacing(8),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveHelper.spacing(8),
+                        ),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.business,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      tempSelectedProject = value;
+                    });
+                  },
+                  selectedItem: tempSelectedProject,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.selectedProjectFilter.value =
+                              tempSelectedProject;
+                          controller.applyFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

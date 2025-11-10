@@ -117,23 +117,96 @@ class WeeklyInspectionController extends GetxController {
   }
 
   // Function to handle search
-  void searchSurveys(String query) {
-    if (query.isEmpty) {
-      // If search query is empty, show all measurement sheets
-      filteredMeasurementSheets.assignAll(measurementSheets);
+  // void searchSurveys(String query) {
+  //   if (query.isEmpty) {
+  //     // If search query is empty, show all measurement sheets
+  //     filteredMeasurementSheets.assignAll(measurementSheets);
+  //   } else {
+  //     // Filter measurement sheets based on packageName or cboqName
+  //     filteredMeasurementSheets.assignAll(
+  //       measurementSheets
+  //           .where(
+  //             (sheet) =>
+  //                 sheet.packageName.toLowerCase().contains(
+  //                   query.toLowerCase(),
+  //                 ) ||
+  //                 sheet.cboqName.toLowerCase().contains(query.toLowerCase()),
+  //           )
+  //           .toList(),
+  //     );
+  //   }
+  // }
+   // Filter & Sort Variables
+  final RxnString selectedPackageFilter = RxnString(null);
+  final RxBool isAscending = true.obs;
+
+  // Get unique package names for filter dropdown
+  List<String> getPackageNames() {
+    return measurementSheets.map((sheet) => sheet.packageName).toSet().toList();
+  }
+
+  // Apply filters (called from dialog)
+  void applyFilters() {
+    var filtered = measurementSheets.toList();
+
+    if (selectedPackageFilter.value != null) {
+      filtered = filtered
+          .where((sheet) => sheet.packageName == selectedPackageFilter.value)
+          .toList();
+    }
+
+    if (searchController.text.isNotEmpty) {
+      filtered = filtered
+          .where(
+            (sheet) =>
+                sheet.packageName.toLowerCase().contains(
+                  searchController.text.toLowerCase(),
+                ) ||
+                sheet.cboqName.toLowerCase().contains(
+                  searchController.text.toLowerCase(),
+                ),
+          )
+          .toList();
+    }
+
+    filteredMeasurementSheets.assignAll(filtered);
+    applySorting();
+  }
+
+  // Clear all filters
+  void clearFilters() {
+    selectedPackageFilter.value = null;
+    searchController.clear();
+    filteredMeasurementSheets.assignAll(measurementSheets);
+    applySorting();
+  }
+
+  // Toggle sort order
+  void toggleSorting() {
+    isAscending.value = !isAscending.value;
+    applySorting();
+  }
+
+  // Apply sorting by CBOQ Name
+  void applySorting() {
+    if (isAscending.value) {
+      filteredMeasurementSheets.sort(
+        (a, b) => a.cboqName.compareTo(b.cboqName),
+      );
     } else {
-      // Filter measurement sheets based on packageName or cboqName
-      filteredMeasurementSheets.assignAll(
-        measurementSheets
-            .where(
-              (sheet) =>
-                  sheet.packageName.toLowerCase().contains(
-                    query.toLowerCase(),
-                  ) ||
-                  sheet.cboqName.toLowerCase().contains(query.toLowerCase()),
-            )
-            .toList(),
+      filteredMeasurementSheets.sort(
+        (a, b) => b.cboqName.compareTo(a.cboqName),
       );
     }
+  }
+
+  // Update search to re-apply filters + sorting
+  void searchSurveys(String query) {
+    if (query.isEmpty && selectedPackageFilter.value == null) {
+      filteredMeasurementSheets.assignAll(measurementSheets);
+    } else {
+      applyFilters(); // This will respect both search + filter
+    }
+    applySorting();
   }
 }
