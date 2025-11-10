@@ -109,21 +109,91 @@ class PboqMeasurmentDetailController extends GetxController {
   }
 
   // Search PBOQ items
+  // void searchPboq(String query) {
+  //   if (query.isEmpty) {
+  //     filteredPboqList.assignAll(pboqList);
+  //   } else {
+  //     filteredPboqList.assignAll(
+  //       pboqList
+  //           .where(
+  //             (pboq) =>
+  //                 pboq.packageName.toLowerCase().contains(
+  //                   query.toLowerCase(),
+  //                 ) ||
+  //                 pboq.cboqName.toLowerCase().contains(query.toLowerCase()),
+  //           )
+  //           .toList(),
+  //     );
+  //   }
+  // }
+
+  // Filter & Sort Variables
+  final RxnString selectedPackageFilter = RxnString(null);
+  final RxBool isAscending = true.obs;
+
+  // Get unique package names for filter dropdown
+  List<String> getPackageNames() {
+    return pboqList.map((sheet) => sheet.packageName).toSet().toList();
+  }
+
+  // Apply filters (called from dialog)
+  void applyFilters() {
+    var filtered = pboqList.toList();
+
+    if (selectedPackageFilter.value != null) {
+      filtered = filtered
+          .where((sheet) => sheet.packageName == selectedPackageFilter.value)
+          .toList();
+    }
+
+    if (searchController.text.isNotEmpty) {
+      filtered = filtered
+          .where(
+            (sheet) =>
+                sheet.packageName.toLowerCase().contains(
+                  searchController.text.toLowerCase(),
+                ) ||
+                sheet.cboqName.toLowerCase().contains(
+                  searchController.text.toLowerCase(),
+                ),
+          )
+          .toList();
+    }
+
+    filteredPboqList.assignAll(filtered);
+    applySorting();
+  }
+
+  // Clear all filters
+  void clearFilters() {
+    selectedPackageFilter.value = null;
+    searchController.clear();
+    filteredPboqList.assignAll(pboqList);
+    applySorting();
+  }
+
+  // Toggle sort order
+  void toggleSorting() {
+    isAscending.value = !isAscending.value;
+    applySorting();
+  }
+
+  // Apply sorting by CBOQ Name
+  void applySorting() {
+    if (isAscending.value) {
+      filteredPboqList.sort((a, b) => a.cboqName.compareTo(b.cboqName));
+    } else {
+      filteredPboqList.sort((a, b) => b.cboqName.compareTo(a.cboqName));
+    }
+  }
+
+  // Update search to re-apply filters + sorting
   void searchPboq(String query) {
-    if (query.isEmpty) {
+    if (query.isEmpty && selectedPackageFilter.value == null) {
       filteredPboqList.assignAll(pboqList);
     } else {
-      filteredPboqList.assignAll(
-        pboqList
-            .where(
-              (pboq) =>
-                  pboq.packageName.toLowerCase().contains(
-                    query.toLowerCase(),
-                  ) ||
-                  pboq.cboqName.toLowerCase().contains(query.toLowerCase()),
-            )
-            .toList(),
-      );
+      applyFilters(); // This will respect both search + filter
     }
+    applySorting();
   }
 }
