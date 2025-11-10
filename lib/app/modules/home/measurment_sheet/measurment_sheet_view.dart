@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:dropdown_search/dropdown_search.dart'; // Add this import
 
 class MeasurmentSheetView extends StatelessWidget {
   const MeasurmentSheetView({super.key});
@@ -33,19 +34,22 @@ class MeasurmentSheetView extends StatelessWidget {
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
-            // Add search field
+
+            // Search, Filter, and Sort Row
             Padding(
               padding: ResponsiveHelper.padding(16),
-              child: _buildSearchField(controller),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSearchField(controller)),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildFilterButton(context, controller),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildSortButton(controller),
+                ],
+              ),
             ),
-            // Padding(
-            //   padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
-            //   child: Text(
-            //     "Skyline Towers ➔ Measurement Sheet",
-            //     style: AppStyle.bodySmallPoppinsPrimary,
-            //   ),
-            // ),
-            // Expanded to make ListView take remaining space
+
+            // Expanded ListView
             Expanded(
               child: Obx(
                 () => controller.isLoading.value
@@ -192,49 +196,6 @@ class MeasurmentSheetView extends StatelessWidget {
                                                 ),
                                               ),
                                             ),
-                                            // Expanded(
-                                            //   child: ElevatedButton(
-                                            //     style:
-                                            //         AppButtonStyles.elevatedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       controller.toggleExpanded(
-                                            //         index,
-                                            //       );
-                                            //     },
-                                            //     child: Text(
-                                            //       controller
-                                            //                   .expandedIndex
-                                            //                   .value ==
-                                            //               index
-                                            //           ? "Less"
-                                            //           : "Read",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsWhite,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                            // SizedBox(
-                                            //   width:
-                                            //       ResponsiveHelper.screenWidth *
-                                            //       0.05,
-                                            // ),
-                                            // Expanded(
-                                            //   child: OutlinedButton(
-                                            //     style:
-                                            //         AppButtonStyles.outlinedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       controller.viewMeasurementSheet(
-                                            //         sheet,
-                                            //       );
-                                            //       Get.toNamed(AppRoutes.pboqList);
-                                            //     },
-                                            //     child: Text(
-                                            //       "View",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsBlack,
-                                            //     ),
-                                            //   ),
-                                            // ),
                                           ],
                                         ),
                                       ],
@@ -254,13 +215,14 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
+  // Search Field
   TextFormField _buildSearchField(MeasurementSheetController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
         hintText: 'Search....',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        suffixIcon: const Icon(Icons.search),
+        suffixIcon: const Icon(Icons.search, size: 20),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
@@ -270,10 +232,193 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
+  // Filter Button
+  Widget _buildFilterButton(
+    BuildContext context,
+    MeasurementSheetController controller,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context, controller),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  // Sort Button
+  Widget _buildSortButton(MeasurementSheetController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+  }
+
+  // Filter Dialog
+  void _showFilterDialog(
+    BuildContext context,
+    MeasurementSheetController controller,
+  ) {
+    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filter Measurement Sheets',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.padding(20),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        labelText: 'Search Package',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  items: controller.getPackageNames(),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Package',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.business,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      tempSelectedPackage = value;
+                    });
+                  },
+                  selectedItem: tempSelectedPackage,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.selectedPackageFilter.value =
+                              tempSelectedPackage;
+                          controller.applyFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Shimmer Effect
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5, // Show 5 shimmer cards
+      itemCount: 5,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -294,8 +439,6 @@ class MeasurmentSheetView extends StatelessWidget {
                 padding: ResponsiveHelper.padding(16),
                 child: Column(
                   children: [
-                    _buildShimmerRow(),
-                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                     _buildShimmerRow(),
                     SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                     _buildShimmerRow(),
@@ -378,17 +521,6 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
-  // Text _sectionTitle(String title) {
-  //   return Text(
-  //     title,
-  //     style: GoogleFonts.poppins(
-  //       color: AppColors.grey,
-  //       fontWeight: FontWeight.w600,
-  //       fontSize: 18,
-  //     ),
-  //   );
-  // }
-
   AppBar _buildAppbar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
@@ -403,23 +535,58 @@ class MeasurmentSheetView extends StatelessWidget {
         ),
       ),
       actions: [
-        IconButton(
-          onPressed: () {
-            Get.toNamed(AppRoutes.addPBOQ);
-            // Add functionality to add a new measurement sheet
-          },
-          icon: Row(
-            children: [
-              Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
-              Text(
-                'Add',
-                style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
-                  fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-                ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppColors.defaultBlack, // Change to your primary color
+              width: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(8), // Rounded corners
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(
+              8,
+            ), // Important for ripple effect
+            onTap: () {
+              Get.toNamed(AppRoutes.addPBOQ);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Optional icon
+                  // Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(20)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Add',
+                    style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                        .copyWith(
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+                        ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
+        // IconButton(
+        //   onPressed: () {
+        //     Get.toNamed(AppRoutes.addPBOQ);
+        //   },
+        //   icon: Row(
+        //     children: [
+        //       // Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
+        //       Text(
+        //         'Add',
+        //         style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
+        //           fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
