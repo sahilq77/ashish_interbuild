@@ -52,6 +52,7 @@ import 'package:ashishinterbuild/app/modules/notification/notification_view.dart
 import 'package:ashishinterbuild/app/modules/profile/update_profile/update_profile_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/update_profile/update_profile_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/splash/splash_view.dart';
+import 'package:ashishinterbuild/app/widgets/no_internet_screen.dart';
 import 'package:get/get.dart';
 
 class AppRoutes {
@@ -86,6 +87,7 @@ class AppRoutes {
   static const String addClientCommitment = '/add-client-commitment';
   static const String updateClientCommitment = '/update-client-commitment';
   static const String updateProfile = '/update-profile';
+    static const String noInternet = '/nointernet';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -223,6 +225,11 @@ class AppRoutes {
       name: updateProfile,
       page: () => const UpdateProfileScreenView(),
       binding: UpdateProfileBinding(),
+    ),
+    GetPage(
+      name: noInternet,
+      page: () => NoInternetScreen(),
+      transition: Transition.fadeIn,
     ),
   ];
 }
