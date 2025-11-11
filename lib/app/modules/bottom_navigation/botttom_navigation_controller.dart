@@ -12,7 +12,7 @@ class BottomNavigationController extends GetxController {
   void onInit() {
     super.onInit();
     // Initialize routes based on userType
-    routes = _getRoutesForUserType(AppUtility.userRole);
+    routes = _getRoutesForUserType(int.tryParse(AppUtility.userRoleId ?? ''));
     // Sync initial index with current route
     syncIndexWithRoute(Get.currentRoute);
     // Listen for route changes
@@ -90,15 +90,16 @@ class BottomNavigationController extends GetxController {
 
   void goToHome() {
     selectedIndex.value = 0;
-    if (AppUtility.userRole == 0) {
-      Get.offAllNamed(AppRoutes.home);
-    } else if (AppUtility.userRole == 1) {
-      Get.offAllNamed(AppRoutes.home);
-    } else if (AppUtility.userRole == 2) {
-      Get.offAllNamed(AppRoutes.home);
-    } else {
-      Get.offAllNamed(AppRoutes.home);
-    }
+    Get.offAllNamed(AppRoutes.home);
+    // if (AppUtility.userRole == 0) {
+    //   Get.offAllNamed(AppRoutes.home);
+    // } else if (AppUtility.userRole == 1) {
+    //   Get.offAllNamed(AppRoutes.home);
+    // } else if (AppUtility.userRole == 2) {
+    //   Get.offAllNamed(AppRoutes.home);
+    // } else {
+    //   Get.offAllNamed(AppRoutes.home);
+    // }
   }
 
   Future<bool> onWillPop() async {

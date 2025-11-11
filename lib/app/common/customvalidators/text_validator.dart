@@ -91,7 +91,10 @@ class TextValidator {
 
   // Validates if the input matches a custom regex pattern
   static String? matchesPattern(
-      String? value, RegExp pattern, String errorMessage) {
+    String? value,
+    RegExp pattern,
+    String errorMessage,
+  ) {
     if (value == null || value.trim().isEmpty) {
       return 'Please enter a value';
     }
@@ -118,7 +121,9 @@ class TextValidator {
 
   // Combines multiple validators and returns the first error message or null if all pass
   static String? combineValidators(
-      String? value, List<String? Function(String?)> validators) {
+    String? value,
+    List<String? Function(String?)> validators,
+  ) {
     for (var validator in validators) {
       final result = validator(value);
       if (result != null) {
@@ -127,6 +132,7 @@ class TextValidator {
     }
     return null; // All validators passed
   }
+
   static String? isUsername(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter a username';
@@ -141,9 +147,9 @@ class TextValidator {
     if (value == null || value.isEmpty) {
       return 'Please enter a password';
     }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
-    }
+    // if (value.length < 6) {
+    //   return 'Password must be at least 6 characters long';
+    // }
     return null;
   }
 }

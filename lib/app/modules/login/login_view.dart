@@ -32,7 +32,7 @@ class _LoginViewState extends State<LoginView> {
         child: Center(
           child: Form(
             key: controller.formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.onUnfocus,
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               padding: ResponsiveHelper.paddingSymmetric(horizontal: 24),
@@ -63,9 +63,9 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: ResponsiveHelper.spacing(12)),
                   TextFormField(
-                    key: controller.usernameFieldKey,
-                    controller: controller.usernameController,
-                    focusNode: controller.usernameFocusNode,
+                    key: controller.emailFieldKey,
+                    controller: controller.emailController,
+                    focusNode: controller.emailFocusNode,
                     keyboardType: TextInputType.text,
                     validator: (value) => TextValidator.isUsername(value),
                     inputFormatters: [
@@ -165,7 +165,13 @@ class _LoginViewState extends State<LoginView> {
                     height: ResponsiveHelper.spacing(50),
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: controller.login,
+                   onPressed: () {
+                      controller.login(
+                        mobile: "",
+                        password: "",
+                        deviceToken: "",
+                      );
+                    },
                       style: AppButtonStyles.elevatedLargeBlack(),
                       child: ResponsiveHelper.safeText(
                         'Login',

@@ -1,5 +1,6 @@
 import 'package:ashishinterbuild/app/data/service/notfication_services.dart';
 import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart';
+import 'package:ashishinterbuild/app/widgets/connctivityservice.dart';
 import 'package:ashishinterbuild/firebase_options.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,15 +14,16 @@ import 'app/utils/app_utility.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await AppUtility.initialize();
-  Get.lazyPut<BottomNavigationController>(
+  // await AppUtility.initialize();
+
+  final NotificationServices notificationServices = NotificationServices();
+    Get.put(ConnectivityService(), permanent: true);
+  notificationServices.requestNotificationPermission();
+  notificationServices.isTokenRefresh();
+   Get.lazyPut<BottomNavigationController>(
     () => BottomNavigationController(),
     fenix: true,
   );
-   final NotificationServices notificationServices = NotificationServices();
-   
-  notificationServices.requestNotificationPermission();
-  notificationServices.isTokenRefresh();
   runApp(const MyApp());
 }
 
@@ -43,7 +45,6 @@ class MyApp extends StatelessWidget {
           primary: AppColors.primary,
         ),
         appBarTheme: AppBarTheme(
-          
           actionsIconTheme: IconThemeData(size: 30),
           scrolledUnderElevation: 0.0,
           backgroundColor: AppColors.primary,

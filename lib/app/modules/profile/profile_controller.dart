@@ -1,5 +1,7 @@
 import 'package:ashishinterbuild/app/data/models/profile/profile_model.dart';
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_images.dart';
+import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:get/get.dart';
 
 class ProfileController extends GetxController {
@@ -53,7 +55,8 @@ class ProfileController extends GetxController {
       // Simulate logout process
       await Future.delayed(const Duration(seconds: 1));
       // Navigate to login screen and remove all previous routes
-      Get.offAllNamed('/login');
+      await AppUtility.clearUserInfo();
+      Get.offAllNamed(AppRoutes.login);
     } catch (e) {
       Get.snackbar(
         'Error',

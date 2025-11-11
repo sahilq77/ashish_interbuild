@@ -59,6 +59,7 @@ class AppUtility {
     await prefs.setString('is_admin_user', isadmin);
     await prefs.setStringList('allowed_modules', modules);
     await prefs.setString('auth_token', token);
+    
     isAdminUser = isadmin;
     authToken = token;
     allowedModules = modules;
