@@ -56,7 +56,7 @@ class UpdateProfileScreenView extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Profile Details',
+        'Update Profile',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
@@ -115,7 +115,7 @@ class UpdateProfileScreenView extends StatelessWidget {
                           child:
                               controller.user.value!.profilePictureUrl != null
                               ? ClipOval(
-                                  child: Image.asset(
+                                  child: Image.network(
                                     controller.user.value!.profilePictureUrl!,
                                     width: ResponsiveHelper.spacing(100),
                                     height: ResponsiveHelper.spacing(100),
@@ -219,16 +219,16 @@ class UpdateProfileScreenView extends StatelessWidget {
             label: 'Email',
             value: controller.user.value!.email,
           ),
-          const Divider(),
-          _buildReadOnlyField(
-            label: 'Phone',
-            value: controller.user.value!.phone ?? 'Not provided',
-          ),
-          const Divider(),
-          _buildReadOnlyField(
-            label: 'Address',
-            value: controller.user.value!.address ?? 'Not provided',
-          ),
+          // const Divider(),
+          // _buildReadOnlyField(
+          //   label: 'Phone',
+          //   value: controller.user.value!.phone ?? 'Not provided',
+          // ),
+          // const Divider(),
+          // _buildReadOnlyField(
+          //   label: 'Address',
+          //   value: controller.user.value!.address ?? 'Not provided',
+          // ),
         ],
       ),
     );
