@@ -27,8 +27,8 @@ class GetLoginResponse {
   factory GetLoginResponse.fromJson(Map<String, dynamic> json) =>
       GetLoginResponse(
         status: json["status"] as bool,
-        error: json["error"] as String?, // may be null
-        message: json["message"] as String,
+        error: json["error"] ?? "", // may be null
+        message: json["message"] ?? "",
         data: json["data"] == null
             ? null
             : Data.fromJson(json["data"] as Map<String, dynamic>),

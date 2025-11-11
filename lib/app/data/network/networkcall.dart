@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
+import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:ashishinterbuild/app/widgets/connctivityservice.dart';
@@ -15,11 +17,28 @@ import '../../routes/app_routes.dart';
 class Networkcall {
   final ConnectivityService _connectivityService =
       Get.find<ConnectivityService>();
-  static GetSnackBar? _slowInternetSnackBar;
-  static const int _minResponseTimeMs =
-      3000; // Threshold for slow internet (3s)
-  static bool _isNavigatingToNoInternet = false; // Prevent multiple navigations
 
+  // ---------- Bearer Token Management ----------
+  static String? _bearerToken;
+
+  /// Set the bearer token (call after successful login / token refresh)
+  static void setBearerToken(String token) {
+    _bearerToken = token;
+    log('Bearer token set');
+  }
+
+  /// Clear the token (call on logout)
+  static void clearBearerToken() {
+    _bearerToken = null;
+    log('Bearer token cleared');
+  }
+
+  // ---------- Slow-Internet Snackbar ----------
+  static GetSnackBar? _slowInternetSnackBar;
+  static const int _minResponseTimeMs = 3000; // 3 seconds
+  static bool _isNavigatingToNoInternet = false;
+
+  // -------------------------------------------------
   Future<List<Object?>?> postMethod(
     int requestCode,
     String url,
@@ -27,197 +46,198 @@ class Networkcall {
     BuildContext context,
   ) async {
     try {
-      // Check connectivity with retries
+      // ---- Connectivity check ----
       final isConnected = await _connectivityService.checkConnectivity();
       if (!isConnected) {
         await _navigateToNoInternet();
         return null;
       }
 
-      // Start measuring response time
+      // ---- Response timer ----
       final stopwatch = Stopwatch()..start();
 
-      // Make POST request with timeout
-      var response = await http
+      // ---- Build headers (add Bearer if present) ----
+      final Map<String, String> headers = {'Content-Type': 'application/json'};
+      if (_bearerToken != null && _bearerToken!.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $_bearerToken';
+      }
+
+      // ---- POST request ----
+      final response = await http
           .post(
             Uri.parse(url),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: body.isEmpty ? null : body,
           )
           .timeout(
             const Duration(seconds: 30),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
+            onTimeout: () =>
+                throw TimeoutException('Request timed out. Please try again.'),
           );
 
-      // Stop measuring response time
       stopwatch.stop();
-      final responseTimeMs = stopwatch.elapsedMilliseconds;
+      _handleSlowInternet(stopwatch.elapsedMilliseconds);
 
-      // Handle slow internet
-      _handleSlowInternet(responseTimeMs);
-
-      var data = response.body;
+      final data = response.body;
       if (response.statusCode == 200) {
         log(
-          "url : $url \n Request Code : $requestCode \n body : $body \n Response : $data",
+          "POST → $url \nRequestCode: $requestCode \nBody: $body \nResponse: $data",
         );
 
-        // Wrap response in [] for consistency
-        String str = "[${response.body}]";
+        // Wrap in array for the existing parsers
+        final str = "[${response.body}]";
 
         switch (requestCode) {
           case 1:
-            final login = getLoginResponseFromJson(str);
-            return login;
-         
+            return getLoginResponseFromJson(str);
 
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
         }
       } else {
-        log("url : $url \n Request body : $data");
+        log("POST → $url \nStatus: ${response.statusCode} \nResponse: $data");
         throw HttpException(
           'Server error: ${response.statusCode}',
           response.statusCode,
         );
       }
     } on NoInternetException catch (e) {
-      log("url : $url \n Request body : $body \n Response : $e");
+      log("POST → $url \nError: $e");
       await _navigateToNoInternet();
       return null;
     } on TimeoutException catch (e) {
-      log("url : $url \n Request body : $body \n Response : $e");
-      // Use AppSnackbarStyles for timeout error
+      log("POST → $url \nError: $e");
       AppSnackbarStyles.showError(
         title: 'Request Timed Out',
         message: 'The server took too long to respond. Please try again.',
       );
       return null;
     } on HttpException catch (e) {
-      log("url : $url \n Request body : $body \n Response : $e");
+      log("POST → $url \nError: $e");
       return null;
     } on SocketException catch (e) {
-      log("url : $url \n Request body : $body \n Response : $e");
+      log("POST → $url \nError: $e");
       await _navigateToNoInternet();
       return null;
     } catch (e) {
-      log("url : $url \n Request body : $body \n Response : $e");
+      log("POST → $url \nUnexpected: $e");
       return null;
     }
   }
 
+  // -------------------------------------------------
   Future<List<Object?>?> getMethod(
     int requestCode,
     String url,
     BuildContext context,
   ) async {
     try {
-      // Check connectivity with retries
+      // ---- Connectivity check ----
       final isConnected = await _connectivityService.checkConnectivity();
       if (!isConnected) {
         await _navigateToNoInternet();
         return null;
       }
 
-      // Start measuring response time
+      // ---- Response timer ----
       final stopwatch = Stopwatch()..start();
 
-      // Make GET request with timeout
-      var response = await http
-          .get(Uri.parse(url))
+      // ---- Build headers (add Bearer if present) ----
+      final Map<String, String> headers = {};
+      if (AppUtility.authToken != null && AppUtility.authToken!.isNotEmpty) {
+        headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
+      }
+
+      // ---- GET request ----
+      final response = await http
+          .get(Uri.parse(url), headers: headers)
           .timeout(
             const Duration(seconds: 30),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
+            onTimeout: () =>
+                throw TimeoutException('Request timed out. Please try again.'),
           );
 
-      // Stop measuring response time
       stopwatch.stop();
-      final responseTimeMs = stopwatch.elapsedMilliseconds;
+      _handleSlowInternet(stopwatch.elapsedMilliseconds);
 
-      // Handle slow internet
-      _handleSlowInternet(responseTimeMs);
+      final data = response.body;
+      log("GET → $url");
 
-      var data = response.body;
-      log(url);
       if (response.statusCode == 200) {
-        log("url : $url \n Response : $data");
-        String str = "[${response.body}]";
+        log("GET → $url \nResponse: $data");
+
+        final str = "[${response.body}]";
+
         switch (requestCode) {
-          // case 2:
-          //   final getStates = getStateResponseFromJson(str);
-          //   return getStates;
+          case 2:
+            return getUserProfileResponseFromJson(str);
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
         }
       } else {
-        log("url : $url \n Response : $data");
+        log("GET → $url \nStatus: ${response.statusCode} \nResponse: $data");
         throw HttpException(
           'Server error: ${response.statusCode}',
           response.statusCode,
         );
       }
     } on NoInternetException catch (e) {
-      log("url : $url \n Response : $e");
+      log("GET → $url \nError: $e");
       await _navigateToNoInternet();
       return null;
     } on TimeoutException catch (e) {
-      log("url : $url \n Response : $e");
-      // Use AppSnackbarStyles for timeout error
+      log("GET → $url \nError: $e");
       AppSnackbarStyles.showError(
         title: 'Request Timed Out',
         message: 'The server took too long to respond. Please try again.',
       );
       return null;
     } on HttpException catch (e) {
-      log("url : $url \n Response : $e");
+      log("GET → $url \nError: $e");
       return null;
     } on SocketException catch (e) {
-      log("url : $url \n Response : $e");
+      log("GET → $url \nError: $e");
       await _navigateToNoInternet();
       return null;
     } catch (e) {
-      log("url : $url \n Response : $e");
+      log("GET → $url \nUnexpected: $e");
       return null;
     }
   }
 
+  // -------------------------------------------------
   Future<void> _navigateToNoInternet() async {
     if (!_isNavigatingToNoInternet &&
         Get.currentRoute != AppRoutes.noInternet) {
       _isNavigatingToNoInternet = true;
-      // Double-check connectivity before navigating
+
       final isConnected = await _connectivityService.checkConnectivity();
       if (!isConnected) {
         await Get.offNamed(AppRoutes.noInternet);
       }
-      // Reset flag after a delay
+
       await Future.delayed(const Duration(milliseconds: 500));
       _isNavigatingToNoInternet = false;
     }
   }
 
+  // -------------------------------------------------
   void _handleSlowInternet(int responseTimeMs) {
     if (responseTimeMs > _minResponseTimeMs) {
-      // Show slow internet snackbar if not already shown
       if (_slowInternetSnackBar == null || !Get.isSnackbarOpen) {
         _slowInternetSnackBar = GetSnackBar(
           titleText: Text(
             'Slow Internet',
-            style:
-                AppStyle.heading1PoppinsWhite, // Use AppStyle for consistency
+            style: AppStyle.heading1PoppinsWhite,
           ),
           messageText: Text(
             'Slow internet connection detected. Please check your network.',
             style: AppStyle.subheading1PoppinsWhite,
           ),
-          duration: const Duration(days: 1), // Persistent until closed
-          backgroundColor: Colors.orange.shade600, // Match warning style
+          duration: const Duration(days: 1),
+          backgroundColor: Colors.orange.shade600,
           snackPosition: SnackPosition.TOP,
           isDismissible: false,
           margin: const EdgeInsets.all(10),
@@ -232,7 +252,6 @@ class Networkcall {
         Get.showSnackbar(_slowInternetSnackBar!);
       }
     } else {
-      // Close slow internet snackbar if connection improves
       if (_slowInternetSnackBar != null && Get.isSnackbarOpen) {
         Get.closeCurrentSnackbar();
         _slowInternetSnackBar = null;

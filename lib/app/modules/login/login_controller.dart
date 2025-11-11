@@ -71,6 +71,7 @@ class LoginController extends GetxController {
     required String? password,
     required String? deviceToken,
   }) async {
+    log(AppUtility.authToken.toString());
     try {
       // Use controller values directly since they are validated by the form
       final jsonBody = {

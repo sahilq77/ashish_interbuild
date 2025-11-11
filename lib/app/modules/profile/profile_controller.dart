@@ -1,7 +1,14 @@
+import 'dart:convert';
+
+import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
 import 'package:ashishinterbuild/app/data/models/profile/profile_model.dart';
+import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/data/network/networkutility.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_images.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProfileController extends GetxController {
@@ -12,7 +19,12 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchUser();
+    // fetchUser();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchUserProfile(
+        context: Get.context!,
+      ); // Fetch user profile on initialization
+    });
   }
 
   String get greeting {
@@ -26,28 +38,121 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Mock fetching user data (replace with actual API call or local storage)
-  Future<void> fetchUser() async {
+  var userProfileList = <UserProfile>[].obs;
+  var errorMessage = ''.obs;
+
+  RxString imageLink = "".obs;
+
+  // // Method to set the selected user
+  // void setSelectedUser(UserProfile user) {
+  //   selectedUser.value = user;
+  // }
+
+  // // Method to clear the selected user
+  // void clearSelectedUser() {
+  //   selectedUser.value = null;
+  // }
+
+  // Method to fetch user profile
+  Future<void> fetchUserProfile({
+    required BuildContext context,
+    bool isRefresh = false,
+  }) async {
     try {
       isLoading.value = true;
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-      user.value = const User(
-        id: '1',
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        profilePictureUrl: AppImages.profile, // No profile picture for now
-      );
+      errorMessage.value = '';
+
+      if (isRefresh) {
+        userProfileList.clear(); // Clear existing data on refresh
+      }
+
+      final jsonBody = {
+        // "user_id": AppUtility.userID,
+        // "user_type": AppUtility.userType,
+      };
+
+      List<GetUserProfileResponse>? response =
+          (await Networkcall().getMethod(
+                Networkutility.getProfileApi,
+                Networkutility.getProfile,
+
+                context,
+              ))
+              as List<GetUserProfileResponse>?;
+
+      if (response != null && response.isNotEmpty) {
+        if (response[0].status == true) {
+          final users = response[0].data;
+          user.value = User(
+            id: users.roleId,
+            name: users.userName,
+            email: users.emailId,
+            profilePictureUrl: users.profileImg,
+          );
+          // userProfileList.add(
+          //   UserProfile(
+          //     empCode: users.empCode,
+          //     personName: users.personName,
+          //     contactNo: users.contactNo,
+          //     emailId: users.emailId,
+          //     userName: users.userName,
+          //     profileImg: users.profileImg,
+          //     password: users.password,
+          //     roleId: users.roleId,
+          //     hodPersonName: users.hodPersonName,
+          //     hodEmpCode: users.hodEmpCode,
+          //     reportingToPersonName: users.reportingToPersonName,
+          //     reportingToEmpCode: users.reportingToEmpCode,
+          //     departmentName: users.departmentName,
+          //     designationName: users.designationName,
+          //     roleName: users.roleName,
+          //     allowedModulesData: users.allowedModulesData,
+          //   ),
+          // );
+        } else {
+          errorMessage.value =
+              'Failed to load profile: ${response[0].message ?? 'Unknown error'}';
+        }
+      } else {
+        errorMessage.value = 'No response from server';
+      }
+    } on NoInternetException catch (e) {
+      errorMessage.value = e.message;
+    } on TimeoutException catch (e) {
+      errorMessage.value = e.message;
+    } on HttpException catch (e) {
+      errorMessage.value = '${e.message} (Code: ${e.statusCode})';
+    } on ParseException catch (e) {
+      errorMessage.value = e.message;
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load user: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      errorMessage.value = 'Unexpected error: $e';
     } finally {
       isLoading.value = false;
     }
   }
+
+  // // Mock fetching user data (replace with actual API call or local storage)
+  // Future<void> fetchUser() async {
+  //   try {
+  //     isLoading.value = true;
+  //     // Simulate network delay
+  //     await Future.delayed(const Duration(seconds: 1));
+  //     user.value = const User(
+  //       id: '1',
+  //       name: 'John Doe',
+  //       email: 'john.doe@example.com',
+  //       profilePictureUrl: AppImages.profile, // No profile picture for now
+  //     );
+  //   } catch (e) {
+  //     Get.snackbar(
+  //       'Error',
+  //       'Failed to load user: $e',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   // Handle logout logic (replace with actual auth service logout)
   Future<void> logout() async {

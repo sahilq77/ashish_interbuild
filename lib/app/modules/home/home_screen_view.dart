@@ -229,7 +229,7 @@ class _HomeViewState extends State<HomeView> {
             padding: EdgeInsets.zero,
             icon: Icon(FontAwesomeIcons.bell, color: AppColors.defaultBlack),
             onPressed: () {
-              Get.toNamed(AppRoutes.notifications);
+              print(AppUtility.authToken.toString());
             },
           ),
         ),

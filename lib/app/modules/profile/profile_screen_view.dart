@@ -72,10 +72,10 @@ class ProfileScreenView extends StatelessWidget {
                               child: Column(
                                 children: [
                                   ListTile(
- onTap: () {
+                                    onTap: () {
                                       Get.toNamed(AppRoutes.updateProfile);
                                     },
-                                    
+
                                     leading: Icon(FontAwesomeIcons.user),
                                     title: Text(
                                       "Update Profile",
@@ -199,7 +199,7 @@ class ProfileScreenView extends StatelessWidget {
                           child:
                               controller.user.value!.profilePictureUrl != null
                               ? ClipOval(
-                                  child: Image.asset(
+                                  child: Image.network(
                                     controller.user.value!.profilePictureUrl!,
                                     width: ResponsiveHelper.spacing(100),
                                     height: ResponsiveHelper.spacing(100),
