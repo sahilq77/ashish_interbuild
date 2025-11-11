@@ -350,6 +350,12 @@ class _HomeViewState extends State<HomeView> {
       gradientColor: Color.fromARGB(255, 0, 102, 255),
       icon: AppImages.clientIcon,
     ),
+    GridItem(
+      title: 'Work Front Update (WFU)',
+      route: AppRoutes.workFrontUpdateProjectList,
+      gradientColor: Color.fromARGB(255, 0, 102, 255),
+      icon: AppImages.clientIcon,
+    ),
   ];
 
   // -------------------------------------------------------------------------

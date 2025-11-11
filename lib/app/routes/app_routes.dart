@@ -14,6 +14,8 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commi
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_screen.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_screen_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_binding.dart';
@@ -87,7 +89,9 @@ class AppRoutes {
   static const String addClientCommitment = '/add-client-commitment';
   static const String updateClientCommitment = '/update-client-commitment';
   static const String updateProfile = '/update-profile';
-    static const String noInternet = '/nointernet';
+  static const String noInternet = '/nointernet';
+  static const String workFrontUpdateProjectList =
+      '/work-front-update-project-list';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -230,6 +234,12 @@ class AppRoutes {
       name: noInternet,
       page: () => NoInternetScreen(),
       transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: workFrontUpdateProjectList,
+      page: () => WorkFrontUpdateProjectList(),
+
+      binding: WorkFrontUpdateProjectListBinding(),
     ),
   ];
 }
