@@ -2,16 +2,27 @@ import 'package:get/get.dart';
 
 class AddAccIssueFormController extends GetxController {
   final RxString accCategory = ''.obs;
-  final RxList<String> accCategories = <String>['Category A', 'Category B', 'Category C'].obs;
+  final RxList<String> accCategories = <String>['Amit', 'Ganesh', 'Sumit'].obs;
 
   final RxString priority = ''.obs;
-  final RxList<String> priorities = <String>['Critical', 'High', 'Medium', 'Low'].obs;
+  final RxList<String> priorities = <String>[
+    'Critical',
+    'High',
+    'Medium',
+    'Low',
+  ].obs;
+  final RxString category = ''.obs;
+  final RxList<String> categories = <String>['Milestone', 'Milestone-1'].obs;
 
   final RxString keyDelayEvents = ''.obs;
   final RxList<String> keyDelayOptions = <String>['Yes', 'No'].obs;
 
   final RxString affectedMilestone = ''.obs;
-  final RxList<String> milestones = <String>['Milestone 1', 'Milestone 2', 'Milestone 3'].obs;
+  final RxList<String> milestones = <String>[
+    'Milestone 1',
+    'Milestone 2',
+    'Milestone 3',
+  ].obs;
 
   final RxString briefDetails = ''.obs;
 

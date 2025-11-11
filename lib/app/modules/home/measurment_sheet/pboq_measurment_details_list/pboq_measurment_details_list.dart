@@ -605,22 +605,58 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
         ),
       ),
       actions: [
-        IconButton(
-          onPressed: () {
-            Get.toNamed(AppRoutes.addPBOQ);
-          },
-          icon: Row(
-            children: [
-              Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
-              Text(
-                'Add',
-                style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
-                  fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-                ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppColors.defaultBlack, // Change to your primary color
+              width: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(8), // Rounded corners
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(
+              8,
+            ), // Important for ripple effect
+            onTap: () {
+              Get.toNamed(AppRoutes.addPBOQ);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Optional icon
+                  // Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(20)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Add',
+                    style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                        .copyWith(
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+                        ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
+        // IconButton(
+        //   onPressed: () {
+        //     Get.toNamed(AppRoutes.addPBOQ);
+        //   },
+        //   icon: Row(
+        //     children: [
+        //       Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
+        //       Text(
+        //         'Add',
+        //         style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
+        //           fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),

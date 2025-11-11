@@ -63,4 +63,5 @@ class AccController extends GetxController {
       expandedIndex.value = index; // Expand the selected card
     }
   }
+  
 }

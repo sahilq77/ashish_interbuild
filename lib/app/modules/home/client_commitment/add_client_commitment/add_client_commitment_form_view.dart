@@ -78,8 +78,8 @@ class AddClientCommitmentFormView extends StatelessWidget {
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
                 label: 'Category*',
-                value: controller.priority.value,
-                items: controller.priorities,
+                value: controller.category.value,
+                items: controller.categories,
                 onChanged: controller.onPriorityChanged,
                 validator: (value) => value == null || value.isEmpty
                     ? 'Please select a category'
@@ -104,24 +104,34 @@ class AddClientCommitmentFormView extends StatelessWidget {
                 hint: 'Select Date',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildAttachmentField(
-                label: 'Final Attachment* (Required : PNG,JPG,JPEG)',
-                fileName: controller.attachmentFileName.value,
-                onAttachmentPicked: controller.pickAttachment,
-                hint: 'Choose File',
-                validator: (value) => value == 'No file chosen'
-                    ? 'Please select a file (PNG, JPG, JPEG)'
+              _buildDropdownField(
+                label: 'Priority*',
+                value: controller.priority.value,
+                items: controller.priorities,
+                onChanged: controller.onPriorityChanged,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please select a Priority'
                     : null,
+                hint: 'Select Priority',
               ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildTextFormField(
-                label: 'Remarks',
-                initialValue: '',
-                onChanged: (value) {
-                  // Add remarks logic to controller if needed
-                },
-                hint: 'Enter Remarks',
-              ),
+              // _buildAttachmentField(
+              //   label: 'Final Attachment* (Required : PNG,JPG,JPEG)',
+              //   fileName: controller.attachmentFileName.value,
+              //   onAttachmentPicked: controller.pickAttachment,
+              //   hint: 'Choose File',
+              //   validator: (value) => value == 'No file chosen'
+              //       ? 'Please select a file (PNG, JPG, JPEG)'
+              //       : null,
+              // ),
+              // SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              // _buildTextFormField(
+              //   label: 'Remarks',
+              //   initialValue: '',
+              //   onChanged: (value) {
+              //     // Add remarks logic to controller if needed
+              //   },
+              //   hint: 'Enter Remarks',
+              // ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
                 onPressed: controller.submitForm,
