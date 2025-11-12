@@ -14,6 +14,8 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commi
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_screen.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/cliient_commitment_dashboard/client_commitment_dashboard_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/cliient_commitment_dashboard/client_commitment_dashbord.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
@@ -92,6 +94,7 @@ class AppRoutes {
   static const String updateAccForm = '/update-acc-form';
   static const String editAccForm = '/edit-acc-form';
   static const String clientCommitmentProject = '/client-commitment-project';
+  static const String clientCommitmentDashboard = '/client-commitment-dashboard';
   static const String clientCommitmentList = '/client-commitment-list';
   static const String addClientCommitment = '/add-client-commitment';
   static const String updateClientCommitment = '/update-client-commitment';
@@ -218,6 +221,13 @@ class AppRoutes {
       page: () => const ClientCommitmentProject(),
       binding: ClientCommitmentProjectBinding(),
     ),
+GetPage(
+      name: clientCommitmentDashboard,
+      page: () => const ClientCommitmentDashbord(),
+      binding: ClientCommitmentDashboardBinding(),
+    ),
+
+    
     GetPage(
       name: clientCommitmentList,
       page: () => const ClientCommitmentScreen(),
