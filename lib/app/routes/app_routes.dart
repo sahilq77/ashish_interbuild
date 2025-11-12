@@ -14,6 +14,8 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commi
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_screen.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
@@ -93,6 +95,7 @@ class AppRoutes {
   static const String clientCommitmentList = '/client-commitment-list';
   static const String addClientCommitment = '/add-client-commitment';
   static const String updateClientCommitment = '/update-client-commitment';
+    static const String editClientCommitment = '/edit-client-commitment';
   static const String updateProfile = '/update-profile';
   static const String noInternet = '/nointernet';
   static const String workFrontUpdateProjectList =
@@ -231,6 +234,13 @@ class AppRoutes {
       page: () => const UpdateClientCommitmentFormView(),
       binding: UpdateClientCommitmentFormBinding(),
     ),
+ GetPage(
+      name: editClientCommitment,
+      page: () => const EditClientCommitmentFormView(),
+      binding: EditClientCommitmentBinding(),
+    ),
+
+  
     GetPage(
       name: updateProfile,
       page: () => const UpdateProfileScreenView(),

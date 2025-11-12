@@ -218,7 +218,7 @@ class ClientCommitmentScreen extends StatelessWidget {
                                                 0.01,
                                           ),
                                         ],
-                                        Divider(),
+                                        // Divider(),
                                         Row(
                                           children: [
                                             // Expanded(
@@ -251,7 +251,7 @@ class ClientCommitmentScreen extends StatelessWidget {
                                             Expanded(
                                               child: OutlinedButton(
                                                 style:
-                                                    AppButtonStyles.outlinedSmallBlack(),
+                                                    AppButtonStyles.outlinedExtraSmallBlack(),
                                                 onPressed: () {
                                                   Get.toNamed(
                                                     AppRoutes
@@ -273,15 +273,31 @@ class ClientCommitmentScreen extends StatelessWidget {
                                             Expanded(
                                               child: OutlinedButton(
                                                 style:
-                                                    AppButtonStyles.outlinedSmallBlack(),
+                                                    AppButtonStyles.outlinedExtraSmallBlack(),
                                                 onPressed: () {
-                                                  // _showConfirmationDialog(context, sheet);
+                                                  Get.toNamed(
+                                                    AppRoutes.editClientCommitment,
+                                                  );
                                                 },
-                                                child: Text(
-                                                  "Delete",
-                                                  style: AppStyle
-                                                      .labelPrimaryPoppinsBlack,
-                                                ),
+                                                child: Icon(Icons.edit),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.05,
+                                            ),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style:
+                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                onPressed: () {
+                                                  // _showConfirmationDialog(
+                                                  //   context,
+                                                  //   sheet,
+                                                  // );
+                                                },
+                                                child: Icon(Icons.delete),
                                               ),
                                             ),
                                           ],
