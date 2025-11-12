@@ -177,8 +177,11 @@ class Networkcall {
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
         }
-      } else {
+      } else if (response.statusCode == 401) {
+        await AppUtility.clearUserInfo();
+        Get.offAllNamed(AppRoutes.login);
         log("GET → $url \nStatus: ${response.statusCode} \nResponse: $data");
+      } else {
         throw HttpException(
           'Server error: ${response.statusCode}',
           response.statusCode,

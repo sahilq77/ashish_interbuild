@@ -2,6 +2,7 @@ import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart' show AppRoutes;
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -36,7 +37,15 @@ class ClientCommitmentScreen extends StatelessWidget {
             ),
             Padding(
               padding: ResponsiveHelper.padding(16),
-              child: _buildSearchField(controller),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSearchField(controller)),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildFilterButton(context, controller),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildSortButton(controller),
+                ],
+              ),
             ),
             Expanded(
               child: Obx(
@@ -88,15 +97,7 @@ class ClientCommitmentScreen extends StatelessWidget {
                                               0.002,
                                         ),
                                         _buildDetailRow("HOD", commitment.hod),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Task Details",
-                                          commitment.taskDetails,
-                                        ),
+
                                         SizedBox(
                                           height:
                                               ResponsiveHelper.screenHeight *
@@ -104,6 +105,15 @@ class ClientCommitmentScreen extends StatelessWidget {
                                         ),
                                         if (controller.expandedIndex.value ==
                                             index) ...[
+                                          _buildDetailRow(
+                                            "Task Details",
+                                            commitment.taskDetails,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
                                           _buildDetailRow(
                                             "Affected Milestone",
                                             commitment.affectedMilestone,
@@ -276,7 +286,8 @@ class ClientCommitmentScreen extends StatelessWidget {
                                                     AppButtonStyles.outlinedExtraSmallBlack(),
                                                 onPressed: () {
                                                   Get.toNamed(
-                                                    AppRoutes.editClientCommitment,
+                                                    AppRoutes
+                                                        .editClientCommitment,
                                                   );
                                                 },
                                                 child: Icon(Icons.edit),
@@ -316,6 +327,247 @@ class ClientCommitmentScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterButton(
+    BuildContext context,
+    ClientCommitmentController controller,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context, controller),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(ClientCommitmentController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+  }
+
+  void _showFilterDialog(
+    BuildContext context,
+    ClientCommitmentController controller,
+  ) {
+    // temporary values – they are applied only when user presses “Apply”
+    String? tempRole = controller.selectedRole.value;
+    String? tempHod = controller.selectedHod.value;
+    String? tempCategory = controller.selectedCategory.value;
+    String? tempMilestone = controller.selectedMilestone.value;
+    String? tempPriority = controller.selectedPriority.value;
+    String? tempIssueOpen = controller.selectedIssueOpen.value;
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Header ───────────────────────────────────────
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filters',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              // ── Scrollable filter list ───────────────────────
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.padding(20),
+                  child: Column(
+                    children: [
+                      _filterDropdown(
+                        label: 'Role',
+                        items: [''] + controller.roleList,
+                        value: tempRole ?? '',
+                        onChanged: (v) => setState(() => tempRole = v),
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdown(
+                        label: 'HOD',
+                        items: [''] + controller.hodList,
+                        value: tempHod ?? '',
+                        onChanged: (v) => setState(() => tempHod = v),
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdown(
+                        label: 'Category',
+                        items: [''] + controller.categoryList,
+                        value: tempCategory ?? '',
+                        onChanged: (v) => setState(() => tempCategory = v),
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdown(
+                        label: 'Affected Milestone',
+                        items: [''] + controller.milestoneList,
+                        value: tempMilestone ?? '',
+                        onChanged: (v) => setState(() => tempMilestone = v),
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdown(
+                        label: 'Priority',
+                        items: [''] + controller.priorityList,
+                        value: tempPriority ?? '',
+                        onChanged: (v) => setState(() => tempPriority = v),
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdown(
+                        label: 'Issue Open',
+                        items: const ['', 'Yes', 'No'],
+                        value: tempIssueOpen ?? '',
+                        onChanged: (v) => setState(() => tempIssueOpen = v),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Buttons ───────────────────────────────────────
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          // push temp values into controller
+                          controller.selectedRole.value = tempRole ?? '';
+                          controller.selectedHod.value = tempHod ?? '';
+                          controller.selectedCategory.value =
+                              tempCategory ?? '';
+                          controller.selectedMilestone.value =
+                              tempMilestone ?? '';
+                          controller.selectedPriority.value =
+                              tempPriority ?? '';
+                          controller.selectedIssueOpen.value =
+                              tempIssueOpen ?? '';
+
+                          controller.applyFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper widget used inside the dialog
+  Widget _filterDropdown({
+    required String label,
+    required List<String> items,
+    required String value,
+    required void Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      value: value.isEmpty ? null : value,
+      items: items
+          .map(
+            (e) =>
+                DropdownMenuItem(value: e, child: Text(e.isEmpty ? 'All' : e)),
+          )
+          .toList(),
+      onChanged: onChanged,
+      isExpanded: true,
     );
   }
 
