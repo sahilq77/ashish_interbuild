@@ -22,6 +22,8 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/update_clien
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_binding.dart';
@@ -94,16 +96,19 @@ class AppRoutes {
   static const String updateAccForm = '/update-acc-form';
   static const String editAccForm = '/edit-acc-form';
   static const String clientCommitmentProject = '/client-commitment-project';
-  static const String clientCommitmentDashboard = '/client-commitment-dashboard';
+  static const String clientCommitmentDashboard =
+      '/client-commitment-dashboard';
   static const String clientCommitmentList = '/client-commitment-list';
   static const String addClientCommitment = '/add-client-commitment';
   static const String updateClientCommitment = '/update-client-commitment';
-    static const String editClientCommitment = '/edit-client-commitment';
+  static const String editClientCommitment = '/edit-client-commitment';
   static const String updateProfile = '/update-profile';
   static const String noInternet = '/nointernet';
   static const String workFrontUpdateProjectList =
       '/work-front-update-project-list';
-  static const String workFrontUpdateDashboard =      '/work-front-update-dashboard';
+  static const String workFrontUpdateList = '/work-front-update-list';
+
+  static const String workFrontUpdateDashboard = '/work-front-update-dashboard';
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
@@ -221,13 +226,12 @@ class AppRoutes {
       page: () => const ClientCommitmentProject(),
       binding: ClientCommitmentProjectBinding(),
     ),
-GetPage(
+    GetPage(
       name: clientCommitmentDashboard,
       page: () => const ClientCommitmentDashbord(),
       binding: ClientCommitmentDashboardBinding(),
     ),
 
-    
     GetPage(
       name: clientCommitmentList,
       page: () => const ClientCommitmentScreen(),
@@ -244,13 +248,12 @@ GetPage(
       page: () => const UpdateClientCommitmentFormView(),
       binding: UpdateClientCommitmentFormBinding(),
     ),
- GetPage(
+    GetPage(
       name: editClientCommitment,
       page: () => const EditClientCommitmentFormView(),
       binding: EditClientCommitmentBinding(),
     ),
 
-  
     GetPage(
       name: updateProfile,
       page: () => const UpdateProfileScreenView(),
@@ -267,22 +270,25 @@ GetPage(
 
       binding: WorkFrontUpdateProjectListBinding(),
     ),
- GetPage(
+    GetPage(
       name: workFrontUpdateDashboard,
       page: () => WorkFrontUpdateDashboard(),
 
       binding: WorkFrontUpdateDashboardBinding(),
     ),
+    GetPage(
+      name: workFrontUpdateList,
+      page: () => WorkFrontUpdateListView(),
 
-GetPage(
+      binding: WorkFrontUpdateListBinding(),
+    ),
+
+    GetPage(
       name: editAccForm,
       page: () => EditAccFormView(),
 
       binding: EditAccBinding(),
     ),
-
-
-    
   ];
 }
 

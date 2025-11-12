@@ -95,7 +95,7 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
   ) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.dailyProgressReport);
+        Get.toNamed(AppRoutes.workFrontUpdateList);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -116,7 +116,7 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () {
-              Get.toNamed(AppRoutes.dailyProgressReport);
+              Get.toNamed(AppRoutes.workFrontUpdateList);
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
