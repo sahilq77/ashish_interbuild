@@ -39,15 +39,17 @@ class AddPboqFormView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'PBOQ Name',
-                value: controller.selectedPboqName.value,
-                items: controller.pboqNames,
-                onChanged: controller.onPboqNameChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a PBOQ name'
-                    : null,
-                hint: 'Select a PBOQ name',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'PBOQ Name',
+                  value: controller.selectedPboqName.value,
+                  items: controller.pboqNames,
+                  onChanged: controller.onPboqNameChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select a PBOQ name'
+                      : null,
+                  hint: 'Select a PBOQ name',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               Obx(

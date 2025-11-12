@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:ashishinterbuild/app/data/models/global_model/packages/get_package_name_response.dart';
+import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
@@ -8,34 +8,35 @@ import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class PackageNameController extends GetxController {
-  RxList<PackageData> packageList = <PackageData>[].obs;
+class PboqNameController extends GetxController {
+  RxList<PboqData> pboqList = <PboqData>[].obs;
   var isLoading = false.obs;
   var errorMessage = ''.obs;
-  RxString? selectedPackageVal;
+  RxString? selectedPboqVal;
 
-  static PackageNameController get to => Get.find();
+  static PboqNameController get to => Get.find();
 
-  // Helper to expose only package names for UI
-  List<String> get packageNames =>
-      packageList.map((p) => p.packageName).toList();
+  // Helper to expose only pboq names for UI
+  List<String> get pboqNames => pboqList.map((p) => p.pboqName).toList();
 
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
-        fetchPackages(context: Get.context!);
+        fetchPboqs(context: Get.context!);
       }
     });
   }
 
-  Future<void> fetchPackages({
+  /// Fetch the list of PBOQs from the server
+  Future<void> fetchPboqs({
     required BuildContext context,
     bool forceFetch = false,
   }) async {
-    log("PackageData API call");
-    if (!forceFetch && packageList.isNotEmpty) return;
+    log("PboqData API call");
+
+    if (!forceFetch && pboqList.isNotEmpty) return;
 
     try {
       isLoading.value = true;
@@ -43,21 +44,21 @@ class PackageNameController extends GetxController {
 
       final response =
           await Networkcall().getMethod(
-                Networkutility.getPackagesListApi,
-                Networkutility.getPackagesList,
+                Networkutility.getPboqApi,
+                Networkutility.getPboq,
                 context,
               )
-              as List<GetPackageNameResponse>?;
+              as List<GetPboqNameResponse>?;
 
       log(
-        'Fetch PackageData Response: ${response?.isNotEmpty == true ? response![0].toJson() : 'null'}',
+        'Fetch PboqData Response: ${response?.isNotEmpty == true ? response![0].toJson() : 'null'}',
       );
 
       if (response != null && response.isNotEmpty) {
         if (response[0].status == true) {
-          packageList.value = response[0].data as List<PackageData>;
+          pboqList.value = response[0].data as List<PboqData>;
           log(
-            'PackageData List Loaded: ${packageList.map((s) => "${s.packageName}: ${s.packageId}").toList()}',
+            'PboqData List Loaded: ${pboqList.map((s) => "${s.pboqName}: ${s.pboqId}").toList()}',
           );
         } else {
           errorMessage.value = response[0].status.toString();
@@ -111,7 +112,7 @@ class PackageNameController extends GetxController {
       );
     } catch (e, stackTrace) {
       errorMessage.value = 'Unexpected error: $e';
-      log('Fetch PackageData Exception: $e, stack: $stackTrace');
+      log('Fetch PboqData Exception: $e, stack: $stackTrace');
       Get.snackbar(
         'Error',
         'Unexpected error: $e',
@@ -123,21 +124,24 @@ class PackageNameController extends GetxController {
     }
   }
 
-  List<String> getPackageIds() {
-    return packageList.map((s) => s.packageId.toString()).toSet().toList();
+  /// Returns a **unique** list of PBOQ IDs as strings
+  List<String> getPboqIds() {
+    return pboqList.map((s) => s.pboqId.toString()).toSet().toList();
   }
 
-  String? getPackageNameById(String packageId) {
-    return packageList
-            .firstWhereOrNull((p) => p.packageId.toString() == packageId)
-            ?.packageName ??
+  /// Find PBOQ name by its ID
+  String? getPboqNameById(String pboqId) {
+    return pboqList
+            .firstWhereOrNull((p) => p.pboqId.toString() == pboqId)
+            ?.pboqName ??
         '';
   }
 
-  String? getPackageIdByName(String packageName) {
-    return packageList
-        .firstWhereOrNull((p) => p.packageName == packageName)
-        ?.packageId
+  /// Find PBOQ ID by its name
+  String? getPboqIdByName(String pboqName) {
+    return pboqList
+        .firstWhereOrNull((p) => p.pboqName == pboqName)
+        ?.pboqId
         .toString();
   }
 }

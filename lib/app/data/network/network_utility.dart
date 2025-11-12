@@ -15,4 +15,7 @@ class Networkutility {
 
   static String getPackagesList = "${baseUrl + "packages"}";
   static int getPackagesListApi = 5;
+
+  static String getPboq = "${baseUrl + "pboq"}";
+  static int getPboqApi = 6;
 }

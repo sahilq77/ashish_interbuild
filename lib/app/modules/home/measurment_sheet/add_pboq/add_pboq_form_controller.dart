@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
 import 'package:get/get.dart';
 
 class FieldSet {
@@ -24,12 +25,11 @@ class AddPboqFormController extends GetxController {
 
   // Injected real controller
   late final PackageNameController _pkgCtrl = Get.find<PackageNameController>();
-
+  late final PboqNameController _pboqCtrl = Get.find<PboqNameController>();
   // Dynamic package names from API
   List<String> get packageNames => _pkgCtrl.packageNames;
+  List<String> get pboqNames => _pboqCtrl.pboqNames;
 
-  // Static data (replace later if needed)
-  final List<String> pboqNames = ['PBOQ A', 'PBOQ B', 'PBOQ C'];
   final List<String> zones = ['Zone 1', 'Zone 2', 'Zone 3'];
   final List<String> locations = ['Location A', 'Location B', 'Location C'];
 
@@ -47,7 +47,14 @@ class AddPboqFormController extends GetxController {
   }
 
   void onPboqNameChanged(String? value) {
-    if (value != null) selectedPboqName.value = value;
+    selectedPboqName.value = value ?? '';
+
+    // ---- LOG THE NAME ------------------------------------------------
+    log('Selected PBOQ Name: $value');
+
+    // ---- LOG THE ID --------------------------------------------------
+    final String? PBOQId = _pboqCtrl.getPboqIdByName(value.toString());
+    log('Selected PBOQ ID  : $PBOQId');
   }
 
   void onZoneChanged(int index, String? value) {

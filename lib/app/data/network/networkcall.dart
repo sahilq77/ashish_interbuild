@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
-import 'package:ashishinterbuild/app/data/models/packages/get_package_name_response.dart';
+import 'package:ashishinterbuild/app/data/models/global_model/packages/get_package_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
 import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
@@ -188,6 +189,9 @@ class Networkcall {
           case 5:
             final getPackages = getPackageNameResponseFromJson(str);
             return getPackages;
+             case 6:
+            final getPboq = getPboqNameResponseFromJson(str);
+            return getPboq;
 
           default:
             log("Invalid request code: $requestCode");
