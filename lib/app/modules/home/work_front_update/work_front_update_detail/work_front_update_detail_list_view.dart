@@ -101,8 +101,8 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                                             height: ResponsiveHelper.spacing(4),
                                           ),
                                           _buildDetailRow(
-                                            "PBOA Rate",
-                                            "${sheet.pboaRate}",
+                                            "PBOA Amount",
+                                            "${sheet.pboaAmount}",
                                           ),
                                           SizedBox(
                                             height: ResponsiveHelper.spacing(4),
@@ -118,23 +118,35 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                                             "CBOQ Code",
                                             sheet.cboqCode,
                                           ),
-                                          _buildDetailRow("Doer", sheet.doer),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("UOM", sheet.uom),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("Fix", sheet.fix),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("Trade", sheet.trade),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
                                           _buildDetailRow("Zone", sheet.zone),
+                                          SizedBox(
+                                            height: ResponsiveHelper.spacing(4),
+                                          ),
+                                          _buildDetailRow(
+                                            "Location",
+                                            sheet.location,
+                                          ),
+                                          SizedBox(
+                                            height: ResponsiveHelper.spacing(4),
+                                          ),
+                                          _buildDetailRow(
+                                            "Sub Location",
+                                            sheet.subLocation,
+                                          ),
+                                          SizedBox(
+                                            height: ResponsiveHelper.spacing(4),
+                                          ),
+                                          _buildDetailRow(
+                                            "Revised Start",
+                                            "${sheet.revisedStartDate.toLocal().toString().split(' ')[0]}",
+                                          ),
+                                          SizedBox(
+                                            height: ResponsiveHelper.spacing(4),
+                                          ),
+                                          _buildDetailRow(
+                                            "Revised End",
+                                            "${sheet.revisedEndDate.toLocal().toString().split(' ')[0]}",
+                                          ),
                                         ],
 
                                         SizedBox(
@@ -146,7 +158,7 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                "Qty: ${sheet.msQty}",
+                                                "Qty: ${sheet.pboaQty}",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsBlack
                                                     .responsive
@@ -156,7 +168,7 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                                             const SizedBox(width: 4),
                                             Expanded(
                                               child: Text(
-                                                "Amt: ${sheet.amount}",
+                                                "Amt: ${sheet.pboaAmount}",
                                                 style: AppStyle
                                                     .labelPrimaryPoppinsBlack
                                                     .responsive
@@ -365,27 +377,29 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
   ) {
     String? tempSelectedPackage = controller.selectedPackageFilter.value;
     String? tempSelectedZone = controller.selectedZoneFilter.value;
+    String? tempSelectedLocation =
+        controller.selectedLocationFilter.value; // <-- NEW
 
     showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (ctx, setState) => Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(16)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+              // Header (unchanged)
               Container(
                 width: double.infinity,
                 padding: ResponsiveHelper.paddingSymmetric(
-                  vertical: 20,
+                  vertical: 16,
                   horizontal: 16,
                 ),
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 child: const Text(
                   'Filter Work Front',
@@ -398,9 +412,9 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                 ),
               ),
 
-              // Package Dropdown
+              // Package Dropdown (unchanged)
               Padding(
-                padding: ResponsiveHelper.padding(20),
+                padding: ResponsiveHelper.padding(16),
                 child: DropdownSearch<String>(
                   popupProps: const PopupProps.menu(showSearchBox: true),
                   items: controller.getPackageNames(),
@@ -428,11 +442,11 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                 ),
               ),
 
-              // Zone Dropdown
+              // Zone Dropdown (unchanged)
               Padding(
                 padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 0,
+                  horizontal: 16,
+                  vertical: 8,
                 ),
                 child: DropdownSearch<String>(
                   popupProps: const PopupProps.menu(showSearchBox: true),
@@ -461,10 +475,43 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                 ),
               ),
 
-              // Buttons
+              // ---------- NEW: Location Dropdown ----------
               Padding(
                 padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(showSearchBox: true),
+                  items: controller.getLocationNames(),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Location',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.place,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (v) => setState(() => tempSelectedLocation = v),
+                  selectedItem: tempSelectedLocation,
+                ),
+              ),
+
+              // Buttons (apply now also writes location)
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 16,
                   vertical: 16,
                 ),
                 child: Row(
@@ -506,6 +553,8 @@ class WorkFrontUpdateDetailListView extends StatelessWidget {
                               tempSelectedPackage;
                           controller.selectedZoneFilter.value =
                               tempSelectedZone;
+                          controller.selectedLocationFilter.value =
+                              tempSelectedLocation; // <-- NEW
                           controller.applyFilters();
                           Navigator.pop(context);
                         },

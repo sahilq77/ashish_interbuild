@@ -1,4 +1,4 @@
-import 'package:ashishinterbuild/app/data/models/work_front_update/work_front_update_model.dart';
+import 'package:ashishinterbuild/app/data/models/work_front_update/work_front_update_detail_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,15 +6,22 @@ class WorkFrontUpdateDetailListController extends GetxController {
   // ------------------------------------------------------------------
   // Reactive data
   // ------------------------------------------------------------------
-  final RxList<WorkFrontUpdateModel> items = <WorkFrontUpdateModel>[].obs;
-  final RxList<WorkFrontUpdateModel> filteredMeasurementSheets = <WorkFrontUpdateModel>[].obs;
+  final RxList<WorkFrontUpdateDetailModel> items =
+      <WorkFrontUpdateDetailModel>[].obs;
+  final RxList<WorkFrontUpdateDetailModel> filteredMeasurementSheets =
+      <WorkFrontUpdateDetailModel>[].obs;
+  final RxList<MeasurementSheetModel> measurementSheets =
+      <MeasurementSheetModel>[].obs;
+
   final RxInt expandedIndex = (-1).obs;
   final RxBool isLoading = true.obs;
 
   // Search & Filter
   final TextEditingController searchController = TextEditingController();
   final RxnString selectedPackageFilter = RxnString();
-  final RxnString selectedZoneFilter = RxnString(); // <<< NEW: Zone filter
+  final RxnString selectedZoneFilter = RxnString();
+  final RxnString selectedLocationFilter =
+      RxnString(); // <-- NEW: Location Filter
   final RxBool isAscending = true.obs;
 
   // ------------------------------------------------------------------
@@ -32,121 +39,68 @@ class WorkFrontUpdateDetailListController extends GetxController {
   }
 
   // ------------------------------------------------------------------
-  // Dummy data
+  // Dummy data - EXACTLY matches your screenshots
   // ------------------------------------------------------------------
   Future<void> loadDummyData() async {
     isLoading.value = true;
     await Future.delayed(const Duration(seconds: 1));
 
-    final dummy = [
-      WorkFrontUpdateModel(
-        srNo: 1,
-        systemId: 335,
-        packageName: "Ashok Package",
+    final dummyWorkFront = [
+      WorkFrontUpdateDetailModel(
+        source: "pboq",
+        zone: "Private Zone",
+        location: "Bedrooms",
+        subLocation: "Bedroom sub location",
         cboqCode: "C002",
         pboq: "CBOQ-2",
         pboa: "Floor leveling",
-        pboaQty: 300,
-        pboaRate: 0.30,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID1",
-        trade: "Civil",
-        zone: "Private Zone,Public Zone",
-        rate: 0.30,
-        amount: 90.00,
-        msQty: 300,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
+        systemId: 335,
+        pboaQty: 300.00,
+        pboaAmount: 90.00,
+        revisedStartDate: DateTime(2025, 11, 5),
+        revisedEndDate: DateTime(2025, 11, 12),
       ),
-      WorkFrontUpdateModel(
-        srNo: 2,
-        systemId: 336,
-        packageName: "Ravi Package",
-        cboqCode: "C003",
-        pboq: "CBOQ-3",
-        pboa: "Wall plaster",
-        pboaQty: 500,
-        pboaRate: 0.45,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID2",
-        trade: "Civil",
-        zone: "Public Zone",
-        rate: 0.45,
-        amount: 225.00,
-        msQty: 500,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 3,
-        systemId: 337,
-        packageName: "Ashok Package",
-        cboqCode: "C004",
-        pboq: "CBOQ-4",
-        pboa: "Ceiling work",
-        pboaQty: 200,
-        pboaRate: 0.60,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID3",
-        trade: "Civil",
+      WorkFrontUpdateDetailModel(
+        source: "pboq",
         zone: "Private Zone",
-        rate: 0.60,
-        amount: 120.00,
-        msQty: 200,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 4,
-        systemId: 338,
-        packageName: "Ravi Package",
-        cboqCode: "C005",
-        pboq: "CBOQ-5",
-        pboa: "Painting",
-        pboaQty: 400,
-        pboaRate: 0.25,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID4",
-        trade: "Finishing",
-        zone: "Public Zone,Private Zone",
-        rate: 0.25,
-        amount: 100.00,
-        msQty: 400,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 5,
-        systemId: 339,
-        packageName: "Suresh Package",
-        cboqCode: "C006",
-        pboq: "CBOQ-6",
-        pboa: "Tile work",
-        pboaQty: 150,
-        pboaRate: 0.80,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID5",
-        trade: "Finishing",
-        zone: "Private Zone",
-        rate: 0.80,
-        amount: 120.00,
-        msQty: 150,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
+        location: "Bedrooms",
+        subLocation: "Bedroom sub location",
+        cboqCode: "C002",
+        pboq: "CBOQ-2",
+        pboa: "Floor leveling",
+        systemId: 335,
+        pboaQty: 300.00,
+        pboaAmount: 90.00,
+        revisedStartDate: DateTime(2025, 11, 5),
+        revisedEndDate: DateTime(2025, 11, 12),
       ),
     ];
 
-    items.assignAll(dummy);
+    final dummyMS = [
+      MeasurementSheetModel(
+        nos: 1,
+        length: 10.00,
+        breadth: 5.00,
+        height: 3.00,
+        msQty: 150.00,
+        lastUploadedFile: null,
+        progressUpdatedOn: null,
+        receivedDate: null,
+      ),
+      MeasurementSheetModel(
+        nos: 1,
+        length: 10.00,
+        breadth: 5.00,
+        height: 3.00,
+        msQty: 150.00,
+        lastUploadedFile: null,
+        progressUpdatedOn: null,
+        receivedDate: null,
+      ),
+    ];
+
+    items.assignAll(dummyWorkFront);
+    measurementSheets.assignAll(dummyMS);
     filteredMeasurementSheets.assignAll(items);
     isLoading.value = false;
   }
@@ -157,10 +111,12 @@ class WorkFrontUpdateDetailListController extends GetxController {
   Future<void> refreshData() async {
     items.clear();
     filteredMeasurementSheets.clear();
+    measurementSheets.clear();
     await loadDummyData();
     searchController.clear();
     selectedPackageFilter.value = null;
-    selectedZoneFilter.value = null; // <<< Reset zone filter
+    selectedZoneFilter.value = null;
+    selectedLocationFilter.value = null; // <-- Reset location filter
   }
 
   // ------------------------------------------------------------------
@@ -173,43 +129,56 @@ class WorkFrontUpdateDetailListController extends GetxController {
   // ------------------------------------------------------------------
   // ---------- FILTER & SORT ----------
   // ------------------------------------------------------------------
-  List<String> getPackageNames() =>
-      items.map((e) => e.packageName).toSet().toList();
+  List<String> getPackageNames() => items.map((e) => e.pboq).toSet().toList();
 
-  List<String> getZoneNames() => // <<< NEW: Get unique zones
-      items.map((e) => e.zone).where((z) => z.isNotEmpty).toSet().toList();
+  List<String> getZoneNames() => items.map((e) => e.zone).toSet().toList();
+
+  List<String> getLocationNames() => // <-- NEW: Location dropdown options
+      items.map((e) => e.location).toSet().toList();
 
   void applyFilters() {
     var list = items.toList();
 
-    // ---- Package filter ----
+    // ---- Package filter (PBOQ) ----
     if (selectedPackageFilter.value != null) {
-      list = list
-          .where((e) => e.packageName == selectedPackageFilter.value)
-          .toList();
+      list = list.where((e) => e.pboq == selectedPackageFilter.value).toList();
     }
 
     // ---- Zone filter ----
     if (selectedZoneFilter.value != null) {
+      list = list.where((e) => e.zone == selectedZoneFilter.value).toList();
+    }
+
+    // ---- Location filter (NEW) ----
+    if (selectedLocationFilter.value != null) {
       list = list
-          .where((e) => e.zone == selectedZoneFilter.value)
+          .where((e) => e.location == selectedLocationFilter.value)
           .toList();
     }
 
     // ---- Search ----
     final query = searchController.text.trim().toLowerCase();
     if (query.isNotEmpty) {
-      list = list.where((e) =>
-          e.packageName.toLowerCase().contains(query) ||
-          e.cboqCode.toLowerCase().contains(query) ||
-          e.pboa.toLowerCase().contains(query) ||
-          e.zone.toLowerCase().contains(query)).toList();
+      list = list
+          .where(
+            (e) =>
+                e.pboq.toLowerCase().contains(query) ||
+                e.cboqCode.toLowerCase().contains(query) ||
+                e.pboa.toLowerCase().contains(query) ||
+                e.zone.toLowerCase().contains(query) ||
+                e.location.toLowerCase().contains(
+                  query,
+                ), // <-- Added location to search
+          )
+          .toList();
     }
 
     // ---- Sort by CBOQ Code ----
-    list.sort((a, b) => isAscending.value
-        ? a.cboqCode.compareTo(b.cboqCode)
-        : b.cboqCode.compareTo(a.cboqCode));
+    list.sort(
+      (a, b) => isAscending.value
+          ? a.cboqCode.compareTo(b.cboqCode)
+          : b.cboqCode.compareTo(a.cboqCode),
+    );
 
     filteredMeasurementSheets.assignAll(list);
   }
@@ -221,7 +190,8 @@ class WorkFrontUpdateDetailListController extends GetxController {
 
   void clearFilters() {
     selectedPackageFilter.value = null;
-    selectedZoneFilter.value = null; // <<< Clear zone
+    selectedZoneFilter.value = null;
+    selectedLocationFilter.value = null; // <-- Clear location filter
     searchController.clear();
     applyFilters();
   }

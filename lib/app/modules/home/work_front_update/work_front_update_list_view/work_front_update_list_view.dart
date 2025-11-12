@@ -175,7 +175,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
                                                   );
                                                 },
                                                 child: Text(
-                                                  "Update",
+                                                  "MS Qty: ${sheet.msQty}",
                                                   style: AppStyle
                                                       .labelPrimaryPoppinsBlack
                                                       .responsive
