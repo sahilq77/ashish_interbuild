@@ -230,6 +230,7 @@ class _HomeViewState extends State<HomeView> {
             icon: Icon(FontAwesomeIcons.bell, color: AppColors.defaultBlack),
             onPressed: () {
               print(AppUtility.authToken.toString());
+              Get.toNamed(AppRoutes.notifications);
             },
           ),
         ),
