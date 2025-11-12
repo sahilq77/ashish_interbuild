@@ -65,7 +65,7 @@ class ClientCommitmentProject extends StatelessWidget {
                             final project = controller.filteredProjects[index];
                             return GestureDetector(
                               onTap: () =>
-                                  Get.toNamed(AppRoutes.clientCommitmentList),
+                                  Get.toNamed(AppRoutes.clientCommitmentDashboard),
                               child: Card(
                                 margin: EdgeInsets.only(
                                   bottom: ResponsiveHelper.screenHeight * 0.02,

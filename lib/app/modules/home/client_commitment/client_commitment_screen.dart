@@ -31,7 +31,7 @@ class ClientCommitmentScreen extends StatelessWidget {
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Text(
-                "Client Commitments ➔ Awaited Clearance From Client",
+                "CC ➔ Client Commitments",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
@@ -370,11 +370,12 @@ class ClientCommitmentScreen extends StatelessWidget {
     );
   }
 
+  // ────── FILTER DIALOG (REFACTORED WITH ICONS) ──────
   void _showFilterDialog(
     BuildContext context,
     ClientCommitmentController controller,
   ) {
-    // temporary values – they are applied only when user presses “Apply”
+    // temporary values – applied only on “Apply”
     String? tempRole = controller.selectedRole.value;
     String? tempHod = controller.selectedHod.value;
     String? tempCategory = controller.selectedCategory.value;
@@ -415,49 +416,58 @@ class ClientCommitmentScreen extends StatelessWidget {
               // ── Scrollable filter list ───────────────────────
               Flexible(
                 child: SingleChildScrollView(
-                  padding: ResponsiveHelper.padding(20),
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Column(
                     children: [
-                      _filterDropdown(
+                      _filterDropdownWithIcon(
                         label: 'Role',
-                        items: [''] + controller.roleList,
-                        value: tempRole ?? '',
+                        items: controller.roleList,
+                        selected: tempRole,
                         onChanged: (v) => setState(() => tempRole = v),
+                        icon: Icons.person,
                       ),
                       const SizedBox(height: 12),
-                      _filterDropdown(
+                      _filterDropdownWithIcon(
                         label: 'HOD',
-                        items: [''] + controller.hodList,
-                        value: tempHod ?? '',
+                        items: controller.hodList,
+                        selected: tempHod,
                         onChanged: (v) => setState(() => tempHod = v),
+                        icon: Icons.supervisor_account,
                       ),
                       const SizedBox(height: 12),
-                      _filterDropdown(
+                      _filterDropdownWithIcon(
                         label: 'Category',
-                        items: [''] + controller.categoryList,
-                        value: tempCategory ?? '',
+                        items: controller.categoryList,
+                        selected: tempCategory,
                         onChanged: (v) => setState(() => tempCategory = v),
+                        icon: Icons.category,
                       ),
                       const SizedBox(height: 12),
-                      _filterDropdown(
+                      _filterDropdownWithIcon(
                         label: 'Affected Milestone',
-                        items: [''] + controller.milestoneList,
-                        value: tempMilestone ?? '',
+                        items: controller.milestoneList,
+                        selected: tempMilestone,
                         onChanged: (v) => setState(() => tempMilestone = v),
+                        icon: Icons.military_tech,
                       ),
                       const SizedBox(height: 12),
-                      _filterDropdown(
+                      _filterDropdownWithIcon(
                         label: 'Priority',
-                        items: [''] + controller.priorityList,
-                        value: tempPriority ?? '',
+                        items: controller.priorityList,
+                        selected: tempPriority,
                         onChanged: (v) => setState(() => tempPriority = v),
+                        icon: Icons.flag,
                       ),
                       const SizedBox(height: 12),
-                      _filterDropdown(
+                      _filterDropdownWithIcon(
                         label: 'Issue Open',
-                        items: const ['', 'Yes', 'No'],
-                        value: tempIssueOpen ?? '',
+                        items: const ['Yes', 'No'],
+                        selected: tempIssueOpen,
                         onChanged: (v) => setState(() => tempIssueOpen = v),
+                        icon: Icons.check_circle,
                       ),
                     ],
                   ),
@@ -509,7 +519,6 @@ class ClientCommitmentScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          // push temp values into controller
                           controller.selectedRole.value = tempRole ?? '';
                           controller.selectedHod.value = tempHod ?? '';
                           controller.selectedCategory.value =
@@ -541,33 +550,48 @@ class ClientCommitmentScreen extends StatelessWidget {
   }
 
   // Helper widget used inside the dialog
-  Widget _filterDropdown({
+  Widget _filterDropdownWithIcon({
     required String label,
     required List<String> items,
-    required String value,
-    required void Function(String?) onChanged,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
   }) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+    // prepend an empty entry so “All” can be selected
+    final List<String> fullList = ['', ...items];
+
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          searchFieldProps: TextFieldProps(
+            decoration: InputDecoration(
+              labelText: 'Search',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-          borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        // Show “All” for the empty entry
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
       ),
-      value: value.isEmpty ? null : value,
-      items: items
-          .map(
-            (e) =>
-                DropdownMenuItem(value: e, child: Text(e.isEmpty ? 'All' : e)),
-          )
-          .toList(),
-      onChanged: onChanged,
-      isExpanded: true,
     );
   }
 
