@@ -52,6 +52,7 @@ dependencies:
   cached_network_image: ^3.4.1
   permission_handler: ^11.3.1
   device_info_plus: ^11.5.0
+  image: ^4.2.0
   
 
 dev_dependencies:

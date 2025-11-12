@@ -1,9 +1,14 @@
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/daily_progress_report_model.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/update_daily_progress_report_model.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class UpdateProgressReportController extends GetxController {
+
   final RxList<UpdateDailyProgressReportModel> measurementSheets =
       <UpdateDailyProgressReportModel>[].obs;
   final RxList<UpdateDailyProgressReportModel> filteredMeasurementSheets =
@@ -11,6 +16,13 @@ class UpdateProgressReportController extends GetxController {
   final RxInt expandedIndex = (-1).obs;
   final RxBool isLoading = true.obs;
   final TextEditingController searchController = TextEditingController();
+final RxString _tempImagePath = ''.obs;
+
+  // ADD THIS PUBLIC GETTER
+  String get tempImagePath => _tempImagePath.value;
+  // NEW: Image Picker
+  final ImagePicker _picker = ImagePicker();
+
 
   @override
   void onInit() {
@@ -52,6 +64,7 @@ class UpdateProgressReportController extends GetxController {
         execution: "Completed",
         updatedOn: "2025-10-10",
       ),
+      // ... other dummy items (unchanged)
       UpdateDailyProgressReportModel(
         srNo: "2",
         systemId: "SYS002",
@@ -147,23 +160,7 @@ class UpdateProgressReportController extends GetxController {
     }
   }
 
-  // void searchSurveys(String query) {
-  //   if (query.isEmpty) {
-  //     filteredMeasurementSheets.assignAll(measurementSheets);
-  //   } else {
-  //     filteredMeasurementSheets.assignAll(
-  //       measurementSheets
-  //           .where(
-  //             (sheet) =>
-  //                 sheet.pboa.toLowerCase().contains(query.toLowerCase()) ||
-  //                 sheet.zone.toLowerCase().contains(query.toLowerCase()) ||
-  //                 sheet.location.toLowerCase().contains(query.toLowerCase()),
-  //           )
-  //           .toList(),
-  //     );
-  //   }
-  // }
-   // Filter & Sort Variables
+  // Filter & Sort Variables
   final RxnString selectedPackageFilter = RxnString(null);
   final RxBool isAscending = true.obs;
 
@@ -172,7 +169,7 @@ class UpdateProgressReportController extends GetxController {
     return measurementSheets.map((sheet) => sheet.location).toSet().toList();
   }
 
-  // Apply filters (called from dialog)
+  // Apply filters
   void applyFilters() {
     var filtered = measurementSheets.toList();
 
@@ -232,8 +229,62 @@ class UpdateProgressReportController extends GetxController {
     if (query.isEmpty && selectedPackageFilter.value == null) {
       filteredMeasurementSheets.assignAll(measurementSheets);
     } else {
-      applyFilters(); // This will respect both search + filter
+      applyFilters();
     }
     applySorting();
   }
+
+  // ──────────────────────────────────────────────────────────────────────
+//  NEW: Pick image for a sheet – **NO size/quality limits**
+// ──────────────────────────────────────────────────────────────────────
+Future<void> pickImageForSheet(UpdateDailyProgressReportModel sheet) async {
+  final source = await _showImageSourceDialog();
+  if (source == null) return;
+
+  // NOTE: we deliberately omit maxWidth, maxHeight and imageQuality
+  final XFile? pickedFile = await _picker.pickImage(source: source);
+
+  if (pickedFile != null) {
+    final String savedPath = await _saveImageToAppDir(pickedFile);
+    sheet.capturedImagePath = savedPath;
+    _tempImagePath.value = savedPath;
+  }
+}
+
+  Future<ImageSource?> _showImageSourceDialog() async {
+    return Get.dialog<ImageSource>(
+      AlertDialog(
+        title: Text('Select Image Source'),
+        actions: [
+          TextButton.icon(
+            icon: Icon(Icons.photo_library),
+            label: Text('Gallery'),
+            onPressed: () => Get.back(result: ImageSource.gallery),
+          ),
+          TextButton.icon(
+            icon: Icon(Icons.camera_alt),
+            label: Text('Camera'),
+            onPressed: () => Get.back(result: ImageSource.camera),
+          ),
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () => Get.back(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String> _saveImageToAppDir(XFile file) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final String path = '${directory.path}/dpr_images/$fileName';
+
+    final File dest = File(path);
+    await dest.parent.create(recursive: true);
+    await File(file.path).copy(dest.path);
+    return dest.path;
+  }
+
+  void clearTempImage() => _tempImagePath.value = '';
 }

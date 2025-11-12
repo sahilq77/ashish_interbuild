@@ -20,6 +20,7 @@ class UpdateDailyProgressReportModel {
   final String progress;
   final String execution;
   final String updatedOn;
+  String? capturedImagePath;  // <-- ADD THIS
 
   UpdateDailyProgressReportModel({
     required this.srNo,
@@ -43,5 +44,6 @@ class UpdateDailyProgressReportModel {
     required this.progress,
     required this.execution,
     required this.updatedOn,
+    this.capturedImagePath,  // <-- ADD THIS
   });
 }

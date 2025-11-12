@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:io';
 
 class UpdateProgressReportList extends StatelessWidget {
   const UpdateProgressReportList({super.key});
@@ -100,7 +101,6 @@ class UpdateProgressReportList extends StatelessWidget {
                               controller.filteredMeasurementSheets[index];
                           return GestureDetector(
                             onTap: () {
-                              // Handle card tap if needed
                               controller.toggleExpanded(index);
                             },
                             child: Card(
@@ -115,12 +115,6 @@ class UpdateProgressReportList extends StatelessWidget {
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(10),
-                                  // border: Border(
-                                  //   left: BorderSide(
-                                  //     color: AppColors.primary,
-                                  //     width: 5,
-                                  //   ),
-                                  // ),
                                 ),
                                 child: Obx(
                                   () => Padding(
@@ -128,27 +122,6 @@ class UpdateProgressReportList extends StatelessWidget {
                                     child: Column(
                                       children: [
                                         _buildDetailRow("PBOA", sheet.pboa),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow("Zone", sheet.zone),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "Location",
-                                        //   sheet.location,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow("MS Qty", sheet.msQty),
                                         if (controller.expandedIndex.value ==
                                             index) ...[
                                           SizedBox(
@@ -322,7 +295,6 @@ class UpdateProgressReportList extends StatelessWidget {
                                               ResponsiveHelper.screenHeight *
                                               0.01,
                                         ),
-                                        //  Divider(),
                                         Row(
                                           children: [
                                             Expanded(
@@ -359,10 +331,13 @@ class UpdateProgressReportList extends StatelessWidget {
                                               child: OutlinedButton(
                                                 style:
                                                     AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () {
+                                                onPressed: () async {
+                                                  await controller
+                                                      .pickImageForSheet(sheet);
                                                   _showConfirmationDialog(
                                                     context,
                                                     sheet,
+                                                    controller,
                                                   );
                                                 },
                                                 child: Text(
@@ -374,49 +349,6 @@ class UpdateProgressReportList extends StatelessWidget {
                                                 ),
                                               ),
                                             ),
-                                            // Expanded(
-                                            //   child: ElevatedButton(
-                                            //     style:
-                                            //         AppButtonStyles.elevatedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       controller.toggleExpanded(
-                                            //         index,
-                                            //       );
-                                            //     },
-                                            //     child: Text(
-                                            //       controller
-                                            //                   .expandedIndex
-                                            //                   .value ==
-                                            //               index
-                                            //           ? "Less"
-                                            //           : "Read",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsWhite,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                            // SizedBox(
-                                            //   width:
-                                            //       ResponsiveHelper.screenWidth *
-                                            //       0.05,
-                                            // ),
-                                            // Expanded(
-                                            //   child: OutlinedButton(
-                                            //     style:
-                                            //         AppButtonStyles.outlinedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       _showConfirmationDialog(
-                                            //         context,
-                                            //         sheet,
-                                            //       );
-                                            //     },
-                                            //     child: Text(
-                                            //       "Update",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsBlack,
-                                            //     ),
-                                            //   ),
-                                            // ),
                                           ],
                                         ),
                                       ],
@@ -436,244 +368,162 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
-  // Filter Button
-  Widget _buildFilterButton(
-    BuildContext context,
-    UpdateProgressReportController controller,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
-        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-        constraints: const BoxConstraints(),
-      ),
-    );
-  }
+  // ... [ALL OTHER WIDGETS UNCHANGED: _buildFilterButton, _buildSortButton, etc.] ...
 
-  // Filter Dialog
-  void _showFilterDialog(
+  void _showConfirmationDialog(
     BuildContext context,
+    dynamic sheet,
     UpdateProgressReportController controller,
   ) {
-    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+    // Reset any previous temporary image
+    controller.clearTempImage();
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: ResponsiveHelper.paddingSymmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(ResponsiveHelper.spacing(20)),
-                  ),
-                ),
-                child: Text(
-                  'Filter Measurement Sheets',
-                  style: AppStyle.heading1PoppinsWhite.responsive,
-                  textAlign: TextAlign.center,
+      builder: (dialogContext) {
+        // ---- LOCAL STATE FOR THE DIALOG ----
+        String? tempSelectedPackage = controller.selectedPackageFilter.value;
+
+        return StatefulBuilder(
+          builder: (BuildContext ctx, StateSetter setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              title: Text(
+                'Confirm Update',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: ResponsiveHelper.getResponsiveFontSize(18),
                 ),
               ),
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Package',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                      ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Are you sure you want to update the progress report for ${sheet.pboa}?',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveHelper.getResponsiveFontSize(14),
                     ),
                   ),
-                  items: controller.getPackageNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Package',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
+                  const SizedBox(height: 16),
+
+                  // ---- REACTIVE IMAGE PREVIEW (Obx inside StatefulBuilder) ----
+                  Obx(() {
+                    final path = controller.tempImagePath;
+                    if (path.isEmpty) {
+                      return Container(
+                        height: 120,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.lightGrey),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                        child: const Center(child: Text('No image selected')),
+                      );
+                    }
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(path),
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (c, e, s) => Container(
+                          height: 180,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Text('Failed to load image'),
+                          ),
+                        ),
                       ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
+                    );
+                  }),
+
+                  const SizedBox(height: 16),
+
+                  // ---- OPTIONAL: Dropdown to change package inside dialog ----
+                  // (Uncomment if you want the user to change package here)
+                  /*
+                  DropdownSearch<String>(
+                    popupProps: const PopupProps.menu(showSearchBox: true),
+                    items: controller.getPackageNames(),
+                    dropdownDecoratorProps: DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: 'Select Package',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                     ),
+                    selectedItem: tempSelectedPackage,
+                    onChanged: (val) => setDialogState(() => tempSelectedPackage = val),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      tempSelectedPackage = value;
-                    });
-                  },
-                  selectedItem: tempSelectedPackage,
-                ),
+                  */
+                ],
               ),
-              Padding(
-                padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Row(
+              actions: [
+                Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.outlinedSmallBlack(),
                         onPressed: () {
-                          controller.clearFilters();
-                          Navigator.pop(context);
+                          controller.clearTempImage();
+                          Navigator.of(context).pop();
                         },
                         child: Text(
-                          'Clear',
-                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                          'Cancel',
+                          style: AppStyle.labelPrimaryPoppinsBlack,
                         ),
                       ),
                     ),
-                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () {
-                          controller.selectedPackageFilter.value =
-                              tempSelectedPackage;
-                          controller.applyFilters();
-                          Navigator.pop(context);
+                        style: AppButtonStyles.elevatedSmallBlack(),
+                        onPressed: () async {
+                          // ---- Confirm logic (same as before) ----
+                          if (controller.tempImagePath.isNotEmpty) {
+                            Get.snackbar(
+                              "Success",
+                              "Updated with photo!",
+                              backgroundColor: AppColors.primary,
+                              colorText: Colors.white,
+                            );
+                          } else {
+                            Get.snackbar(
+                              "Warning",
+                              "No image attached!",
+                              backgroundColor: Colors.orange,
+                              colorText: Colors.white,
+                            );
+                          }
+
+                          // OPTIONAL: apply package change if you added the dropdown
+                          // if (tempSelectedPackage != null) {
+                          //   controller.selectedPackageFilter.value = tempSelectedPackage!;
+                          //   controller.applyFilters();
+                          // }
+
+                          Navigator.of(context).pop();
                         },
                         child: Text(
-                          'Apply',
-                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                          'Confirm',
+                          style: AppStyle.labelPrimaryPoppinsWhite,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Sort Button
-  Widget _buildSortButton(UpdateProgressReportController controller) {
-    return Obx(
-      () => Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.grey),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: IconButton(
-          icon: Icon(
-            controller.isAscending.value
-                ? Icons.arrow_upward
-                : Icons.arrow_downward,
-            color: AppColors.primary,
-          ),
-          onPressed: controller.toggleSorting,
-          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-          constraints: const BoxConstraints(),
-        ),
-      ),
-    );
-  }
-
-  void _showConfirmationDialog(BuildContext context, dynamic sheet) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10), // Reduced border radius
-          ),
-          title: Text(
-            'Confirm Update',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: ResponsiveHelper.getResponsiveFontSize(18),
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to update the progress report for ${sheet.pboa}?',
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(14),
-            ),
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: AppButtonStyles.outlinedSmallBlack(),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Cancel',
-                      style: AppStyle.labelPrimaryPoppinsBlack,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: AppButtonStyles.elevatedSmallBlack(),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Confirm',
-                      style: AppStyle.labelPrimaryPoppinsWhite,
-                    ),
-                  ),
-                ),
               ],
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
+
+  // ... [ALL OTHER METHODS UNCHANGED: _buildSearchField, _buildShimmerEffect, etc.] ...
+  // Keep everything else exactly as in your original file
 
   TextFormField _buildSearchField(UpdateProgressReportController controller) {
     return TextFormField(
@@ -727,20 +577,14 @@ class UpdateProgressReportList extends StatelessWidget {
                         Expanded(
                           child: Container(
                             height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            color: Colors.grey.shade300,
                           ),
                         ),
                         SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
                         Expanded(
                           child: Container(
                             height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            color: Colors.grey.shade300,
                           ),
                         ),
                       ],
@@ -815,6 +659,182 @@ class UpdateProgressReportList extends StatelessWidget {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
         child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(
+    BuildContext context,
+    UpdateProgressReportController controller,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context, controller),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  void _showFilterDialog(
+    BuildContext context,
+    UpdateProgressReportController controller,
+  ) {
+    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filter Measurement Sheets',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.padding(20),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        labelText: 'Search Package',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  items: controller.getPackageNames(),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Package',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.business,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) =>
+                      setState(() => tempSelectedPackage = value),
+                  selectedItem: tempSelectedPackage,
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.selectedPackageFilter.value =
+                              tempSelectedPackage;
+                          controller.applyFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(UpdateProgressReportController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
       ),
     );
   }
