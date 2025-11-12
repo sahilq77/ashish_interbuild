@@ -1,6 +1,7 @@
 import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart' show AppRoutes;
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -34,7 +35,15 @@ class AccScreenView extends StatelessWidget {
             ),
             Padding(
               padding: ResponsiveHelper.padding(16),
-              child: _buildSearchField(controller),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSearchField(controller)),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildFilterButton(context, controller),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildSortButton(controller),
+                ],
+              ),
             ),
             Expanded(
               child: Obx(
@@ -85,19 +94,8 @@ class AccScreenView extends StatelessWidget {
                                               ResponsiveHelper.screenHeight *
                                               0.002,
                                         ),
-                                        _buildDetailRow(
-                                          "Brief Detail",
-                                          issue.briefDetail,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow(
-                                          "Affected Milestone",
-                                          issue.affectedMilestone,
-                                        ),
+                                        _buildDetailRow("Role", issue.role),
+
                                         // Show additional details only if expanded
                                         if (controller.expandedIndex.value ==
                                             index) ...[
@@ -158,7 +156,19 @@ class AccScreenView extends StatelessWidget {
                                                 ResponsiveHelper.screenHeight *
                                                 0.002,
                                           ),
-                                          _buildDetailRow("Role", issue.role),
+                                          _buildDetailRow(
+                                            "Brief Detail",
+                                            issue.briefDetail,
+                                          ),
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Affected Milestone",
+                                            issue.affectedMilestone,
+                                          ),
                                           SizedBox(
                                             height:
                                                 ResponsiveHelper.screenHeight *
@@ -178,12 +188,12 @@ class AccScreenView extends StatelessWidget {
                                             issue.statusUpdate,
                                           ),
                                         ],
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.01,
-                                        ),
-                                        Divider(),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.01,
+                                        // ),
+                                        // Divider(),
                                         Row(
                                           children: [
                                             // Expanded(
@@ -277,6 +287,240 @@ class AccScreenView extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(AccController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context, AccController controller) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context, controller),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  void _showFilterDialog(
+    BuildContext context,
+    AccController controller, // <-- correct type
+  ) {
+    // temporary values that are only written when the user presses **Apply**
+    String? tempCategory = controller.selectedCategoryFilter.value;
+    String? tempRole = controller.selectedRoleFilter.value;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ----- Header -----
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filter ACC',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              // ----- Category dropdown -----
+              Padding(
+                padding: ResponsiveHelper.padding(20),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        labelText: 'Search Category',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  items: controller.categoryNames,
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Category',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveHelper.spacing(8),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveHelper.spacing(8),
+                        ),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.category,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (v) => setState(() => tempCategory = v),
+                  selectedItem: tempCategory,
+                ),
+              ),
+
+              // ----- Role dropdown -----
+              Padding(
+                padding: ResponsiveHelper.padding(20),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        labelText: 'Search Role',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  items: controller.roleNames,
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: 'Select Role',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveHelper.spacing(8),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveHelper.spacing(8),
+                        ),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.person,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  onChanged: (v) => setState(() => tempRole = v),
+                  selectedItem: tempRole,
+                ),
+              ),
+
+              // ----- Buttons -----
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.selectedCategoryFilter.value =
+                              tempCategory;
+                          controller.selectedRoleFilter.value = tempRole;
+                          controller.applyFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
