@@ -31,7 +31,7 @@ class ClientCommitmentScreen extends StatelessWidget {
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Text(
-                "CC ➔ Client Commitments",
+                "CC Dashboard ➔ Client Commitments",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
