@@ -1,5 +1,6 @@
 import 'package:ashishinterbuild/app/data/service/notfication_services.dart';
 import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/widgets/connctivityservice.dart';
 import 'package:ashishinterbuild/firebase_options.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
@@ -18,6 +19,7 @@ Future<void> main() async {
 
   final NotificationServices notificationServices = NotificationServices();
     Get.put(ConnectivityService(), permanent: true);
+    Get.lazyPut<PackageNameController>(() => PackageNameController(), fenix: true);
   notificationServices.requestNotificationPermission();
   notificationServices.isTokenRefresh();
    Get.lazyPut<BottomNavigationController>(

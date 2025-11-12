@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list_binding.dart';
@@ -110,7 +111,7 @@ class AppRoutes {
       '/work-front-update-project-list';
   static const String workFrontUpdateList = '/work-front-update-list';
 
-      static const String workFrontUpdateDetailList =
+  static const String workFrontUpdateDetailList =
       '/work-front-update-detail-list';
 
   static const String workFrontUpdateDashboard = '/work-front-update-dashboard';
@@ -135,7 +136,7 @@ class AppRoutes {
     GetPage(
       name: addPBOQ,
       page: () => const AddPboqFormView(),
-      binding: AddPboqFormBinding(),
+      bindings: [AddPboqFormBinding(), PackageNameBinding()],
     ),
     GetPage(
       name: pboqList,
@@ -288,13 +289,12 @@ class AppRoutes {
       binding: WorkFrontUpdateListBinding(),
     ),
 
-   GetPage(
+    GetPage(
       name: workFrontUpdateDetailList,
       page: () => WorkFrontUpdateDetailListView(),
 
       binding: WorkFrontUpdateDetailListBinding(),
     ),
-    
 
     GetPage(
       name: editAccForm,

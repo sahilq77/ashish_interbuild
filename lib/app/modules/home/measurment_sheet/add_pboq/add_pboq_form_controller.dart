@@ -1,11 +1,14 @@
+import 'dart:developer';
+
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:get/get.dart';
 
 class FieldSet {
   var selectedZone = ''.obs;
-  var planningStatus = 'Not Started'.obs; // Default read-only value
+  var planningStatus = 'Not Started'.obs;
   var selectedLocation = ''.obs;
   var subLocation = ''.obs;
-  var uom = 'Unit'.obs; // Default read-only value
+  var uom = 'Unit'.obs;
   var nos = ''.obs;
   var length = ''.obs;
   var height = ''.obs;
@@ -15,43 +18,46 @@ class FieldSet {
 }
 
 class AddPboqFormController extends GetxController {
-  // Reactive variables for form fields
   var selectedPackage = ''.obs;
   var selectedPboqName = ''.obs;
-  var fieldSets = <FieldSet>[FieldSet()].obs; // Initialize with one empty set
+  var fieldSets = <FieldSet>[FieldSet()].obs;
 
-  // Sample data for dropdowns (replace with actual data from your backend or API)
-  final List<String> packageNames = ['Package 1', 'Package 2', 'Package 3'];
+  // Injected real controller
+  late final PackageNameController _pkgCtrl = Get.find<PackageNameController>();
+
+  // Dynamic package names from API
+  List<String> get packageNames => _pkgCtrl.packageNames;
+
+  // Static data (replace later if needed)
   final List<String> pboqNames = ['PBOQ A', 'PBOQ B', 'PBOQ C'];
   final List<String> zones = ['Zone 1', 'Zone 2', 'Zone 3'];
   final List<String> locations = ['Location A', 'Location B', 'Location C'];
 
-  // Handlers for dropdown changes
-  void onPackageChanged(String? value) {
-    if (value != null) {
-      selectedPackage.value = value;
-    }
+  void onPackageChanged(String? newPackageName) {
+    selectedPackage.value = newPackageName ?? '';
+
+    // ---- LOG THE NAME ------------------------------------------------
+    log('Selected Package Name: $newPackageName');
+
+    // ---- LOG THE ID --------------------------------------------------
+    final String? pkgId = _pkgCtrl.getPackageIdByName(
+      newPackageName.toString(),
+    );
+    log('Selected Package ID  : $pkgId');
   }
 
   void onPboqNameChanged(String? value) {
-    if (value != null) {
-      selectedPboqName.value = value;
-    }
+    if (value != null) selectedPboqName.value = value;
   }
 
   void onZoneChanged(int index, String? value) {
-    if (value != null) {
-      fieldSets[index].selectedZone.value = value;
-    }
+    if (value != null) fieldSets[index].selectedZone.value = value;
   }
 
   void onLocationChanged(int index, String? value) {
-    if (value != null) {
-      fieldSets[index].selectedLocation.value = value;
-    }
+    if (value != null) fieldSets[index].selectedLocation.value = value;
   }
 
-  // Handlers for text field changes
   void onSubLocationChanged(int index, String value) {
     fieldSets[index].subLocation.value = value;
   }
@@ -72,20 +78,16 @@ class AddPboqFormController extends GetxController {
     fieldSets[index].remark.value = value;
   }
 
-  // Add a new set of fields
   void addFieldSet() {
     fieldSets.add(FieldSet());
   }
 
-  // Refresh handler
   Future<void> onRefresh() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
     resetForm();
   }
 
-  // Form submission logic
   void submitForm() {
-    // Validate Package and PBOQ Name
     if (selectedPackage.isEmpty) {
       Get.snackbar('Error', 'Please select a package name');
       return;
@@ -95,48 +97,46 @@ class AddPboqFormController extends GetxController {
       return;
     }
 
-    // Validate each field set
     for (int i = 0; i < fieldSets.length; i++) {
-      var fieldSet = fieldSets[i];
-      if (fieldSet.selectedZone.isEmpty) {
+      final f = fieldSets[i];
+      if (f.selectedZone.isEmpty) {
         Get.snackbar('Error', 'Please select a zone for field set ${i + 1}');
         return;
       }
-      if (fieldSet.selectedLocation.isEmpty) {
-        Get.snackbar('Error', 'Please select a location for field set ${i + 1}');
+      if (f.selectedLocation.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Please select a location for field set ${i + 1}',
+        );
         return;
       }
     }
 
-    // Process form data for all field sets
-    print('Form Data:');
+    print('=== SUBMIT ===');
     print('Package: ${selectedPackage.value}');
-    print('PBOQ Name: ${selectedPboqName.value}');
+    print('PBOQ: ${selectedPboqName.value}');
     for (int i = 0; i < fieldSets.length; i++) {
-      var fieldSet = fieldSets[i];
-      print('Field Set ${i + 1}:');
-      print('  Zone: ${fieldSet.selectedZone.value}');
-      print('  Planning Status: ${fieldSet.planningStatus.value}');
-      print('  Location: ${fieldSet.selectedLocation.value}');
-      print('  Sub Location: ${fieldSet.subLocation.value}');
-      print('  UOM: ${fieldSet.uom.value}');
-      print('  Nos: ${fieldSet.nos.value}');
-      print('  Length: ${fieldSet.length.value}');
-      print('  Height: ${fieldSet.height.value}');
-      print('  Remark: ${fieldSet.remark.value}');
+      final f = fieldSets[i];
+      print('--- Set ${i + 1} ---');
+      print('Zone: ${f.selectedZone.value}');
+      print('Planning: ${f.planningStatus.value}');
+      print('Location: ${f.selectedLocation.value}');
+      print('Sub-Loc: ${f.subLocation.value}');
+      print('UOM: ${f.uom.value}');
+      print('Nos: ${f.nos.value}');
+      print('Length: ${f.length.value}');
+      print('Height: ${f.height.value}');
+      print('Remark: ${f.remark.value}');
     }
 
-    // Reset form after submission
     resetForm();
-
     Get.snackbar('Success', 'Form submitted successfully');
   }
 
-  // Reset form fields
   void resetForm() {
     selectedPackage.value = '';
     selectedPboqName.value = '';
     fieldSets.clear();
-    fieldSets.add(FieldSet()); // Add one empty set to start
+    fieldSets.add(FieldSet());
   }
 }

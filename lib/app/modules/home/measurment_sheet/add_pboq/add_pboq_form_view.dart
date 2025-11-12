@@ -26,15 +26,17 @@ class AddPboqFormView extends StatelessWidget {
           padding: ResponsiveHelper.padding(16),
           child: Column(
             children: [
-              _buildDropdownField(
-                label: 'Package Name',
-                value: controller.selectedPackage.value,
-                items: controller.packageNames,
-                onChanged: controller.onPackageChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a package'
-                    : null,
-                hint: 'Select a package',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Package Name',
+                  value: controller.selectedPackage.value,
+                  items: controller.packageNames,
+                  onChanged: controller.onPackageChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select a package'
+                      : null,
+                  hint: 'Select a package',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(

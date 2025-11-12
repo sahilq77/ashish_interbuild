@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
+import 'package:ashishinterbuild/app/data/models/packages/get_package_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
 import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
@@ -184,6 +185,10 @@ class Networkcall {
           case 4:
             final getProjects = getProjectNameResponseFromJson(str);
             return getProjects;
+          case 5:
+            final getPackages = getPackageNameResponseFromJson(str);
+            return getPackages;
+
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
