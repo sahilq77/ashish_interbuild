@@ -8,4 +8,7 @@ class Networkutility {
   static int getProfileApi = 2;
   static String updateUserDetail = "${baseUrl + "update-user-details"}";
   static int updateUserDetailApi = 3;
+
+  static String getProjectNameList = "${baseUrl + "projects"}";
+  static int getProjectNameListApi = 4;
 }

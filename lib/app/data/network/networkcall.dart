@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
 import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
+import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -89,7 +90,8 @@ class Networkcall {
 
         switch (requestCode) {
           case 1:
-            return getLoginResponseFromJson(str);
+            final login = getLoginResponseFromJson(str);
+            return login;
 
           default:
             log("Invalid request code: $requestCode");
@@ -176,7 +178,12 @@ class Networkcall {
 
         switch (requestCode) {
           case 2:
-            return getUserProfileResponseFromJson(str);
+            final getProfile = getUserProfileResponseFromJson(str);
+            return getProfile;
+
+          case 4:
+            final getProjects = getProjectNameResponseFromJson(str);
+            return getProjects;
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
