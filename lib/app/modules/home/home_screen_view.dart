@@ -37,7 +37,7 @@ class _HomeViewState extends State<HomeView> {
           // Call the same onWillPop logic from BottomNavigationController
           bool shouldPop = await bottomController.onWillPop();
           if (shouldPop && context.mounted) {
-            Navigator.of(context).pop();
+            bottomController.onWillPop();
           }
         }
       },

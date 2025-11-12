@@ -17,7 +17,7 @@ class UpdateProfileScreenView extends StatelessWidget {
     final UpdateProfileController controller = Get.put(
       UpdateProfileController(),
     );
-      
+
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -143,19 +143,23 @@ class UpdateProfileScreenView extends StatelessWidget {
                                   ),
                                 )
                               : networkUrl != null
-                              ? ClipOval(
-                                  child: Image.network(
-                                    networkUrl,
-                                    width: ResponsiveHelper.spacing(100),
-                                    height: ResponsiveHelper.spacing(100),
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Icon(
-                                              Icons.person,
-                                              size: 55,
-                                              color: AppColors.grey,
-                                            ),
+                              ? GestureDetector(
+                                  onTap: () =>
+                                      controller.showImageSourceSheet(),
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      networkUrl,
+                                      width: ResponsiveHelper.spacing(100),
+                                      height: ResponsiveHelper.spacing(100),
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(
+                                                Icons.person,
+                                                size: 55,
+                                                color: AppColors.grey,
+                                              ),
+                                    ),
                                   ),
                                 )
                               : const Icon(

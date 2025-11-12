@@ -75,15 +75,15 @@ class AccScreenView extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        _buildDetailRow(
-                                          "Sr.No",
-                                          issue.srNo.toString(),
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
+                                        // _buildDetailRow(
+                                        //   "Sr.No",
+                                        //   issue.srNo.toString(),
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
                                         _buildDetailRow(
                                           "ACC Category",
                                           issue.accCategory,

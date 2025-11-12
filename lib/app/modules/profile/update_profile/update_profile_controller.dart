@@ -6,6 +6,7 @@ import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/data/network/networkutility.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,14 +21,12 @@ class UpdateProfileController extends GetxController {
   final RxBool isLoading = true.obs;
   final ImagePicker _picker = ImagePicker();
   final ProfileController refreshontroller = Get.put(ProfileController());
+
   @override
   void onInit() {
     super.onInit();
-    // fetchUser();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchUserProfile(
-        context: Get.context!,
-      ); // Fetch user profile on initialization
+      fetchUserProfile(context: Get.context!);
     });
   }
 
@@ -44,20 +43,11 @@ class UpdateProfileController extends GetxController {
 
   var userProfileList = <UserProfile>[].obs;
   var errorMessages = ''.obs;
-
   RxString imageLink = "".obs;
 
-  // // Method to set the selected user
-  // void setSelectedUser(UserProfile user) {
-  //   selectedUser.value = user;
-  // }
-
-  // // Method to clear the selected user
-  // void clearSelectedUser() {
-  //   selectedUser.value = null;
-  // }
-
-  // Method to fetch user profile
+  // -----------------------------------------------------------------
+  // 1. Fetch user profile
+  // -----------------------------------------------------------------
   Future<void> fetchUserProfile({
     required BuildContext context,
     bool isRefresh = false,
@@ -66,20 +56,14 @@ class UpdateProfileController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      if (isRefresh) {
-        userProfileList.clear(); // Clear existing data on refresh
-      }
+      if (isRefresh) userProfileList.clear();
 
-      final jsonBody = {
-        // "user_id": AppUtility.userID,
-        // "user_type": AppUtility.userType,
-      };
+      final jsonBody = {};
 
       List<GetUserProfileResponse>? response =
           (await Networkcall().getMethod(
                 Networkutility.getProfileApi,
                 Networkutility.getProfile,
-
                 context,
               ))
               as List<GetUserProfileResponse>?;
@@ -97,92 +81,113 @@ class UpdateProfileController extends GetxController {
         } else {
           errorMessage.value =
               'Failed to load profile: ${response[0].message ?? 'Unknown error'}';
+          AppSnackbarStyles.showError(
+            title: 'Profile Error',
+            message: errorMessage.value,
+          );
         }
       } else {
         errorMessage.value = 'No response from server';
+        AppSnackbarStyles.showError(
+          title: 'Network Error',
+          message: errorMessage.value,
+        );
       }
     } on NoInternetException catch (e) {
       errorMessage.value = e.message;
+      AppSnackbarStyles.showError(title: 'No Internet', message: e.message);
     } on TimeoutException catch (e) {
       errorMessage.value = e.message;
+      AppSnackbarStyles.showError(title: 'Timeout', message: e.message);
     } on HttpException catch (e) {
       errorMessage.value = '${e.message} (Code: ${e.statusCode})';
+      AppSnackbarStyles.showError(
+        title: 'HTTP Error',
+        message: errorMessage.value,
+      );
     } on ParseException catch (e) {
       errorMessage.value = e.message;
+      AppSnackbarStyles.showError(title: 'Parse Error', message: e.message);
     } catch (e) {
       errorMessage.value = 'Unexpected error: $e';
+      AppSnackbarStyles.showError(
+        title: 'Unexpected',
+        message: errorMessage.value,
+      );
     } finally {
       isLoading.value = false;
     }
   }
-Future<bool> requestImagePermission(ImageSource source) async {
-  late Permission permission;
 
-  if (source == ImageSource.camera) {
-    permission = Permission.camera;
-  } else {
-    // Android 13+ uses granular media permissions
-    if (Platform.isAndroid) {
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
-      if (androidInfo.version.sdkInt >= 33) {
-        permission = Permission.photos; // READ_MEDIA_IMAGES
-      } else {
-        permission = Permission.storage; // Legacy
-      }
+  // -----------------------------------------------------------------
+  // Permission handling
+  // -----------------------------------------------------------------
+  Future<bool> requestImagePermission(ImageSource source) async {
+    late Permission permission;
+
+    if (source == ImageSource.camera) {
+      permission = Permission.camera;
     } else {
-      permission = Permission.photos;
+      if (Platform.isAndroid) {
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        permission = androidInfo.version.sdkInt >= 33
+            ? Permission.photos
+            : Permission.storage;
+      } else {
+        permission = Permission.photos;
+      }
     }
-  }
 
-  final status = await permission.request();
+    final status = await permission.request();
 
-  if (status.isGranted || status.isLimited) {
-    return true; // iOS: isLimited means user selected some photos
-  }
+    if (status.isGranted || status.isLimited) return true;
 
-  if (status.isDenied) {
-    Get.snackbar(
-      'Permission Required',
-      'Please grant permission to access ${source == ImageSource.camera ? 'camera' : 'gallery'}.',
-      snackPosition: SnackPosition.TOP,
-    );
+    if (status.isDenied) {
+      AppSnackbarStyles.showWarning(
+        title: 'Permission Required',
+        message:
+            'Please grant permission to access ${source == ImageSource.camera ? 'camera' : 'gallery'}.',
+      );
+      return false;
+    }
+
+    if (status.isPermanentlyDenied) {
+      AppSnackbarStyles.showError(
+        title: 'Permission Denied',
+        message: 'Please enable permission from settings.',
+      );
+      // Optional: add a button to open settings (you can keep openAppSettings())
+      return false;
+    }
+
     return false;
   }
 
-  if (status.isPermanentlyDenied) {
-    Get.snackbar(
-      'Permission Denied',
-      'Please enable permission from settings.',
-      snackPosition: SnackPosition.TOP,
-      mainButton: TextButton(
-        onPressed: () => openAppSettings(),
-        child: const Text('Open Settings', style: TextStyle(color: Colors.white)),
-      ),
-    );
-    return false;
-  }
+  // -----------------------------------------------------------------
+  // Pick image
+  // -----------------------------------------------------------------
+  Future<void> pickImage(ImageSource source) async {
+    final hasPermission = await requestImagePermission(source);
+    if (!hasPermission) return;
 
-  return false;
-}
- Future<void> pickImage(ImageSource source) async {
-  final hasPermission = await requestImagePermission(source);
-  if (!hasPermission) return;
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 800,
+      );
 
-  try {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: source,
-      imageQuality: 85,
-      maxWidth: 800,
-    );
-
-    if (pickedFile != null) {
-      user.value = user.value?.copyWith(profileImgPath: pickedFile.path);
-      imageLink.value = pickedFile.path;
+      if (pickedFile != null) {
+        user.value = user.value?.copyWith(profileImgPath: pickedFile.path);
+        imageLink.value = pickedFile.path;
+      }
+    } catch (e) {
+      AppSnackbarStyles.showError(
+        title: 'Image Error',
+        message: 'Failed to pick image: $e',
+      );
     }
-  } catch (e) {
-    Get.snackbar('Error', 'Failed to pick image: $e');
   }
-}
 
   // -----------------------------------------------------------------
   // 2. Update profile (multipart)
@@ -198,22 +203,18 @@ Future<bool> requestImagePermission(ImageSource source) async {
         Uri.parse(Networkutility.updateUserDetail),
       );
 
-      // Text fields
       request.fields['person_name'] = user.name;
       request.fields['contact_no'] = "7777";
 
-      // ---- Profile image (if selected) ----
       if (user.profileImgPath != null &&
           File(user.profileImgPath!).existsSync()) {
         final file = await http.MultipartFile.fromPath(
           'profile_img',
           user.profileImgPath!,
-          // contentType: MediaType('image', 'jpeg'), // most cameras return jpeg
         );
         request.files.add(file);
       }
 
-      // Auth header
       request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
 
       final streamedResponse = await request.send();
@@ -221,28 +222,24 @@ Future<bool> requestImagePermission(ImageSource source) async {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         successMessage.value = 'Profile updated successfully!';
-        Get.snackbar(
-          'Success',
-          successMessage.value,
-          snackPosition: SnackPosition.TOP,
+        AppSnackbarStyles.showSuccess(
+          title: 'Success',
+          message: successMessage.value,
         );
-        // Refresh profile after success
         await fetchUserProfile(context: Get.context!);
       } else {
         errorMessage.value =
             'Failed: ${response.statusCode} – ${response.body}';
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
+        AppSnackbarStyles.showError(
+          title: 'Update Failed',
+          message: errorMessage.value,
         );
       }
     } catch (e) {
       errorMessage.value = 'Exception: $e';
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.TOP,
+      AppSnackbarStyles.showError(
+        title: 'Exception',
+        message: errorMessage.value,
       );
     } finally {
       isLoading.value = false;
@@ -250,7 +247,7 @@ Future<bool> requestImagePermission(ImageSource source) async {
   }
 
   // -----------------------------------------------------------------
-  // 3. Helper to show picker bottom-sheet
+  // 3. Show image source bottom sheet
   // -----------------------------------------------------------------
   void showImageSourceSheet() {
     Get.bottomSheet(
@@ -288,13 +285,14 @@ Future<bool> requestImagePermission(ImageSource source) async {
   }
 }
 
+// -----------------------------------------------------------------
+// User model (unchanged)
+// -----------------------------------------------------------------
 class User {
   final String id;
   final String name;
   final String email;
   final String? profilePictureUrl;
-
-  // NEW – path of the image that will be uploaded
   String? profileImgPath;
 
   User({
@@ -305,7 +303,6 @@ class User {
     this.profileImgPath,
   });
 
-  // Helper to create a copy with a new path
   User copyWith({String? profileImgPath}) {
     return User(
       id: id,

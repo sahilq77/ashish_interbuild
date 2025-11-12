@@ -78,15 +78,15 @@ class ClientCommitmentScreen extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        _buildDetailRow(
-                                          "Sr. No.",
-                                          commitment.srNo.toString(),
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
+                                        // _buildDetailRow(
+                                        //   "Sr. No.",
+                                        //   commitment.srNo.toString(),
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
                                         _buildDetailRow(
                                           "Task Assigned To",
                                           commitment.taskAssignedTo,
