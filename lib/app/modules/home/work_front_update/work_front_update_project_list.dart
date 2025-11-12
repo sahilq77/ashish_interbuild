@@ -1,7 +1,7 @@
 import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart'
     show BottomNavigationController;
 import 'package:ashishinterbuild/app/modules/bottom_navigation/cutom_bottom_bar.dart';
-import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_project_name/measurment_project_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_project_name/project_name_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -16,7 +16,7 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MeasurmentProjectNameController controller = Get.find();
+    final ProjectNameController controller = Get.find();
     final bottomController = Get.put(BottomNavigationController());
     ResponsiveHelper.init(context);
     return PopScope(
@@ -109,7 +109,7 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchField(MeasurmentProjectNameController controller) {
+  Widget _buildSearchField(ProjectNameController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
@@ -127,7 +127,7 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
 
   Widget _buildFilterButton(
     BuildContext context,
-    MeasurmentProjectNameController controller,
+    ProjectNameController controller,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -143,7 +143,7 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
     );
   }
 
-  Widget _buildSortButton(MeasurmentProjectNameController controller) {
+  Widget _buildSortButton(ProjectNameController controller) {
     return Obx(
       () => Container(
         decoration: BoxDecoration(
@@ -167,7 +167,7 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
 
   void _showFilterDialog(
     BuildContext context,
-    MeasurmentProjectNameController controller,
+    ProjectNameController controller,
   ) {
     String? tempSelectedProject = controller.selectedProjectFilter.value;
 

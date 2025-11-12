@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 
-class MeasurmentProjectNameController extends GetxController {
+class ProjectNameController extends GetxController {
   // Reactive list of projects
   final RxList<ProjectName> projects = <ProjectName>[].obs;
 

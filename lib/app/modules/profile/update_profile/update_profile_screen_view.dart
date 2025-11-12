@@ -4,6 +4,7 @@ import 'package:ashishinterbuild/app/modules/profile/update_profile/update_profi
 import 'package:ashishinterbuild/app/utils/app_colors.dart'
     show AppColors, accentOrangeFaded;
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
+import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -40,7 +41,7 @@ class UpdateProfileScreenView extends StatelessWidget {
                     child: Column(
                       children: [
                         SizedBox(height: ResponsiveHelper.spacing(24)),
-                        _buildProfileHeader(controller),
+                        _buildProfileHeader(controller, context),
                         SizedBox(height: ResponsiveHelper.spacing(24)),
                         _buildDetailSection(controller),
                         SizedBox(height: ResponsiveHelper.spacing(24)),
@@ -84,7 +85,10 @@ class UpdateProfileScreenView extends StatelessWidget {
   // ========================================
   // Profile Header with Image Picker
   // ========================================
-  Widget _buildProfileHeader(UpdateProfileController controller) {
+  Widget _buildProfileHeader(
+    UpdateProfileController controller,
+    BuildContext context,
+  ) {
     return Column(
       children: [
         Stack(
@@ -128,7 +132,10 @@ class UpdateProfileScreenView extends StatelessWidget {
                     children: [
                       // Avatar
                       GestureDetector(
-                        onTap: () => controller.showImageSourceSheet(),
+                        onTap: () => controller.showImageSourceSheet(
+                          context,
+                          controller,
+                        ),
                         child: CircleAvatar(
                           radius: ResponsiveHelper.spacing(50),
                           backgroundColor: AppColors.lightGrey,
@@ -143,23 +150,19 @@ class UpdateProfileScreenView extends StatelessWidget {
                                   ),
                                 )
                               : networkUrl != null
-                              ? GestureDetector(
-                                  onTap: () =>
-                                      controller.showImageSourceSheet(),
-                                  child: ClipOval(
-                                    child: Image.network(
-                                      networkUrl,
-                                      width: ResponsiveHelper.spacing(100),
-                                      height: ResponsiveHelper.spacing(100),
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(
-                                                Icons.person,
-                                                size: 55,
-                                                color: AppColors.grey,
-                                              ),
-                                    ),
+                              ? ClipOval(
+                                  child: Image.network(
+                                    networkUrl,
+                                    width: ResponsiveHelper.spacing(100),
+                                    height: ResponsiveHelper.spacing(100),
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.person,
+                                              size: 55,
+                                              color: AppColors.grey,
+                                            ),
                                   ),
                                 )
                               : const Icon(
@@ -177,7 +180,10 @@ class UpdateProfileScreenView extends StatelessWidget {
                         child: GestureDetector(
                           onTap: () {
                             print("object");
-                            controller.showImageSourceSheet();
+                            controller.showImageSourceSheet(
+                              context,
+                              controller,
+                            );
                           },
                           child: Container(
                             width: ResponsiveHelper.spacing(28),
@@ -290,42 +296,52 @@ class UpdateProfileScreenView extends StatelessWidget {
   Widget _buildSaveButton(UpdateProfileController controller) {
     return Padding(
       padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.accentOrange,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: EdgeInsets.symmetric(
-              vertical: ResponsiveHelper.spacing(16),
-            ),
-          ),
-          onPressed: controller.user.value?.profileImgPath != null
-              ? () => controller.updateUser(controller.user.value!)
-              : null,
-          child: Obx(
-            () => controller.isLoading.value
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    'Save Changes',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-          ),
+      child: ElevatedButton(
+        onPressed: controller.user.value?.profileImgPath != null
+            ? () => controller.updateUser(controller.user.value!)
+            : null,
+        style: AppButtonStyles.elevatedMediumBlack(),
+        child: ResponsiveHelper.safeText(
+          'Save Changes',
+          style: AppStyle.buttonTextPoppinsWhite.responsive,
         ),
       ),
+      // child: SizedBox(
+      //   width: double.infinity,
+      //   child: ElevatedButton(
+      //     style: ElevatedButton.styleFrom(
+      //       backgroundColor: AppColors.accentOrange,
+      //       shape: RoundedRectangleBorder(
+      //         borderRadius: BorderRadius.circular(12),
+      //       ),
+      //       padding: EdgeInsets.symmetric(
+      //         vertical: ResponsiveHelper.spacing(16),
+      //       ),
+      //     ),
+      //     onPressed: controller.user.value?.profileImgPath != null
+      //         ? () => controller.updateUser(controller.user.value!)
+      //         : null,
+      //     child: Obx(
+      //       () => controller.isLoading.value
+      //           ? const SizedBox(
+      //               height: 20,
+      //               width: 20,
+      //               child: CircularProgressIndicator(
+      //                 strokeWidth: 2,
+      //                 color: Colors.white,
+      //               ),
+      //             )
+      //           : const Text(
+      //               'Save Changes',
+      //               style: TextStyle(
+      //                 color: Colors.white,
+      //                 fontSize: 16,
+      //                 fontWeight: FontWeight.w600,
+      //               ),
+      //             ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 }

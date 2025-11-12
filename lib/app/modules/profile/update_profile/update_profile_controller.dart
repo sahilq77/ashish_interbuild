@@ -5,6 +5,8 @@ import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/data/network/networkutility.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_controller.dart';
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
+import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -21,12 +23,14 @@ class UpdateProfileController extends GetxController {
   final RxBool isLoading = true.obs;
   final ImagePicker _picker = ImagePicker();
   final ProfileController refreshontroller = Get.put(ProfileController());
-
   @override
   void onInit() {
     super.onInit();
+    // fetchUser();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      fetchUserProfile(context: Get.context!);
+      fetchUserProfile(
+        context: Get.context!,
+      ); // Fetch user profile on initialization
     });
   }
 
@@ -43,11 +47,20 @@ class UpdateProfileController extends GetxController {
 
   var userProfileList = <UserProfile>[].obs;
   var errorMessages = ''.obs;
+
   RxString imageLink = "".obs;
 
-  // -----------------------------------------------------------------
-  // 1. Fetch user profile
-  // -----------------------------------------------------------------
+  // // Method to set the selected user
+  // void setSelectedUser(UserProfile user) {
+  //   selectedUser.value = user;
+  // }
+
+  // // Method to clear the selected user
+  // void clearSelectedUser() {
+  //   selectedUser.value = null;
+  // }
+
+  // Method to fetch user profile
   Future<void> fetchUserProfile({
     required BuildContext context,
     bool isRefresh = false,
@@ -56,14 +69,20 @@ class UpdateProfileController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      if (isRefresh) userProfileList.clear();
+      if (isRefresh) {
+        userProfileList.clear(); // Clear existing data on refresh
+      }
 
-      final jsonBody = {};
+      final jsonBody = {
+        // "user_id": AppUtility.userID,
+        // "user_type": AppUtility.userType,
+      };
 
       List<GetUserProfileResponse>? response =
           (await Networkcall().getMethod(
                 Networkutility.getProfileApi,
                 Networkutility.getProfile,
+
                 context,
               ))
               as List<GetUserProfileResponse>?;
@@ -81,58 +100,39 @@ class UpdateProfileController extends GetxController {
         } else {
           errorMessage.value =
               'Failed to load profile: ${response[0].message ?? 'Unknown error'}';
-          AppSnackbarStyles.showError(
-            title: 'Profile Error',
-            message: errorMessage.value,
-          );
         }
       } else {
         errorMessage.value = 'No response from server';
-        AppSnackbarStyles.showError(
-          title: 'Network Error',
-          message: errorMessage.value,
-        );
       }
     } on NoInternetException catch (e) {
       errorMessage.value = e.message;
-      AppSnackbarStyles.showError(title: 'No Internet', message: e.message);
     } on TimeoutException catch (e) {
       errorMessage.value = e.message;
-      AppSnackbarStyles.showError(title: 'Timeout', message: e.message);
     } on HttpException catch (e) {
       errorMessage.value = '${e.message} (Code: ${e.statusCode})';
-      AppSnackbarStyles.showError(
-        title: 'HTTP Error',
-        message: errorMessage.value,
-      );
     } on ParseException catch (e) {
       errorMessage.value = e.message;
-      AppSnackbarStyles.showError(title: 'Parse Error', message: e.message);
     } catch (e) {
       errorMessage.value = 'Unexpected error: $e';
-      AppSnackbarStyles.showError(
-        title: 'Unexpected',
-        message: errorMessage.value,
-      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  // -----------------------------------------------------------------
-  // Permission handling
-  // -----------------------------------------------------------------
   Future<bool> requestImagePermission(ImageSource source) async {
     late Permission permission;
 
     if (source == ImageSource.camera) {
       permission = Permission.camera;
     } else {
+      // Android 13+ uses granular media permissions
       if (Platform.isAndroid) {
         final androidInfo = await DeviceInfoPlugin().androidInfo;
-        permission = androidInfo.version.sdkInt >= 33
-            ? Permission.photos
-            : Permission.storage;
+        if (androidInfo.version.sdkInt >= 33) {
+          permission = Permission.photos; // READ_MEDIA_IMAGES
+        } else {
+          permission = Permission.storage; // Legacy
+        }
       } else {
         permission = Permission.photos;
       }
@@ -140,51 +140,82 @@ class UpdateProfileController extends GetxController {
 
     final status = await permission.request();
 
-    if (status.isGranted || status.isLimited) return true;
+    if (status.isGranted || status.isLimited) {
+      return true; // iOS: isLimited means user selected some photos
+    }
 
     if (status.isDenied) {
-      AppSnackbarStyles.showWarning(
-        title: 'Permission Required',
-        message:
-            'Please grant permission to access ${source == ImageSource.camera ? 'camera' : 'gallery'}.',
+      Get.snackbar(
+        'Permission Required',
+        'Please grant permission to access ${source == ImageSource.camera ? 'camera' : 'gallery'}.',
+        snackPosition: SnackPosition.TOP,
       );
       return false;
     }
 
     if (status.isPermanentlyDenied) {
-      AppSnackbarStyles.showError(
-        title: 'Permission Denied',
-        message: 'Please enable permission from settings.',
+      Get.snackbar(
+        'Permission Denied',
+        'Please enable permission from settings.',
+        snackPosition: SnackPosition.TOP,
+        mainButton: TextButton(
+          onPressed: () => openAppSettings(),
+          child: const Text(
+            'Open Settings',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
       );
-      // Optional: add a button to open settings (you can keep openAppSettings())
       return false;
     }
 
     return false;
   }
 
-  // -----------------------------------------------------------------
-  // Pick image
-  // -----------------------------------------------------------------
   Future<void> pickImage(ImageSource source) async {
     final hasPermission = await requestImagePermission(source);
     if (!hasPermission) return;
 
     try {
+      // ---- 1. Use allowedExtensions (gallery only) ----
+      final Map<String, dynamic> extra = source == ImageSource.gallery
+          ? {
+              'allowedExtensions': ['jpg', 'jpeg'],
+            } // <-- ONLY JPG/JPEG
+          : {};
+
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
-        imageQuality: 85,
-        maxWidth: 800,
+        // imageQuality: 85,
+        // maxWidth: 800,
+        // ...extra,                     // spread the map only for gallery
       );
 
-      if (pickedFile != null) {
-        user.value = user.value?.copyWith(profileImgPath: pickedFile.path);
-        imageLink.value = pickedFile.path;
+      if (pickedFile == null) return;
+
+      // ---- 2. Double-check the extension (works on every platform) ----
+      final String path = pickedFile.path;
+      final String ext = path.split('.').last.toLowerCase();
+
+      if (ext != 'jpg' && ext != 'jpeg') {
+        AppSnackbarStyles.showError(
+          title: 'Invalid format',
+          message: "Please select a JPG or JPEG image.",
+        );
+
+        return;
       }
+
+      // ---- 3. Update the user model ----
+      user.value = user.value?.copyWith(profileImgPath: path);
+      imageLink.value = path;
     } catch (e) {
-      AppSnackbarStyles.showError(
-        title: 'Image Error',
-        message: 'Failed to pick image: $e',
+      Get.snackbar(
+        'Error',
+        'Failed to pick image: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
       );
     }
   }
@@ -203,18 +234,22 @@ class UpdateProfileController extends GetxController {
         Uri.parse(Networkutility.updateUserDetail),
       );
 
+      // Text fields
       request.fields['person_name'] = user.name;
       request.fields['contact_no'] = "7777";
 
+      // ---- Profile image (if selected) ----
       if (user.profileImgPath != null &&
           File(user.profileImgPath!).existsSync()) {
         final file = await http.MultipartFile.fromPath(
           'profile_img',
           user.profileImgPath!,
+          // contentType: MediaType('image', 'jpeg'), // most cameras return jpeg
         );
         request.files.add(file);
       }
 
+      // Auth header
       request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
 
       final streamedResponse = await request.send();
@@ -226,20 +261,34 @@ class UpdateProfileController extends GetxController {
           title: 'Success',
           message: successMessage.value,
         );
+
+        // Refresh profile after success
         await fetchUserProfile(context: Get.context!);
+      } else if (response.statusCode == 401) {
+        await AppUtility.clearUserInfo();
+        Get.offAllNamed(AppRoutes.login);
+        errorMessage.value =
+            'Failed: ${response.statusCode} – ${response.body}';
+
+        // Get.snackbar(
+        //   'Error',
+        //   errorMessage.value,
+        //   snackPosition: SnackPosition.TOP,
+        // );
       } else {
         errorMessage.value =
             'Failed: ${response.statusCode} – ${response.body}';
         AppSnackbarStyles.showError(
-          title: 'Update Failed',
+          title: 'Error',
           message: errorMessage.value,
         );
       }
     } catch (e) {
       errorMessage.value = 'Exception: $e';
-      AppSnackbarStyles.showError(
-        title: 'Exception',
-        message: errorMessage.value,
+      Get.snackbar(
+        'Error',
+        errorMessage.value,
+        snackPosition: SnackPosition.TOP,
       );
     } finally {
       isLoading.value = false;
@@ -247,52 +296,154 @@ class UpdateProfileController extends GetxController {
   }
 
   // -----------------------------------------------------------------
-  // 3. Show image source bottom sheet
+  // 3. Helper to show picker bottom-sheet
   // -----------------------------------------------------------------
-  void showImageSourceSheet() {
-    Get.bottomSheet(
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text('Gallery'),
-            onTap: () {
-              Get.back();
-              pickImage(ImageSource.gallery);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text('Camera'),
-            onTap: () {
-              Get.back();
-              pickImage(ImageSource.camera);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cancel),
-            title: const Text('Cancel'),
-            onTap: () => Get.back(),
-          ),
-        ],
-      ),
+  void showImageSourceSheet(
+    BuildContext context,
+    UpdateProfileController controller,
+  ) {
+    showModalBottomSheet(
+      context: context,
       backgroundColor: Colors.white,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter modalSetState) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                    left: 24,
+                    right: 24,
+                    top: 16,
+                  ),
+                  child: Wrap(
+                    children: [
+                      Center(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.photo,
+                              size: 40,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Edit Profile Photo',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF36322E),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Choose a method to update your photo',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        pickImage(ImageSource.camera);
+                                        Navigator.pop(context);
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 30,
+                                        backgroundColor: Colors.orange.shade100,
+                                        child: Icon(
+                                          Icons.camera_alt,
+                                          size: 28,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Camera',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        pickImage(ImageSource.gallery);
+                                        Navigator.pop(context);
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 30,
+                                        backgroundColor: Colors.orange.shade100,
+                                        child: Icon(
+                                          Icons.photo_library,
+                                          size: 28,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Gallery',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                'Cancel',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
 
-// -----------------------------------------------------------------
-// User model (unchanged)
-// -----------------------------------------------------------------
 class User {
   final String id;
   final String name;
   final String email;
   final String? profilePictureUrl;
+
+  // NEW – path of the image that will be uploaded
   String? profileImgPath;
 
   User({
@@ -303,6 +454,7 @@ class User {
     this.profileImgPath,
   });
 
+  // Helper to create a copy with a new path
   User copyWith({String? profileImgPath}) {
     return User(
       id: id,
