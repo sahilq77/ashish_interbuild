@@ -18,9 +18,7 @@ class AccProjectList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProjectNameController controller = Get.put(
-      ProjectNameController(),
-    );
+    final ProjectNameController controller = Get.put(ProjectNameController());
     final bottomController = Get.put(BottomNavigationController());
     ResponsiveHelper.init(context);
     return PopScope(
@@ -49,8 +47,8 @@ class AccProjectList extends StatelessWidget {
                   children: [
                     Expanded(child: _buildSearchField(controller)),
                     SizedBox(width: ResponsiveHelper.spacing(8)),
-                    _buildFilterButton(context, controller),
-                    SizedBox(width: ResponsiveHelper.spacing(8)),
+                    // _buildFilterButton(context, controller),
+                    // SizedBox(width: ResponsiveHelper.spacing(8)),
                     _buildSortButton(controller),
                   ],
                 ),

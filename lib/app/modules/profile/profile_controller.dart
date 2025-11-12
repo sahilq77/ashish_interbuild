@@ -4,7 +4,7 @@ import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.da
 import 'package:ashishinterbuild/app/data/models/profile/profile_model.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
-import 'package:ashishinterbuild/app/data/network/networkutility.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_images.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';

@@ -47,8 +47,8 @@ class ClientCommitmentProject extends StatelessWidget {
                   children: [
                     Expanded(child: _buildSearchField(controller)),
                     SizedBox(width: ResponsiveHelper.spacing(8)),
-                    _buildFilterButton(context, controller),
-                    SizedBox(width: ResponsiveHelper.spacing(8)),
+                    // _buildFilterButton(context, controller),
+                    // SizedBox(width: ResponsiveHelper.spacing(8)),
                     _buildSortButton(controller),
                   ],
                 ),
@@ -64,8 +64,9 @@ class ClientCommitmentProject extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final project = controller.filteredProjects[index];
                             return GestureDetector(
-                              onTap: () =>
-                                  Get.toNamed(AppRoutes.clientCommitmentDashboard),
+                              onTap: () => Get.toNamed(
+                                AppRoutes.clientCommitmentDashboard,
+                              ),
                               child: Card(
                                 margin: EdgeInsets.only(
                                   bottom: ResponsiveHelper.screenHeight * 0.02,

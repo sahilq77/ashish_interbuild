@@ -4,7 +4,7 @@ import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_r
 import 'package:ashishinterbuild/app/data/models/project_name/project%20_name_model.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
-import 'package:ashishinterbuild/app/data/network/networkutility.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart'
     show AppSnackbarStyles;
 import 'package:flutter/widgets.dart';

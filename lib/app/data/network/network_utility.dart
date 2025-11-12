@@ -11,4 +11,6 @@ class Networkutility {
 
   static String getProjectNameList = "${baseUrl + "projects"}";
   static int getProjectNameListApi = 4;
+  static String getPackagesList = "${baseUrl + "packages"}";
+  static int getPackagesListApi = 5;
 }

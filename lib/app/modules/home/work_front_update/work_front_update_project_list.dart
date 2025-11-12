@@ -45,8 +45,8 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
                   children: [
                     Expanded(child: _buildSearchField(controller)),
                     SizedBox(width: ResponsiveHelper.spacing(8)),
-                    _buildFilterButton(context, controller),
-                    SizedBox(width: ResponsiveHelper.spacing(8)),
+                    // _buildFilterButton(context, controller),
+                    // SizedBox(width: ResponsiveHelper.spacing(8)),
                     _buildSortButton(controller),
                   ],
                 ),
