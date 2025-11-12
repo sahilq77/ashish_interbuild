@@ -1,5 +1,6 @@
 class AccModel {
   final int srNo;
+  final String packageName;
   final String accCategory;
   final String briefDetail;
   final String affectedMilestone;
@@ -15,6 +16,7 @@ class AccModel {
 
   AccModel({
     required this.srNo,
+    required this.packageName,
     required this.accCategory,
     required this.briefDetail,
     required this.affectedMilestone,
@@ -32,6 +34,7 @@ class AccModel {
   factory AccModel.fromMap(Map<String, dynamic> map) {
     return AccModel(
       srNo: map['Sr.No'] as int,
+      packageName: map['PckageName'] as String,
       accCategory: map['ACC Category'] as String,
       briefDetail: map['Brief Detail about Issue'] as String,
       affectedMilestone: map['Affected Milestone'] as String,

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
-import 'package:ashishinterbuild/app/widgets/app_button_style.dart'; // Import for button styles
+import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AccScreenView extends StatelessWidget {
@@ -22,14 +22,13 @@ class AccScreenView extends StatelessWidget {
       appBar: _buildAppBar(),
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Text(
-                "Skyline Towers ➔ Awaited Clearance From Client",
+                "Skyline Towers -> Awaited Clearance From Client",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
@@ -96,9 +95,17 @@ class AccScreenView extends StatelessWidget {
                                         ),
                                         _buildDetailRow("Role", issue.role),
 
-                                        // Show additional details only if expanded
                                         if (controller.expandedIndex.value ==
                                             index) ...[
+                                          SizedBox(
+                                            height:
+                                                ResponsiveHelper.screenHeight *
+                                                0.002,
+                                          ),
+                                          _buildDetailRow(
+                                            "Package Name",
+                                            issue.packageName,
+                                          ),
                                           SizedBox(
                                             height:
                                                 ResponsiveHelper.screenHeight *
@@ -188,49 +195,20 @@ class AccScreenView extends StatelessWidget {
                                             issue.statusUpdate,
                                           ),
                                         ],
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.01,
-                                        // ),
-                                        // Divider(),
+                                        SizedBox(
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.01,
+                                        ),
                                         Row(
                                           children: [
-                                            // Expanded(
-                                            //   child: ElevatedButton(
-                                            //     style:
-                                            //         AppButtonStyles.elevatedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       controller.toggleExpanded(
-                                            //         index,
-                                            //       );
-                                            //     },
-                                            //     child: Text(
-                                            //       controller
-                                            //                   .expandedIndex
-                                            //                   .value ==
-                                            //               index
-                                            //           ? "Less"
-                                            //           : "Read",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsWhite,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                            // SizedBox(
-                                            //   width:
-                                            //       ResponsiveHelper.screenWidth *
-                                            //       0.05,
-                                            // ),
                                             Expanded(
                                               child: OutlinedButton(
                                                 style:
                                                     AppButtonStyles.outlinedExtraSmallBlack(),
-                                                onPressed: () {
-                                                  Get.toNamed(
-                                                    AppRoutes.updateAccForm,
-                                                  );
-                                                },
+                                                onPressed: () => Get.toNamed(
+                                                  AppRoutes.updateAccForm,
+                                                ),
                                                 child: Text(
                                                   "Update",
                                                   style: AppStyle
@@ -243,15 +221,29 @@ class AccScreenView extends StatelessWidget {
                                                   ResponsiveHelper.screenWidth *
                                                   0.05,
                                             ),
+                                            // Row(
+                                            //   children: [
+                                            //     IconButton(
+                                            //       onPressed: () {},
+                                            //       icon: Icon(
+                                            //         Icons.edit,
+                                            //         color:
+                                            //             AppColors.defaultBlack,
+                                            //       ),
+                                            //     ),
+                                            //     IconButton(
+                                            //       onPressed: () {},
+                                            //       icon: Icon(Icons.delete),
+                                            //     ),
+                                            //   ],
+                                            // ),
                                             Expanded(
                                               child: OutlinedButton(
                                                 style:
                                                     AppButtonStyles.outlinedExtraSmallBlack(),
-                                                onPressed: () {
-                                                  Get.toNamed(
-                                                    AppRoutes.editAccForm,
-                                                  );
-                                                },
+                                                onPressed: () => Get.toNamed(
+                                                  AppRoutes.editAccForm,
+                                                ),
                                                 child: Icon(Icons.edit),
                                               ),
                                             ),
@@ -264,12 +256,7 @@ class AccScreenView extends StatelessWidget {
                                               child: OutlinedButton(
                                                 style:
                                                     AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () {
-                                                  // _showConfirmationDialog(
-                                                  //   context,
-                                                  //   sheet,
-                                                  // );
-                                                },
+                                                onPressed: () {},
                                                 child: Icon(Icons.delete),
                                               ),
                                             ),
@@ -292,6 +279,7 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
+  // ────── SORT BUTTON (UNCHANGED) ──────
   Widget _buildSortButton(AccController controller) {
     return Obx(
       () => Container(
@@ -314,6 +302,7 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
+  // ────── FILTER BUTTON (UNCHANGED) ──────
   Widget _buildFilterButton(BuildContext context, AccController controller) {
     return Container(
       decoration: BoxDecoration(
@@ -329,13 +318,14 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
-  void _showFilterDialog(
-    BuildContext context,
-    AccController controller, // <-- correct type
-  ) {
-    // temporary values that are only written when the user presses **Apply**
+  // ────── FILTER DIALOG (UPDATED WITH 6 DROPDOWNS) ──────
+  void _showFilterDialog(BuildContext context, AccController controller) {
+    String? tempPackage = controller.selectedPackageFilter.value;
     String? tempCategory = controller.selectedCategoryFilter.value;
+    String? tempPriority = controller.selectedPriorityFilter.value;
+    String? tempMilestone = controller.selectedMilestoneFilter.value;
     String? tempRole = controller.selectedRoleFilter.value;
+    String? tempKeyDelay = controller.selectedKeyDelayFilter.value;
 
     showDialog(
       context: context,
@@ -344,188 +334,204 @@ class AccScreenView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ----- Header -----
-              Container(
-                width: double.infinity,
-                padding: ResponsiveHelper.paddingSymmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    vertical: 20,
+                    horizontal: 16,
                   ),
-                ),
-                child: Text(
-                  'Filter ACC',
-                  style: AppStyle.heading1PoppinsWhite.responsive,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              // ----- Category dropdown -----
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Category',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(ResponsiveHelper.spacing(20)),
                     ),
                   ),
+                  child: Text(
+                    'Filter ACC',
+                    style: AppStyle.heading1PoppinsWhite.responsive,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // 1. Package Name
+                _filterDropdown(
+                  label: 'Package Name',
+                  items: controller.packageNames,
+                  selected: tempPackage,
+                  onChanged: (v) => setState(() => tempPackage = v),
+                  icon: Icons.business,
+                ),
+
+                // 2. Category
+                _filterDropdown(
+                  label: 'Category',
                   items: controller.categoryNames,
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Category',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.category,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
+                  selected: tempCategory,
                   onChanged: (v) => setState(() => tempCategory = v),
-                  selectedItem: tempCategory,
+                  icon: Icons.category,
                 ),
-              ),
 
-              // ----- Role dropdown -----
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Role',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
+                // 3. Priority
+                _filterDropdown(
+                  label: 'Priority',
+                  items: controller.priorityNames,
+                  selected: tempPriority,
+                  onChanged: (v) => setState(() => tempPriority = v),
+                  icon: Icons.flag,
+                ),
+
+                // 4. Affected Milestone
+                _filterDropdown(
+                  label: 'Affected Milestone',
+                  items: controller.milestoneNames,
+                  selected: tempMilestone,
+                  onChanged: (v) => setState(() => tempMilestone = v),
+                  icon: Icons.military_tech,
+                ),
+
+                // 5. Role
+                _filterDropdown(
+                  label: 'Role',
                   items: controller.roleNames,
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Role',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.person,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
+                  selected: tempRole,
                   onChanged: (v) => setState(() => tempRole = v),
-                  selectedItem: tempRole,
+                  icon: Icons.person,
                 ),
-              ),
 
-              // ----- Buttons -----
-              Padding(
-                padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 16,
+                // 6. Key Delay Events
+                _filterDropdown(
+                  label: 'Key Delay Events',
+                  items: controller.keyDelayOptions,
+                  selected: tempKeyDelay,
+                  onChanged: (v) => setState(() => tempKeyDelay = v),
+                  icon: Icons.event,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveHelper.spacing(10),
+
+                // Buttons
+                Padding(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: ResponsiveHelper.paddingSymmetric(
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                ResponsiveHelper.spacing(10),
+                              ),
                             ),
                           ),
-                        ),
-                        onPressed: () {
-                          controller.clearFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Clear',
-                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                          onPressed: () {
+                            controller.clearFilters();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Clear',
+                            style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: ResponsiveHelper.spacing(16)),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveHelper.spacing(10),
+                      SizedBox(width: ResponsiveHelper.spacing(16)),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: ResponsiveHelper.paddingSymmetric(
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                ResponsiveHelper.spacing(10),
+                              ),
                             ),
                           ),
-                        ),
-                        onPressed: () {
-                          controller.selectedCategoryFilter.value =
-                              tempCategory;
-                          controller.selectedRoleFilter.value = tempRole;
-                          controller.applyFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Apply',
-                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                          onPressed: () {
+                            controller.selectedPackageFilter.value =
+                                tempPackage;
+                            controller.selectedCategoryFilter.value =
+                                tempCategory;
+                            controller.selectedPriorityFilter.value =
+                                tempPriority;
+                            controller.selectedMilestoneFilter.value =
+                                tempMilestone;
+                            controller.selectedRoleFilter.value = tempRole;
+                            controller.selectedKeyDelayFilter.value =
+                                tempKeyDelay;
+                            controller.applyFilters();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Apply',
+                            style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // ────── REUSABLE DROPDOWN (ADDED) ──────
+  Widget _filterDropdown({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(horizontal: 16, vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          searchFieldProps: TextFieldProps(
+            decoration: InputDecoration(
+              labelText: 'Search',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
+            ),
+          ),
+        ),
+        items: items,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected,
+      ),
+    );
+  }
+
+  // ────── SEARCH FIELD (UNCHANGED) ──────
   TextFormField _buildSearchField(AccController controller) {
     return TextFormField(
       controller: controller.searchController,
@@ -542,6 +548,7 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
+  // ────── SHIMMER (UNCHANGED) ──────
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
@@ -590,6 +597,7 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
+  // ────── DETAIL ROW (UNCHANGED) ──────
   Widget _buildDetailRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,6 +630,7 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
+  // ────── APP BAR (UNCHANGED) ──────
   AppBar _buildAppBar() {
     return AppBar(
       iconTheme: const IconThemeData(color: Colors.black),
@@ -639,26 +648,17 @@ class AccScreenView extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.defaultBlack, // Change to your primary color
-              width: 0.5,
-            ),
-            borderRadius: BorderRadius.circular(8), // Rounded corners
+            border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(
-              8,
-            ), // Important for ripple effect
-            onTap: () {
-              Get.toNamed(AppRoutes.addAccForm);
-            },
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => Get.toNamed(AppRoutes.addAccForm),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Optional icon
-                  // Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(20)),
                   const SizedBox(width: 6),
                   Text(
                     'Add',
@@ -672,12 +672,6 @@ class AccScreenView extends StatelessWidget {
             ),
           ),
         ),
-        // IconButton(
-        //   onPressed: () {
-        //     Get.toNamed(AppRoutes.addAccForm);
-        //   },
-        //   icon: const Icon(Icons.add),
-        // ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),

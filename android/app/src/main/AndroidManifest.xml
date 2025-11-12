@@ -8,6 +8,7 @@
         android:label="ashishinterbuild"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false" android:fullBackupOnly="false"
         android:enableOnBackInvokedCallback="true"> <!-- Add this line -->
         <activity
             android:name=".MainActivity"

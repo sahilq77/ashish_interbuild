@@ -11,11 +11,19 @@ class AccController extends GetxController {
   // ────── FILTERS ──────
   var selectedCategoryFilter = Rxn<String>();
   var selectedRoleFilter = Rxn<String>();
+
+  // ────── NEW FILTERS (ADDED) ──────
+  var selectedPackageFilter = Rxn<String>();
+  var selectedPriorityFilter = Rxn<String>();
+  var selectedMilestoneFilter = Rxn<String>();
+  var selectedKeyDelayFilter = Rxn<String>(); // "Yes" / "No"
+
+  // ────── ORIGINAL LIST ──────
   var _originalList = <AccModel>[].obs;
 
   // ────── SORTING ──────
-  var isAscending = true.obs; // true = Asc, false = Desc
-  var sortBy = 'Sr.No'.obs; // current sort field
+  var isAscending = true.obs;
+  var sortBy = 'Sr.No'.obs;
 
   @override
   void onInit() {
@@ -31,6 +39,7 @@ class AccController extends GetxController {
     var data = [
       {
         'Sr.No': 1,
+        'PckageName': 'Silver',
         'ACC Category': 'Design Approval',
         'Brief Detail about Issue': 'Tetting',
         'Affected Milestone': 'Milestone One1',
@@ -46,6 +55,7 @@ class AccController extends GetxController {
       },
       {
         'Sr.No': 2,
+        'PckageName': 'Platinum',
         'ACC Category': 'Material Supply',
         'Brief Detail about Issue': 'Steel delayed',
         'Affected Milestone': 'Milestone Two',
@@ -61,6 +71,7 @@ class AccController extends GetxController {
       },
       {
         'Sr.No': 3,
+        'PckageName': 'Gold',
         'ACC Category': 'Design Approval',
         'Brief Detail about Issue': 'Drawing revision',
         'Affected Milestone': 'Milestone One1',
@@ -81,7 +92,6 @@ class AccController extends GetxController {
     accList.assignAll(list);
     isLoading.value = false;
 
-    // Apply initial sort
     _applySort();
   }
 
@@ -93,10 +103,10 @@ class AccController extends GetxController {
 
   void setSortBy(String field) {
     if (sortBy.value == field) {
-      toggleSorting(); // same field → just flip order
+      toggleSorting();
     } else {
       sortBy.value = field;
-      isAscending.value = true; // default to ascending when changing field
+      isAscending.value = true;
       _applySort();
     }
   }
@@ -115,17 +125,13 @@ class AccController extends GetxController {
           compare = a.accCategory.compareTo(b.accCategory);
           break;
         case 'Priority':
-          // Optional: map priority strings to numbers
           const order = {'High': 0, 'Medium': 1, 'Low': 2};
           int aVal = order[a.priority] ?? 3;
           int bVal = order[b.priority] ?? 3;
           compare = aVal.compareTo(bVal);
           break;
         case 'Issue Open Date':
-          // Assuming date is stored as String in "dd-MM-yyyy"
-          compare = _parseDate(
-            a.issueOpenDate,
-          ).compareTo(_parseDate(b.issueOpenDate));
+          compare = _parseDate(a.issueOpenDate).compareTo(_parseDate(b.issueOpenDate));
           break;
         case 'overdue':
           compare = a.overdue.compareTo(b.overdue);
@@ -143,49 +149,74 @@ class AccController extends GetxController {
   DateTime _parseDate(String dateStr) {
     try {
       final parts = dateStr.split('-');
-      return DateTime(
-        int.parse(parts[2]),
-        int.parse(parts[1]),
-        int.parse(parts[0]),
-      );
+      return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
     } catch (e) {
-      return DateTime(1970); // fallback
+      return DateTime(1970);
     }
   }
 
-  // ────────────────────── FILTER HELPERS ──────────────────────
+  // ────────────────────── DROPDOWN LISTS (ADDED) ──────────────────────
+  List<String> get packageNames =>
+      _originalList.map((e) => e.packageName).toSet().toList()..sort();
+
   List<String> get categoryNames =>
       _originalList.map((e) => e.accCategory).toSet().toList()..sort();
+
+  List<String> get priorityNames =>
+      _originalList.map((e) => e.priority).toSet().toList()..sort();
+
+  List<String> get milestoneNames =>
+      _originalList.map((e) => e.affectedMilestone).toSet().toList()..sort();
 
   List<String> get roleNames =>
       _originalList.map((e) => e.role).toSet().toList()..sort();
 
+  List<String> get keyDelayOptions => ['Yes', 'No'];
+
+  // ────────────────────── FILTER HELPERS (UPDATED) ──────────────────────
   void applyFilters() {
     final cat = selectedCategoryFilter.value;
-    final rol = selectedRoleFilter.value;
+    final role = selectedRoleFilter.value;
+    final pkg = selectedPackageFilter.value;
+    final pri = selectedPriorityFilter.value;
+    final mile = selectedMilestoneFilter.value;
+    final key = selectedKeyDelayFilter.value;
 
     final filtered = _originalList.where((issue) {
       final catOk = cat == null || issue.accCategory == cat;
-      final rolOk = rol == null || issue.role == rol;
-      return catOk && rolOk;
+      final roleOk = role == null || issue.role == role;
+      final pkgOk = pkg == null || issue.packageName == pkg;
+      final priOk = pri == null || issue.priority == pri;
+      final mileOk = mile == null || issue.affectedMilestone == mile;
+      final keyOk = key == null ||
+          (key == 'Yes' ? issue.keyDelayEvents : !issue.keyDelayEvents);
+      return catOk && roleOk && pkgOk && priOk && mileOk && keyOk;
     }).toList();
 
     accList.assignAll(filtered);
-    _applySort(); // Re-apply sort after filtering
+    _applySort();
   }
 
   void clearFilters() {
     selectedCategoryFilter.value = null;
     selectedRoleFilter.value = null;
+    selectedPackageFilter.value = null;
+    selectedPriorityFilter.value = null;
+    selectedMilestoneFilter.value = null;
+    selectedKeyDelayFilter.value = null;
+
     accList.assignAll(_originalList);
     _applySort();
   }
 
-  // ────────────────────── SEARCH (with filter & sort) ──────────────────────
+  // ────────────────────── SEARCH (UNCHANGED) ──────────────────────
   void searchIssues(String query) {
-    final base =
-        (selectedCategoryFilter.value != null ||
-            selectedRoleFilter.value != null)
+    final base = (selectedCategoryFilter.value != null ||
+            selectedRoleFilter.value != null ||
+            selectedPackageFilter.value != null ||
+            selectedPriorityFilter.value != null ||
+            selectedMilestoneFilter.value != null ||
+            selectedKeyDelayFilter.value != null)
         ? _originalList
         : _originalList;
 
@@ -195,7 +226,10 @@ class AccController extends GetxController {
       result = result.where((issue) {
         return issue.accCategory.toLowerCase().contains(query.toLowerCase()) ||
             issue.briefDetail.toLowerCase().contains(query.toLowerCase()) ||
-            issue.affectedMilestone.toLowerCase().contains(query.toLowerCase());
+            issue.affectedMilestone.toLowerCase().contains(query.toLowerCase()) ||
+            issue.packageName.toLowerCase().contains(query.toLowerCase()) ||
+            issue.role.toLowerCase().contains(query.toLowerCase()) ||
+            issue.priority.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
 
