@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:ashishinterbuild/app/modules/profile/profile_controller.dart';
 import 'package:ashishinterbuild/app/modules/profile/update_profile/update_profile_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart'
     show AppColors, accentOrangeFaded;
@@ -5,8 +7,7 @@ import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UpdateProfileScreenView extends StatelessWidget {
   const UpdateProfileScreenView({super.key});
@@ -16,6 +17,7 @@ class UpdateProfileScreenView extends StatelessWidget {
     final UpdateProfileController controller = Get.put(
       UpdateProfileController(),
     );
+      
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -41,6 +43,9 @@ class UpdateProfileScreenView extends StatelessWidget {
                         _buildProfileHeader(controller),
                         SizedBox(height: ResponsiveHelper.spacing(24)),
                         _buildDetailSection(controller),
+                        SizedBox(height: ResponsiveHelper.spacing(24)),
+                        _buildSaveButton(controller),
+                        SizedBox(height: ResponsiveHelper.spacing(32)),
                       ],
                     ),
                   ),
@@ -50,6 +55,9 @@ class UpdateProfileScreenView extends StatelessWidget {
     );
   }
 
+  // ========================================
+  // AppBar
+  // ========================================
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: AppColors.white,
@@ -73,6 +81,9 @@ class UpdateProfileScreenView extends StatelessWidget {
     );
   }
 
+  // ========================================
+  // Profile Header with Image Picker
+  // ========================================
   Widget _buildProfileHeader(UpdateProfileController controller) {
     return Column(
       children: [
@@ -80,6 +91,7 @@ class UpdateProfileScreenView extends StatelessWidget {
           clipBehavior: Clip.none,
           alignment: Alignment.bottomCenter,
           children: [
+            // Background card
             Container(
               width: double.infinity,
               height: ResponsiveHelper.spacing(140),
@@ -91,32 +103,49 @@ class UpdateProfileScreenView extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Profile picture with edit button
             Positioned(
               bottom: -ResponsiveHelper.spacing(50),
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
+              child: Obx(() {
+                final String? localPath = controller.user.value?.profileImgPath;
+                final String? networkUrl =
+                    controller.user.value?.profilePictureUrl;
+
+                return Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // Avatar
+                      GestureDetector(
+                        onTap: () => controller.showImageSourceSheet(),
+                        child: CircleAvatar(
                           radius: ResponsiveHelper.spacing(50),
                           backgroundColor: AppColors.lightGrey,
                           child:
-                              controller.user.value!.profilePictureUrl != null
+                              localPath != null && File(localPath).existsSync()
+                              ? ClipOval(
+                                  child: Image.file(
+                                    File(localPath),
+                                    width: ResponsiveHelper.spacing(100),
+                                    height: ResponsiveHelper.spacing(100),
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : networkUrl != null
                               ? ClipOval(
                                   child: Image.network(
-                                    controller.user.value!.profilePictureUrl!,
+                                    networkUrl,
                                     width: ResponsiveHelper.spacing(100),
                                     height: ResponsiveHelper.spacing(100),
                                     fit: BoxFit.cover,
@@ -135,57 +164,60 @@ class UpdateProfileScreenView extends StatelessWidget {
                                   color: AppColors.grey,
                                 ),
                         ),
-                        Positioned(
-                          bottom: ResponsiveHelper.spacing(0),
-                          right: ResponsiveHelper.spacing(0),
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.snackbar(
-                                'Info',
-                                'Edit Profile Picture not implemented',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            },
-                            child: Container(
-                              width: ResponsiveHelper.spacing(28),
-                              height: ResponsiveHelper.spacing(28),
-                              decoration: BoxDecoration(
-                                color: AppColors.lightGrey,
-                                border: Border.all(
-                                  color: AppColors.white,
-                                  width: 3,
+                      ),
+
+                      // Edit Camera Icon
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            print("object");
+                            controller.showImageSourceSheet();
+                          },
+                          child: Container(
+                            width: ResponsiveHelper.spacing(28),
+                            height: ResponsiveHelper.spacing(28),
+                            decoration: BoxDecoration(
+                              color: AppColors.lightGrey,
+                              border: Border.all(
+                                color: AppColors.white,
+                                width: 3,
+                              ),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
                                 ),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.edit,
-                                size: ResponsiveHelper.spacing(13),
-                                color: AppColors.defaultBlack,
-                              ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              size: 13,
+                              color: AppColors.defaultBlack,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              }),
             ),
           ],
         ),
+
+        // Name & Greeting
         SizedBox(height: ResponsiveHelper.spacing(60)),
-        Text(
-          'Hi, ${controller.user.value!.name}',
-          style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
-            fontSize: ResponsiveHelper.getResponsiveFontSize(18),
-            fontWeight: FontWeight.w600,
+        Obx(
+          () => Text(
+            'Hi, ${controller.user.value?.name ?? ''}',
+            style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(18),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         SizedBox(height: ResponsiveHelper.spacing(4)),
@@ -199,6 +231,9 @@ class UpdateProfileScreenView extends StatelessWidget {
     );
   }
 
+  // ========================================
+  // Detail Section (Read-only)
+  // ========================================
   Widget _buildDetailSection(UpdateProfileController controller) {
     return Container(
       margin: ResponsiveHelper.paddingSymmetric(horizontal: 16),
@@ -214,21 +249,11 @@ class UpdateProfileScreenView extends StatelessWidget {
             label: 'Full Name',
             value: controller.user.value!.name,
           ),
-          const Divider(),
+          const Divider(height: 24, thickness: 0.8),
           _buildReadOnlyField(
             label: 'Email',
             value: controller.user.value!.email,
           ),
-          // const Divider(),
-          // _buildReadOnlyField(
-          //   label: 'Phone',
-          //   value: controller.user.value!.phone ?? 'Not provided',
-          // ),
-          // const Divider(),
-          // _buildReadOnlyField(
-          //   label: 'Address',
-          //   value: controller.user.value!.address ?? 'Not provided',
-          // ),
         ],
       ),
     );
@@ -252,6 +277,51 @@ class UpdateProfileScreenView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  // ========================================
+  // Save Button
+  // ========================================
+  Widget _buildSaveButton(UpdateProfileController controller) {
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.accentOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.symmetric(
+              vertical: ResponsiveHelper.spacing(16),
+            ),
+          ),
+          onPressed: controller.user.value?.profileImgPath != null
+              ? () => controller.updateUser(controller.user.value!)
+              : null,
+          child: Obx(
+            () => controller.isLoading.value
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Save Changes',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 }

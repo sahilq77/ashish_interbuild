@@ -22,11 +22,11 @@ class ProfileScreenView extends StatelessWidget {
     final ProfileController controller = Get.put(ProfileController());
     final bottomController = Get.put(BottomNavigationController());
     ResponsiveHelper.init(context);
+
     return PopScope(
-      canPop: false, // Prevent default back navigation
+      canPop: false,
       onPopInvoked: (didPop) async {
         if (!didPop) {
-          // Call the same onWillPop logic from BottomNavigationController
           bool shouldPop = await bottomController.onWillPop();
           if (shouldPop && context.mounted) {
             Navigator.of(context).pop();
@@ -41,98 +41,125 @@ class ProfileScreenView extends StatelessWidget {
               ? const Center(child: CircularProgressIndicator())
               : controller.user.value == null
               ? Center(
-                  child: Text(
-                    'No user data available',
-                    style: AppStyle.bodyRegularPoppinsGrey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'No user data available',
+                        style: AppStyle.bodyRegularPoppinsGrey,
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: () => controller.fetchUserProfile(
+                          context: context,
+                          isRefresh: true,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
                 )
-              : CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          SizedBox(height: ResponsiveHelper.spacing(24)),
-                          _buildProfileHeader(controller),
-                          SizedBox(height: ResponsiveHelper.spacing(24)),
-                          Container(
-                            margin: ResponsiveHelper.paddingSymmetric(
-                              horizontal: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.lightGrey.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(
-                                ResponsiveHelper.spacing(16),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: ResponsiveHelper.paddingSymmetric(
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    await controller.fetchUserProfile(
+                      context: context,
+                      isRefresh: true,
+                    );
+                  },
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            SizedBox(height: ResponsiveHelper.spacing(24)),
+                            _buildProfileHeader(controller),
+                            SizedBox(height: ResponsiveHelper.spacing(24)),
+                            Container(
+                              margin: ResponsiveHelper.paddingSymmetric(
                                 horizontal: 16,
                               ),
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                    onTap: () {
-                                      Get.toNamed(AppRoutes.updateProfile);
-                                    },
-
-                                    leading: Icon(FontAwesomeIcons.user),
-                                    title: Text(
-                                      "Update Profile",
-                                      style: AppStyle.bodyRegularPoppinsBlack,
+                              decoration: BoxDecoration(
+                                color: AppColors.lightGrey.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(
+                                  ResponsiveHelper.spacing(16),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: ResponsiveHelper.paddingSymmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      onTap: () {
+                                        Get.toNamed(AppRoutes.updateProfile);
+                                      },
+                                      leading: const Icon(
+                                        FontAwesomeIcons.user,
+                                      ),
+                                      title: Text(
+                                        "Update Profile",
+                                        style: AppStyle.bodyRegularPoppinsBlack,
+                                      ),
+                                      trailing: Icon(
+                                        Icons.chevron_right,
+                                        color: AppColors.grey,
+                                        size: ResponsiveHelper.spacing(24),
+                                      ),
                                     ),
-                                    trailing: Icon(
-                                      Icons.chevron_right,
-                                      color: AppColors.grey,
-                                      size: ResponsiveHelper.spacing(24),
+                                    const Divider(),
+                                    ListTile(
+                                      onTap: () {
+                                        Get.toNamed(AppRoutes.notifications);
+                                      },
+                                      leading: const Icon(
+                                        FontAwesomeIcons.bell,
+                                      ),
+                                      title: Text(
+                                        "Notification",
+                                        style: AppStyle.bodyRegularPoppinsBlack,
+                                      ),
+                                      trailing: Icon(
+                                        Icons.chevron_right,
+                                        color: AppColors.grey,
+                                        size: ResponsiveHelper.spacing(24),
+                                      ),
                                     ),
-                                  ),
-                                  Divider(),
-                                  ListTile(
-                                    onTap: () {
-                                      Get.toNamed(AppRoutes.notifications);
-                                    },
-                                    leading: Icon(FontAwesomeIcons.bell),
-                                    title: Text(
-                                      "Notification",
-                                      style: AppStyle.bodyRegularPoppinsBlack,
+                                    const Divider(),
+                                    ListTile(
+                                      leading: Icon(
+                                        FontAwesomeIcons.signOut,
+                                        color: AppColors.primary,
+                                      ),
+                                      title: Text(
+                                        "Log Out",
+                                        style:
+                                            AppStyle.bodyRegularPoppinsPrimary,
+                                      ),
+                                      trailing: Icon(
+                                        Icons.chevron_right,
+                                        color: AppColors.grey,
+                                        size: ResponsiveHelper.spacing(24),
+                                      ),
+                                      onTap: () => _showLogoutDialog(
+                                        context,
+                                        controller,
+                                      ),
                                     ),
-                                    trailing: Icon(
-                                      Icons.chevron_right,
-                                      color: AppColors.grey,
-                                      size: ResponsiveHelper.spacing(24),
-                                    ),
-                                  ),
-                                  Divider(),
-                                  ListTile(
-                                    leading: Icon(
-                                      FontAwesomeIcons.signOut,
-                                      color: AppColors.primary,
-                                    ),
-                                    title: Text(
-                                      "Log Out",
-                                      style: AppStyle.bodyRegularPoppinsPrimary,
-                                    ),
-                                    trailing: Icon(
-                                      Icons.chevron_right,
-                                      color: AppColors.grey,
-                                      size: ResponsiveHelper.spacing(24),
-                                    ),
-                                    onTap: () =>
-                                        _showLogoutDialog(context, controller),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: ResponsiveHelper.spacing(24)),
-                        ],
+                            SizedBox(height: ResponsiveHelper.spacing(24)),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
         ),
-        bottomNavigationBar: CustomBottomBar(),
+        bottomNavigationBar: const CustomBottomBar(),
       ),
     );
   }

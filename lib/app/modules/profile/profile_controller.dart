@@ -89,26 +89,7 @@ class ProfileController extends GetxController {
             email: users.emailId,
             profilePictureUrl: users.profileImg,
           );
-          // userProfileList.add(
-          //   UserProfile(
-          //     empCode: users.empCode,
-          //     personName: users.personName,
-          //     contactNo: users.contactNo,
-          //     emailId: users.emailId,
-          //     userName: users.userName,
-          //     profileImg: users.profileImg,
-          //     password: users.password,
-          //     roleId: users.roleId,
-          //     hodPersonName: users.hodPersonName,
-          //     hodEmpCode: users.hodEmpCode,
-          //     reportingToPersonName: users.reportingToPersonName,
-          //     reportingToEmpCode: users.reportingToEmpCode,
-          //     departmentName: users.departmentName,
-          //     designationName: users.designationName,
-          //     roleName: users.roleName,
-          //     allowedModulesData: users.allowedModulesData,
-          //   ),
-          // );
+         
         } else {
           errorMessage.value =
               'Failed to load profile: ${response[0].message ?? 'Unknown error'}';
@@ -130,29 +111,6 @@ class ProfileController extends GetxController {
       isLoading.value = false;
     }
   }
-
-  // // Mock fetching user data (replace with actual API call or local storage)
-  // Future<void> fetchUser() async {
-  //   try {
-  //     isLoading.value = true;
-  //     // Simulate network delay
-  //     await Future.delayed(const Duration(seconds: 1));
-  //     user.value = const User(
-  //       id: '1',
-  //       name: 'John Doe',
-  //       email: 'john.doe@example.com',
-  //       profilePictureUrl: AppImages.profile, // No profile picture for now
-  //     );
-  //   } catch (e) {
-  //     Get.snackbar(
-  //       'Error',
-  //       'Failed to load user: $e',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //     );
-  //   } finally {
-  //     isLoading.value = false;
-  //   }
-  // }
 
   // Handle logout logic (replace with actual auth service logout)
   Future<void> logout() async {

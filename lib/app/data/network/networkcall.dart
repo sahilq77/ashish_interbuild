@@ -146,6 +146,7 @@ class Networkcall {
       // ---- Build headers (add Bearer if present) ----
       final Map<String, String> headers = {};
       if (AppUtility.authToken != null && AppUtility.authToken!.isNotEmpty) {
+        log("Bearer Token: ${AppUtility.authToken}");
         headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
       }
 
