@@ -22,6 +22,8 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/update_clien
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list.dart';
@@ -107,6 +109,9 @@ class AppRoutes {
   static const String workFrontUpdateProjectList =
       '/work-front-update-project-list';
   static const String workFrontUpdateList = '/work-front-update-list';
+
+      static const String workFrontUpdateDetailList =
+      '/work-front-update-detail-list';
 
   static const String workFrontUpdateDashboard = '/work-front-update-dashboard';
 
@@ -282,6 +287,14 @@ class AppRoutes {
 
       binding: WorkFrontUpdateListBinding(),
     ),
+
+   GetPage(
+      name: workFrontUpdateDetailList,
+      page: () => WorkFrontUpdateDetailListView(),
+
+      binding: WorkFrontUpdateDetailListBinding(),
+    ),
+    
 
     GetPage(
       name: editAccForm,

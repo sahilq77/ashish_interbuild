@@ -1,5 +1,5 @@
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_controller.dart';
-import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-class WorkFrontUpdateListView extends StatelessWidget {
-  const WorkFrontUpdateListView({super.key});
+class WorkFrontUpdateDetailListView extends StatelessWidget {
+  const WorkFrontUpdateDetailListView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final WorkFrontUpdateListController controller = Get.find();
+    final WorkFrontUpdateDetailListController controller = Get.find();
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -30,7 +30,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
               child: Text(
-                "Skyline Towers ➔ WFU Dashboard ➔ Work Front Update",
+                "Work Front Update ➔ Work Front Update Detail",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
@@ -169,10 +169,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
                                                 style:
                                                     AppButtonStyles.outlinedExtraSmallPrimary(),
                                                 onPressed: () {
-                                                  Get.toNamed(
-                                                    AppRoutes
-                                                        .workFrontUpdateDetailList,
-                                                  );
+                                                  // Get.toNamed(AppRoutes.updateWorkFront);
                                                 },
                                                 child: Text(
                                                   "Update",
@@ -205,7 +202,9 @@ class WorkFrontUpdateListView extends StatelessWidget {
   // -----------------------------------------------------------------
   // UI Helpers
   // -----------------------------------------------------------------
-  TextFormField _buildSearchField(WorkFrontUpdateListController controller) {
+  TextFormField _buildSearchField(
+    WorkFrontUpdateDetailListController controller,
+  ) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
@@ -327,7 +326,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Work Front Update',
+        'Work Front Update Detail',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
@@ -343,7 +342,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
   // ---------- Filter Button ----------
   Widget _buildFilterButton(
     BuildContext context,
-    WorkFrontUpdateListController controller,
+    WorkFrontUpdateDetailListController controller,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -362,7 +361,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
   // ---------- Filter Dialog (NOW WITH PACKAGE + ZONE) ----------
   void _showFilterDialog(
     BuildContext context,
-    WorkFrontUpdateListController controller,
+    WorkFrontUpdateDetailListController controller,
   ) {
     String? tempSelectedPackage = controller.selectedPackageFilter.value;
     String? tempSelectedZone = controller.selectedZoneFilter.value;
@@ -527,7 +526,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
   }
 
   // ---------- Sort Button ----------
-  Widget _buildSortButton(WorkFrontUpdateListController controller) {
+  Widget _buildSortButton(WorkFrontUpdateDetailListController controller) {
     return Obx(
       () => Container(
         decoration: BoxDecoration(
