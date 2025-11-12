@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-class AddAccIssueFormController extends GetxController {
-
+class EditAccController extends GetxController {
+ 
 
    final RxString package = ''.obs;
   final RxList<String> packages = <String>['BlueNile Cafe Package', 'Alpha Package'].obs;

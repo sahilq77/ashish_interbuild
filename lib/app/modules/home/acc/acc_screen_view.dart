@@ -215,7 +215,7 @@ class AccScreenView extends StatelessWidget {
                                             Expanded(
                                               child: OutlinedButton(
                                                 style:
-                                                    AppButtonStyles.outlinedSmallBlack(),
+                                                    AppButtonStyles.outlinedExtraSmallBlack(),
                                                 onPressed: () {
                                                   Get.toNamed(
                                                     AppRoutes.updateAccForm,
@@ -236,18 +236,31 @@ class AccScreenView extends StatelessWidget {
                                             Expanded(
                                               child: OutlinedButton(
                                                 style:
-                                                    AppButtonStyles.outlinedSmallBlack(),
+                                                    AppButtonStyles.outlinedExtraSmallBlack(),
+                                                onPressed: () {
+                                                  Get.toNamed(
+                                                    AppRoutes.editAccForm,
+                                                  );
+                                                },
+                                                child: Icon(Icons.edit),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  ResponsiveHelper.screenWidth *
+                                                  0.05,
+                                            ),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style:
+                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
                                                 onPressed: () {
                                                   // _showConfirmationDialog(
                                                   //   context,
                                                   //   sheet,
                                                   // );
                                                 },
-                                                child: Text(
-                                                  "Delete",
-                                                  style: AppStyle
-                                                      .labelPrimaryPoppinsBlack,
-                                                ),
+                                                child: Icon(Icons.delete),
                                               ),
                                             ),
                                           ],

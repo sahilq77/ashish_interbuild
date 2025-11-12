@@ -1,4 +1,5 @@
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/edit_acc/edit_acc_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -7,14 +8,12 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddAccIssueFormView extends StatelessWidget {
-  const AddAccIssueFormView({super.key});
+class EditAccFormView extends StatelessWidget {
+  const EditAccFormView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final AddAccIssueFormController controller = Get.put(
-      AddAccIssueFormController(),
-    );
+    final EditAccController controller = Get.put(EditAccController());
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -27,7 +26,7 @@ class AddAccIssueFormView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDropdownField(
-                label: 'Package *',
+                label: 'Package Name*',
                 value: controller.package.value,
                 items: controller.packages,
                 onChanged: controller.onPackageChanged,
@@ -49,7 +48,7 @@ class AddAccIssueFormView extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
-                label: 'Priority',
+                label: 'Priority *',
                 value: controller.priority.value,
                 items: controller.priorities,
                 onChanged: controller.onPriorityChanged,
@@ -57,7 +56,7 @@ class AddAccIssueFormView extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
-                label: 'Key Delay Events',
+                label: 'Key Delay Events *',
                 value: controller.keyDelayEvents.value,
                 items: controller.keyDelayOptions,
                 onChanged: controller.onKeyDelayEventsChanged,
@@ -86,7 +85,7 @@ class AddAccIssueFormView extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDateField(
-                label: 'Issue Open Date *',
+                label: 'Issue Since Date *',
                 selectedDate: controller.issueOpenDate.value,
                 onDateChanged: controller.onIssueOpenDateChanged,
                 hint: 'Enter Date',
@@ -104,7 +103,7 @@ class AddAccIssueFormView extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildAttachmentField(
-                label: 'Attachment',
+                label: 'Attachment  (View)',
                 fileName: controller.attachmentFileName.value,
                 onAttachmentPicked: controller.pickAttachment,
                 hint: 'Choose File',
@@ -278,7 +277,7 @@ class AddAccIssueFormView extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Add ACC Issue Form',
+        'Edit ACC Issue Form',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
