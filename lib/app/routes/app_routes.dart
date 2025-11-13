@@ -52,8 +52,8 @@ import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_pr
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_list.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_binding.dart';
-import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_project_list/weekly_inspection_project_list.dart';
-import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_project_list/weekly_inspection_project_list_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_project_list/weekly_inspection_project_list.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_project_list/weekly_inspection_project_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_view.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_work_inspection_dashboard/weekly_inspection_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_work_inspection_dashboard/weekly_inspection_dashboard_binding.dart';
