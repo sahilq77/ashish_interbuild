@@ -64,8 +64,10 @@ class DprProjectList extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final project = controller.filteredProjects[index];
                             return GestureDetector(
-                              onTap: () =>
-                                  Get.toNamed(AppRoutes.dailyProgressDashboard),
+                              onTap: () => Get.toNamed(
+                                AppRoutes.dprPackageList,
+                                arguments: project.projectId,
+                              ),
                               child: Card(
                                 margin: EdgeInsets.only(
                                   bottom: ResponsiveHelper.screenHeight * 0.02,

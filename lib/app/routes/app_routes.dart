@@ -25,6 +25,7 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_
 import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_package_list/dpr_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
@@ -85,6 +86,7 @@ class AppRoutes {
   static const String pboqList = '/pboq-list';
   static const String deductionForm = '/deduction-form';
   static const String dailyProgressReport = '/daily-progress-report';
+  static const String dprPackageList = '/dpr-package-list';
   static const String updateDailyReportList =
       '/update-daily-progress-report-list';
   static const String dailyProgressDashboard = '/daily-progress-dashboard';
@@ -205,11 +207,19 @@ class AppRoutes {
       page: () => const NotificationView(),
       binding: NotificationBinding(),
     ),
+
+
     GetPage(
       name: dprProjectList,
       page: () => const DprProjectList(),
       binding: DprProjectListBinding(),
     ),
+GetPage(
+      name: dprPackageList,
+      page: () => const DprPackageList(),
+      binding: PackageListBinding(),
+    ),
+    
     GetPage(
       name: weeklyInspectionProjectList,
       page: () => const WeeklyInspectionProjectList(),
