@@ -5,12 +5,9 @@ import 'package:ashishinterbuild/app/modules/global_controller/project_name/proj
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
-import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DprProjectList extends StatelessWidget {
@@ -18,14 +15,15 @@ class DprProjectList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProjectNameController controller = Get.find();
+    // Reuse the same controller instance across screens
+    final ProjectNameController controller = Get.find<ProjectNameController>();
     final bottomController = Get.put(BottomNavigationController());
     ResponsiveHelper.init(context);
+
     return PopScope(
-      canPop: false, // Prevent default back navigation
+      canPop: false,
       onPopInvoked: (didPop) async {
         if (!didPop) {
-          // Call the same onWillPop logic from BottomNavigationController
           bool shouldPop = await bottomController.onWillPop();
           if (shouldPop && context.mounted) {
             Navigator.of(context).pop();
@@ -40,84 +38,123 @@ class DprProjectList extends StatelessWidget {
           color: AppColors.primary,
           child: Column(
             children: [
-              // Search, Filter and Sort row
+              // Search + Sort Row
               Padding(
                 padding: ResponsiveHelper.padding(16),
                 child: Row(
                   children: [
                     Expanded(child: _buildSearchField(controller)),
                     SizedBox(width: ResponsiveHelper.spacing(8)),
-                    // _buildFilterButton(context, controller),
-                    // SizedBox(width: ResponsiveHelper.spacing(8)),
                     _buildSortButton(controller),
                   ],
                 ),
               ),
-              // Expanded to make ListView take remaining space
+
+              // Project List
               Expanded(
-                child: Obx(
-                  () => controller.isLoading.value
-                      ? _buildShimmerEffect(context)
-                      : ListView.builder(
-                          padding: ResponsiveHelper.padding(16),
-                          itemCount: controller.filteredProjects.length,
-                          itemBuilder: (context, index) {
-                            final project = controller.filteredProjects[index];
-                            return GestureDetector(
-                              onTap: () => Get.toNamed(
-                                AppRoutes.dprPackageList,
-                                arguments: project.projectId,
-                              ),
-                              child: Card(
-                                margin: EdgeInsets.only(
-                                  bottom: ResponsiveHelper.screenHeight * 0.02,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.white,
-                                        Colors.grey.shade50,
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                    // border: Border(
-                                    //   left: BorderSide(
-                                    //     color: AppColors.primary,
-                                    //     width: 5,
-                                    //   ),
-                                    // ),
-                                  ),
-                                  child: Padding(
-                                    padding: ResponsiveHelper.padding(16),
-                                    child: _buildDetailRow(
-                                      "Project Name",
-                                      project.projectName,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                child: Obx(() {
+                  // First load shimmer
+                  if (controller.isLoading.value &&
+                      controller.projects.isEmpty) {
+                    return _buildShimmerEffect();
+                  }
+
+                  // Error state
+                  if (controller.errorMessage.value.isNotEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: ResponsiveHelper.padding(20),
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                          textAlign: TextAlign.center,
                         ),
-                ),
+                      ),
+                    );
+                  }
+
+                  // Empty state
+                  if (controller.projects.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No projects found',
+                        style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                      ),
+                    );
+                  }
+
+                  // List with Load More
+                  return ListView.builder(
+                    padding: ResponsiveHelper.padding(16),
+                    itemCount:
+                        controller.projects.length +
+                        (controller.hasMoreData.value ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      // Load more trigger
+                      if (index == controller.projects.length) {
+                        controller.loadMore(context);
+                        return _buildLoadMoreIndicator(controller);
+                      }
+
+                      final project = controller.projects[index];
+
+                      return GestureDetector(
+                        onTap: () => Get.toNamed(
+                          AppRoutes.dprPackageList,
+                          arguments: project.projectId,
+                        ),
+                        child: Card(
+                          margin: EdgeInsets.only(
+                            bottom: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.white, Colors.grey.shade50],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              // border: Border(
+                              //   left: BorderSide(
+                              //     color: AppColors.primary,
+                              //     width: 5,
+                              //   ),
+                              // ),
+                            ),
+                            child: Padding(
+                              padding: ResponsiveHelper.padding(16),
+                              child: _buildDetailRow(
+                                "Project Name",
+                                project.projectName,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }),
               ),
             ],
           ),
         ),
-        bottomNavigationBar: CustomBottomBar(),
+        bottomNavigationBar: const CustomBottomBar(),
       ),
     );
   }
 
+  // ── Search Field ─────────────────────────────────────────────────────
   Widget _buildSearchField(ProjectNameController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
-        hintText: 'Search...',
+        hintText: 'Search projects...',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
         suffixIcon: const Icon(Icons.search, size: 20),
         contentPadding: EdgeInsets.symmetric(
           horizontal: ResponsiveHelper.spacing(12),
@@ -128,24 +165,7 @@ class DprProjectList extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterButton(
-    BuildContext context,
-    ProjectNameController controller,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
-        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-        constraints: const BoxConstraints(),
-      ),
-    );
-  }
-
+  // ── Sort Button ──────────────────────────────────────────────────────
   Widget _buildSortButton(ProjectNameController controller) {
     return Obx(
       () => Container(
@@ -168,157 +188,22 @@ class DprProjectList extends StatelessWidget {
     );
   }
 
-  void _showFilterDialog(
-    BuildContext context,
-    ProjectNameController controller,
-  ) {
-    String? tempSelectedProject = controller.selectedProjectFilter.value;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: ResponsiveHelper.paddingSymmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(ResponsiveHelper.spacing(20)),
-                  ),
-                ),
-                child: Text(
-                  'Filter Projects',
-                  style: AppStyle.heading1PoppinsWhite.responsive,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Project',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  items: controller.getProjectNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Project',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      tempSelectedProject = value;
-                    });
-                  },
-                  selectedItem: tempSelectedProject,
-                ),
-              ),
-              Padding(
-                padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveHelper.spacing(10),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          controller.clearFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Clear',
-                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: ResponsiveHelper.spacing(16)),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveHelper.spacing(10),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          controller.selectedProjectFilter.value =
-                              tempSelectedProject;
-                          controller.applyFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Apply',
-                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+  // ── Project Row ──────────────────────────────────────────────────────
+  Widget _buildDetailRow(String label, String value) {
+    return Text(
+      value,
+      style: AppStyle.reportCardTitle.responsive.copyWith(
+        fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+        fontWeight: FontWeight.w500,
       ),
     );
   }
 
-  Widget _buildShimmerEffect(BuildContext context) {
+  // ── Shimmer Loading ──────────────────────────────────────────────────
+  Widget _buildShimmerEffect() {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5, // Show 5 shimmer cards
+      itemCount: 6,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -327,17 +212,14 @@ class DprProjectList extends StatelessWidget {
             margin: EdgeInsets.only(
               bottom: ResponsiveHelper.screenHeight * 0.02,
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Container(
+              height: 80,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
-                border: Border(
-                  left: BorderSide(color: AppColors.primary, width: 5),
-                ),
-              ),
-              child: Padding(
-                padding: ResponsiveHelper.padding(16),
-                child: Column(children: [_buildShimmerRow()]),
               ),
             ),
           ),
@@ -346,27 +228,21 @@ class DprProjectList extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(width: 130, height: 16, color: Colors.grey.shade300),
-        const SizedBox(width: 8),
-        Text(': ', style: AppStyle.reportCardSubTitle),
-        Expanded(child: Container(height: 16, color: Colors.grey.shade300)),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Text(
-      value,
-      style: AppStyle.reportCardTitle.responsive.copyWith(
-        fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+  // ── Load More Indicator ──────────────────────────────────────────────
+  Widget _buildLoadMoreIndicator(ProjectNameController controller) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Obx(
+          () => controller.isLoadingMore.value
+              ? const CircularProgressIndicator(strokeWidth: 2)
+              : const SizedBox.shrink(),
+        ),
       ),
     );
   }
 
+  // ── AppBar ───────────────────────────────────────────────────────────
   AppBar _buildAppbar() {
     return AppBar(
       backgroundColor: AppColors.white,

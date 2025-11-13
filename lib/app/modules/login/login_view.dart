@@ -25,6 +25,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     ResponsiveHelper.init(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.white,
@@ -32,7 +33,8 @@ class _LoginViewState extends State<LoginView> {
         child: Center(
           child: Form(
             key: controller.formKey,
-            autovalidateMode: AutovalidateMode.onUnfocus,
+            autovalidateMode:
+                AutovalidateMode.onUserInteraction, // <-- real-time validation
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               padding: ResponsiveHelper.paddingSymmetric(horizontal: 24),
@@ -52,81 +54,43 @@ class _LoginViewState extends State<LoginView> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: ResponsiveHelper.spacing(48)),
-                  // Username field
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ResponsiveHelper.safeText(
-                      'Enter your username',
-                      style: AppStyle.bodyRegularPoppinsBlack.responsive
-                          .copyWith(fontSize: 15),
-                    ),
-                  ),
+
+                  // ---------- USERNAME ----------
+                  _buildLabel('Enter your username'),
                   SizedBox(height: ResponsiveHelper.spacing(12)),
                   TextFormField(
                     key: controller.emailFieldKey,
                     controller: controller.emailController,
                     focusNode: controller.emailFocusNode,
                     keyboardType: TextInputType.text,
-                    validator: (value) => TextValidator.isUsername(value),
+                    validator: TextValidator.isUsername,
                     inputFormatters: [
                       FilteringTextInputFormatter.deny(RegExp(r'\s')),
                       LengthLimitingTextInputFormatter(50),
                     ],
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.person,
-                        color: AppColors.primary,
-                        size: ResponsiveHelper.getResponsiveFontSize(20),
-                      ),
-                      hintText: 'Enter username',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(12),
-                        ),
-                        borderSide: const BorderSide(color: AppColors.grey),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(12),
-                        ),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                      ),
-                      contentPadding: ResponsiveHelper.paddingSymmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
+                    decoration: _inputDecoration(
+                      hint: 'Enter username',
+                      prefixIcon: Icons.person,
                     ),
                   ),
                   SizedBox(height: ResponsiveHelper.spacing(24)),
-                  // Password field
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ResponsiveHelper.safeText(
-                      'Enter your password',
-                      style: AppStyle.bodyRegularPoppinsBlack.responsive
-                          .copyWith(fontSize: 15),
-                    ),
-                  ),
+
+                  // ---------- PASSWORD ----------
+                  _buildLabel('Enter your password'),
                   SizedBox(height: ResponsiveHelper.spacing(12)),
                   Obx(
                     () => TextFormField(
                       controller: controller.passwordController,
                       focusNode: controller.passwordFocusNode,
                       obscureText: controller.isPasswordHidden.value,
-                      validator: (value) => TextValidator.isPassword(value),
+                      validator: TextValidator.isPassword,
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(50),
                         SecureTextInputFormatter(),
                       ],
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.lock,
-                          color: AppColors.primary,
-                          size: ResponsiveHelper.getResponsiveFontSize(20),
-                        ),
+                      decoration: _inputDecoration(
+                        hint: 'Enter password',
+                        prefixIcon: Icons.lock,
                         suffixIcon: IconButton(
                           icon: Icon(
                             controller.isPasswordHidden.value
@@ -136,42 +100,30 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           onPressed: controller.togglePasswordVisibility,
                         ),
-                        hintText: 'Enter password',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            ResponsiveHelper.spacing(12),
-                          ),
-                          borderSide: const BorderSide(color: AppColors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            ResponsiveHelper.spacing(12),
-                          ),
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: ResponsiveHelper.paddingSymmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
                       ),
                     ),
                   ),
                   SizedBox(height: ResponsiveHelper.spacing(48)),
-                  // Login button
+
+                  // ---------- LOGIN BUTTON ----------
                   SizedBox(
                     height: ResponsiveHelper.spacing(50),
                     width: double.infinity,
                     child: ElevatedButton(
-                   onPressed: () {
-                      controller.login(
-                        mobile: "",
-                        password: "",
-                        deviceToken: "",
-                      );
-                    },
+                      onPressed:
+                          controller.formKey.currentState?.validate() ?? false
+                          ? () {
+                              // hide keyboard
+                              FocusScope.of(context).unfocus();
+
+                              // call login with real data
+                              controller.login(
+                                mobile: controller.emailController.text.trim(),
+                                password: controller.passwordController.text,
+                                deviceToken: "",
+                              );
+                            }
+                          : null, // disabled when invalid
                       style: AppButtonStyles.elevatedLargeBlack(),
                       child: ResponsiveHelper.safeText(
                         'Login',
@@ -179,6 +131,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                   ),
+
                   SizedBox(height: ResponsiveHelper.spacing(40)),
                 ],
               ),
@@ -188,4 +141,49 @@ class _LoginViewState extends State<LoginView> {
       ),
     );
   }
+
+  // -----------------------------------------------------------------
+  // Helper widgets
+  // -----------------------------------------------------------------
+  Widget _buildLabel(String text) => Align(
+    alignment: Alignment.centerLeft,
+    child: ResponsiveHelper.safeText(
+      text,
+      style: AppStyle.bodyRegularPoppinsBlack.responsive.copyWith(fontSize: 15),
+    ),
+  );
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData prefixIcon,
+    Widget? suffixIcon,
+  }) => InputDecoration(
+    prefixIcon: Icon(
+      prefixIcon,
+      color: AppColors.primary,
+      size: ResponsiveHelper.getResponsiveFontSize(20),
+    ),
+    suffixIcon: suffixIcon,
+    hintText: hint,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(12)),
+      borderSide: const BorderSide(color: AppColors.grey),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(12)),
+      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(12)),
+      borderSide: const BorderSide(color: Colors.red),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(12)),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
+    ),
+    contentPadding: ResponsiveHelper.paddingSymmetric(
+      horizontal: 16,
+      vertical: 16,
+    ),
+  );
 }

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/project_name/project%20_name_model.dart';
+
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
@@ -11,57 +13,77 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class ProjectNameController extends GetxController {
-  // ── Existing ─────────────────────────────────────────────────────
+  // ── UI State ─────────────────────────────────────────────────────
   final RxList<ProjectName> projects = <ProjectName>[].obs;
-  final RxList<ProjectName> filteredProjects = <ProjectName>[].obs;
   final RxBool isLoading = true.obs;
-  final TextEditingController searchController = TextEditingController();
-  final RxnString selectedProjectFilter = RxnString(null);
-  final RxBool isAscending = true.obs;
-
-  // ── New (pagination) ───────────────────────────────────────────
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMoreData = true.obs;
   final RxString errorMessage = ''.obs;
+  final TextEditingController searchController = TextEditingController();
+
+  // ── Pagination ───────────────────────────────────────────────────
   final RxInt offset = 0.obs;
-  final int limit = 20; // change to whatever your API expects
-  final RxList<ProjectName> projectList = <ProjectName>[].obs; // internal list
+  final int limit = 20;
+
+  // ── Internal API Params ─────────────────────────────────────────
+  final RxString _currentKeyword = ''.obs;
+  final RxString _currentOrderBy = 'desc'.obs;
+  final RxBool isAscending = true.obs; // UI only (icon)
+
+  // ── Debounce ─────────────────────────────────────────────────────
+  Timer? _searchDebounce;
+
   @override
   void onInit() {
     super.onInit();
-    fetchProjects(reset: true, context: Get.context!); // first page
-    filteredProjects.assignAll(projects); // keep UI in sync
+    _currentOrderBy.value = '';
+    isAscending.value = true;
+    fetchProjects(reset: true, context: Get.context!, isPagination: true);
   }
 
   @override
   void onClose() {
-    // Dispose of the search controller
     searchController.dispose();
+    _searchDebounce?.cancel();
     super.onClose();
   }
 
-  /// -----------------------------------------------------------
-  ///  Fetch projects from the real API
-  /// -----------------------------------------------------------
+  // ── Build Query String ───────────────────────────────────────────
+  String _buildQueryParams({bool includePagination = true}) {
+    final List<String> parts = [];
+
+    if (_currentKeyword.value.isNotEmpty) {
+      parts.add('keyword=${Uri.encodeComponent(_currentKeyword.value)}');
+    }
+
+    parts.add('order_by=${_currentOrderBy.value}');
+
+    if (includePagination) {
+      parts.add('start=${offset.value}');
+      parts.add('length=$limit');
+    }
+
+    return parts.isNotEmpty ? '?${parts.join('&')}' : '';
+  }
+
+  // ── Fetch Projects (with keyword, order_by, pagination) ──────────
   Future<void> fetchProjects({
     required BuildContext context,
     bool reset = false,
     bool isPagination = false,
-    bool forceFetch = false,
   }) async {
-    // ---- reset ------------------------------------------------
+    projects.clear();
     if (reset) {
       offset.value = 0;
-      projectList.clear();
+      projects.clear();
       hasMoreData.value = true;
     }
 
     if (!hasMoreData.value && !reset) {
-      log('No more data to fetch');
+      log('No more data');
       return;
     }
 
-    // ---- loading state ----------------------------------------
     if (isPagination) {
       isLoadingMore.value = true;
     } else {
@@ -70,49 +92,49 @@ class ProjectNameController extends GetxController {
     errorMessage.value = '';
 
     try {
-      // ---- API CALL -------------------------------------------
+      final String query = _buildQueryParams();
+      final String endpoint = Networkutility.getProjectNameList + query;
+
+      log('API → $endpoint');
+
       final response =
           await Networkcall().getMethod(
-                Networkutility
-                    .getProjectNameListApi, // <-- your endpoint constant
-                Networkutility.getProjectNameList, // <-- query-params if any
+                Networkutility.getProjectNameListApi,
+                endpoint,
                 context,
               )
               as List<GetProjectNameResponse>?;
 
-      // ---- SUCCESS --------------------------------------------
       if (response != null && response.isNotEmpty) {
         final apiResponse = response[0];
 
         if (apiResponse.status == true) {
           final List<ProjectData> apiData = apiResponse.data;
 
-          // stop pagination if we got less than limit
           if (apiData.isEmpty || apiData.length < limit) {
             hasMoreData.value = false;
           }
 
-          // ---- Convert API model → UI model --------------------
           final List<ProjectName> newProjects = apiData.map((p) {
             return ProjectName(
               projectId: p.projectId,
               projectName: p.projectName,
               clientName: p.clientName,
-              location: "", // API does not return location
-              status: p.projectRoles, // you can map to a better field
+              location: "",
+              status: p.projectRoles,
             );
           }).toList();
 
-          projectList.addAll(newProjects);
-          projects.assignAll(projectList); // UI list
-          filteredProjects.assignAll(projectList); // filtered list
+          if (reset) {
+            projects.assignAll(newProjects);
+          } else {
+            projects.addAll(newProjects);
+          }
 
           offset.value += limit;
-          log(
-            'Fetched ${newProjects.length} projects – offset: ${offset.value}',
-          );
+
+          log('Fetched ${newProjects.length} | Total: ${projects.length}');
         } else {
-          // ---- API returned status:false -----------------------
           hasMoreData.value = false;
           errorMessage.value = apiResponse.message ?? 'No data';
           AppSnackbarStyles.showError(
@@ -121,7 +143,6 @@ class ProjectNameController extends GetxController {
           );
         }
       } else {
-        // ---- No response ---------------------------------------
         hasMoreData.value = false;
         errorMessage.value = 'Empty response';
         AppSnackbarStyles.showError(
@@ -129,20 +150,21 @@ class ProjectNameController extends GetxController {
           message: errorMessage.value,
         );
       }
-    }
-    // ---- EXCEPTIONS -------------------------------------------
-    on NoInternetException catch (e) {
+    } on NoInternetException catch (e) {
       errorMessage.value = e.message;
-      AppSnackbarStyles.showError(title: 'Error', message: e.message);
+      AppSnackbarStyles.showError(title: 'No Internet', message: e.message);
     } on TimeoutException catch (e) {
       errorMessage.value = e.message;
-      AppSnackbarStyles.showError(title: 'Error', message: e.message);
+      AppSnackbarStyles.showError(title: 'Timeout', message: e.message);
     } on HttpException catch (e) {
       errorMessage.value = '${e.message} (Code: ${e.statusCode})';
-      AppSnackbarStyles.showError(title: 'Error', message: errorMessage.value);
+      AppSnackbarStyles.showError(
+        title: 'HTTP Error',
+        message: errorMessage.value,
+      );
     } on ParseException catch (e) {
       errorMessage.value = e.message;
-      AppSnackbarStyles.showError(title: 'Error', message: e.message);
+      AppSnackbarStyles.showError(title: 'Parse Error', message: e.message);
     } catch (e) {
       errorMessage.value = 'Unexpected error: $e';
       AppSnackbarStyles.showError(title: 'Error', message: errorMessage.value);
@@ -151,104 +173,46 @@ class ProjectNameController extends GetxController {
       isLoadingMore.value = false;
     }
   }
-  // Function to load dummy data
 
-  // Function to handle refresh
-  Future<void> refreshData() async {
-    searchController.clear();
-    selectedProjectFilter.value = null;
-    await fetchProjects(reset: true, context: Get.context!);
+  // ── Search (Debounced) ───────────────────────────────────────────
+  void searchProjects(String query) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+      final trimmed = query.trim();
+      if (_currentKeyword.value != trimmed) {
+        _currentKeyword.value = trimmed;
+        fetchProjects(reset: true, context: Get.context!);
+      }
+    });
   }
 
+  // ── Toggle Sorting ───────────────────────────────────────────────
+  void toggleSorting() {
+    isAscending.value = !isAscending.value;
+    _currentOrderBy.value = isAscending.value ? 'desc' : 'asc';
+    fetchProjects(reset: true, context: Get.context!);
+    update();
+  }
+
+  // ── Load More ────────────────────────────────────────────────────
   void loadMore(BuildContext context) {
     if (!isLoadingMore.value && hasMoreData.value) {
       fetchProjects(context: context, isPagination: true);
     }
   }
 
-  // Function to handle view action
-  void viewProject(ProjectName project) {
-    // Implement navigation or dialog to view details
-    print('Viewing: ${project.projectName}');
-  }
-
-  // Function to handle search
-  void searchProjects(String query) {
-    if (query.isEmpty) {
-      // If search query is empty, show all projects
-      filteredProjects.assignAll(projects);
-    } else {
-      // Filter projects based on projectName or clientName
-      filteredProjects.assignAll(
-        projects
-            .where(
-              (project) =>
-                  project.projectName.toLowerCase().contains(
-                    query.toLowerCase(),
-                  ) ||
-                  project.clientName.toLowerCase().contains(
-                    query.toLowerCase(),
-                  ),
-            )
-            .toList(),
-      );
-    }
-    applySorting();
-  }
-
-  // Get unique project names for filter
-  List<String> getProjectNames() {
-    return projects.map((p) => p.projectName).toSet().toList();
-  }
-
-  // Apply filters
-  void applyFilters() {
-    var filtered = projects.toList();
-
-    if (selectedProjectFilter.value != null) {
-      filtered = filtered
-          .where((p) => p.projectName == selectedProjectFilter.value)
-          .toList();
-    }
-
-    if (searchController.text.isNotEmpty) {
-      filtered = filtered
-          .where(
-            (p) =>
-                p.projectName.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ) ||
-                p.clientName.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ),
-          )
-          .toList();
-    }
-
-    filteredProjects.assignAll(filtered);
-    applySorting();
-  }
-
-  // Clear filters
-  void clearFilters() {
-    selectedProjectFilter.value = null;
+  // ── Refresh ──────────────────────────────────────────────────────
+  Future<void> refreshData() async {
     searchController.clear();
-    filteredProjects.assignAll(projects);
-    applySorting();
+    _currentKeyword.value = '';
+    _currentOrderBy.value = '';
+    isAscending.value = true;
+    await fetchProjects(reset: true, context: Get.context!);
   }
 
-  // Toggle sorting
-  void toggleSorting() {
-    isAscending.value = !isAscending.value;
-    applySorting();
-  }
-
-  // Apply sorting
-  void applySorting() {
-    if (isAscending.value) {
-      filteredProjects.sort((a, b) => a.projectName.compareTo(b.projectName));
-    } else {
-      filteredProjects.sort((a, b) => b.projectName.compareTo(a.projectName));
-    }
+  // ── View Project (Optional) ──────────────────────────────────────
+  void viewProject(ProjectName project) {
+    log('View: ${project.projectName} (ID: ${project.projectId})');
+    // Navigate or show dialog
   }
 }
