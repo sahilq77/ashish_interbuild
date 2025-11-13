@@ -36,6 +36,7 @@ import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_u
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_view.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_package_list/work_front_update_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_project_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/profile/profile_binding.dart';
@@ -127,6 +128,9 @@ class AppRoutes {
   static const String noInternet = '/nointernet';
   static const String workFrontUpdateProjectList =
       '/work-front-update-project-list';
+  static const String workFrontUpdatePackageList =
+      '/work-front-update-package-list';
+      
   static const String workFrontUpdateList = '/work-front-update-list';
 
   static const String workFrontUpdateDetailList =
@@ -328,6 +332,13 @@ class AppRoutes {
 
       binding: WorkFrontUpdateProjectListBinding(),
     ),
+    GetPage(
+      name: workFrontUpdatePackageList,
+      page: () => WorkfrontUpdatePackageList(),
+
+      binding: PackageListBinding(),
+    ),
+    
     GetPage(
       name: workFrontUpdateDashboard,
       page: () => WorkFrontUpdateDashboard(),
