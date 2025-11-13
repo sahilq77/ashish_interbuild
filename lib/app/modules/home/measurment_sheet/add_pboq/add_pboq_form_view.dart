@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
@@ -84,19 +85,18 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Planning status',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-                        _buildDropdownField(
-                          label: 'Location',
-                          value: controller
-                              .fieldSets[index]
-                              .selectedLocation
-                              .value,
-                          items: controller.locations,
-                          onChanged: (value) =>
-                              controller.onLocationChanged(index, value),
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Please select a location'
-                              : null,
-                          hint: 'Select a location',
+                        Obx(
+                          () => _buildDropdownField(
+                            label: 'Location',
+                            value: controller.selectedZoneLocationName.value,
+                            items: controller.zoneLocations,
+                            onChanged: (value) =>
+                                controller.onLocationChanged(value),
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Please select a location'
+                                : null,
+                            hint: 'Select a location',
+                          ),
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
                         _buildTextFormField(
@@ -215,7 +215,10 @@ class AddPboqFormView extends StatelessWidget {
               fillColor: onChanged == null ? Colors.grey[200] : null,
             ),
           ),
-          popupProps: const PopupProps.menu(showSearchBox: true),
+          popupProps: const PopupProps.menu(
+            showSearchBox: true,
+            showSelectedItems: true,
+          ),
         ),
       ],
     );
@@ -233,6 +236,7 @@ class AddPboqFormView extends StatelessWidget {
         Text(label, style: AppStyle.reportCardRowCount.responsive),
         const SizedBox(height: 8),
         TextFormField(
+          inputFormatters: [SecureTextInputFormatter.deny()],
           initialValue: initialValue,
           onChanged: onChanged,
           enabled: onChanged != null,

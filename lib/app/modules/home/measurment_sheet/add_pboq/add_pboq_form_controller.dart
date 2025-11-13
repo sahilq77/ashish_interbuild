@@ -1,8 +1,8 @@
 import 'dart:developer';
-
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,7 +17,6 @@ class FieldSet {
   var length = ''.obs;
   var height = ''.obs;
   var remark = ''.obs;
-
   FieldSet();
 }
 
@@ -25,6 +24,7 @@ class AddPboqFormController extends GetxController {
   var selectedPackage = ''.obs;
   var selectedPboqName = ''.obs;
   var selectedZoneName = ''.obs;
+  var selectedZoneLocationName = ''.obs;
   var fieldSets = <FieldSet>[FieldSet()].obs;
 
   // Injected real controller
@@ -32,6 +32,8 @@ class AddPboqFormController extends GetxController {
   late final PackageNameController _pkgCtrl = Get.find<PackageNameController>();
   late final PboqNameController _pboqCtrl = Get.find<PboqNameController>();
   late final ZoneController _zoneCtrl = Get.find<ZoneController>();
+  late final ZoneLocationController _zoneLocationCtrl =
+      Get.find<ZoneLocationController>();
 
   @override
   void onInit() {
@@ -50,16 +52,54 @@ class AddPboqFormController extends GetxController {
   List<String> get packageNames => _pkgCtrl.packageNames;
   List<String> get pboqNames => _pboqCtrl.pboqNames;
   List<String> get zoneNames => _zoneCtrl.zoneNames;
+  List<String> get zoneLocations => _zoneLocationCtrl.zoneLocationNames;
 
-  final List<String> locations = ['Location A', 'Location B', 'Location C'];
+  // === NEW: Reset helper for dependent dropdowns ===
+  void _resetDependents({
+    bool resetPboq = false,
+    bool resetZone = false,
+    bool resetLocation = false,
+    bool resetFieldSets = false,
+  }) {
+    if (resetPboq) {
+      selectedPboqName.value = '';
+      _pboqCtrl.pboqNames.clear();
+    }
+    if (resetZone) {
+      selectedZoneName.value = '';
+      _zoneCtrl.zoneNames.clear();
+    }
+    if (resetLocation) {
+      selectedZoneLocationName.value = '';
+      _zoneLocationCtrl.zoneLocationNames.clear();
+    }
+    if (resetFieldSets) {
+      for (final fs in fieldSets) {
+        fs.selectedZone.value = '';
+        fs.selectedLocation.value = '';
+        fs.subLocation.value = '';
+        fs.nos.value = '';
+        fs.length.value = '';
+        fs.height.value = '';
+        fs.remark.value = '';
+        fs.planningStatus.value = 'Not Started';
+        fs.uom.value = 'Unit';
+      }
+    }
+  }
 
   void onPackageChanged(String? newPackageName) async {
     selectedPackage.value = newPackageName ?? '';
 
-    // ---- LOG THE NAME ------------------------------------------------
-    log('Selected Package Name: $newPackageName');
+    // Reset all dependent fields
+    _resetDependents(
+      resetPboq: true,
+      resetZone: true,
+      resetLocation: true,
+      resetFieldSets: true,
+    );
 
-    // ---- LOG THE ID --------------------------------------------------
+    log('Selected Package Name: $newPackageName');
     final String? pkgId = _pkgCtrl.getPackageIdByName(
       newPackageName.toString(),
     );
@@ -69,22 +109,24 @@ class AddPboqFormController extends GetxController {
       projectId: mesurmentCtrl.projectId.value,
       packageId: int.parse(pkgId.toString()),
     );
-    log('Selected Package ID  : $pkgId');
+    log('Selected Package ID : $pkgId');
   }
 
   void onPboqNameChanged(String? value) async {
     selectedPboqName.value = value ?? '';
 
-    // ---- LOG THE NAME ------------------------------------------------
+    // Reset dependent fields below PBOQ
+    _resetDependents(
+      resetZone: true,
+      resetLocation: true,
+      resetFieldSets: true,
+    );
+
     log('Selected PBOQ Name: $value');
-
-    // ---- LOG THE ID --------------------------------------------------
     final String? PBOQId = _pboqCtrl.getPboqIdByName(value.toString());
-    log('Selected PBOQ ID  : $PBOQId');
+    log('Selected PBOQ ID : $PBOQId');
 
-    // ---- FETCH ZONES WITH PACKAGE ID & PBOQ ID -----------------------
     final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
-   
     await _zoneCtrl.fetchZones(
       forceFetch: true,
       context: Get.context!,
@@ -94,19 +136,51 @@ class AddPboqFormController extends GetxController {
     );
   }
 
-  void onZoneChanged(String? value) {
+  void onZoneChanged(String? value) async {
     selectedZoneName.value = value ?? '';
 
-    // ---- LOG THE NAME ------------------------------------------------
-    log('Selected Zone Name: $value');
+    // Reset dependent fields below Zone
+    _resetDependents(resetLocation: true, resetFieldSets: true);
 
-    // ---- LOG THE ID --------------------------------------------------
+    // === ADD THIS LINE TO CLEAR GLOBAL LOCATION DROPDOWN ===
+    selectedZoneLocationName.value = '';
+
+    log('Selected Zone Name: $value');
     final String? zoneId = _zoneCtrl.getZoneIdByName(value.toString());
-    log('Selected Zone ID  : $zoneId');
+    log('Selected Zone ID : $zoneId');
+
+    final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
+    final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
+    if (pkgId == null || pboqId == null || zoneId == null) {
+      log('Warning: Missing required IDs – cannot fetch zone locations');
+      return;
+    }
+    await _zoneLocationCtrl.fetchZoneLocations(
+      context: Get.context!,
+      forceFetch: true,
+      projectId: mesurmentCtrl.projectId.value,
+      packageId: int.tryParse(pkgId) ?? 0,
+      pboqId: int.tryParse(pboqId) ?? 0,
+      zoneId: int.tryParse(zoneId) ?? 0,
+    );
+
+    // Clear previously selected locations in field sets
+    for (final fs in fieldSets) {
+      fs.selectedLocation.value = '';
+    }
   }
 
-  void onLocationChanged(int index, String? value) {
-    if (value != null) fieldSets[index].selectedLocation.value = value;
+  void onLocationChanged(String? value) {
+    selectedZoneLocationName.value = value ?? '';
+
+    // Reset only field set values (keep hierarchy above)
+    _resetDependents(resetFieldSets: true);
+
+    log('Selected Zone Location Name: $value');
+    final String? zoneLocationId = _zoneLocationCtrl.getZoneLocationIdByName(
+      value.toString(),
+    );
+    log('Selected Location ID : $zoneLocationId');
   }
 
   void onSubLocationChanged(int index, String value) {
@@ -147,7 +221,6 @@ class AddPboqFormController extends GetxController {
       Get.snackbar('Error', 'Please select a PBOQ name');
       return;
     }
-
     for (int i = 0; i < fieldSets.length; i++) {
       final f = fieldSets[i];
       if (f.selectedZone.isEmpty) {
@@ -162,7 +235,6 @@ class AddPboqFormController extends GetxController {
         return;
       }
     }
-
     print('=== SUBMIT ===');
     print('Package: ${selectedPackage.value}');
     print('PBOQ: ${selectedPboqName.value}');
@@ -179,7 +251,6 @@ class AddPboqFormController extends GetxController {
       print('Height: ${f.height.value}');
       print('Remark: ${f.remark.value}');
     }
-
     resetForm();
     Get.snackbar('Success', 'Form submitted successfully');
   }
@@ -187,6 +258,7 @@ class AddPboqFormController extends GetxController {
   void resetForm() {
     selectedPackage.value = '';
     selectedPboqName.value = '';
+
     fieldSets.clear();
     fieldSets.add(FieldSet());
   }

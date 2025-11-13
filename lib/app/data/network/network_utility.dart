@@ -21,6 +21,9 @@ class Networkutility {
 
   static String getZones = "${baseUrl + "zones"}";
   static int getZonesApi = 7;
+
+  static String getZoneLocations = "${baseUrl + "zone-locations"}";
+  static int getZoneLocationsApi = 8;
 }
 
 

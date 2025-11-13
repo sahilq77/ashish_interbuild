@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
+import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/packages/get_package_name_response.dart';
@@ -196,7 +197,9 @@ class Networkcall {
           case 7:
             final getZone = getZoneResponseFromJson(str);
             return getZone;
-
+          case 8:
+            final getZoneLocations = getZoneLocationsResponseFromJson(str);
+            return getZoneLocations;
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
