@@ -4,6 +4,7 @@ import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_bi
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_location_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/acc_package_list/acc_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_screen_view.dart';
@@ -105,6 +106,8 @@ class AppRoutes {
       '/weekly-inspection-package-list';
   static const String profile = '/profile';
   static const String accProjects = '/acc-projects';
+  static const String accPackageList = '/acc-package-list';
+
   static const String accScreenList = '/acc-list';
   static const String addAccForm = '/add-acc-form';
   static const String updateAccForm = '/update-acc-form';
@@ -242,6 +245,11 @@ class AppRoutes {
       name: accProjects,
       page: () => const AccProjectList(),
       binding: AccProjectListBinding(),
+    ),
+    GetPage(
+      name: accPackageList,
+      page: () => const AccPackageList(),
+      binding: PackageListBinding(),
     ),
 
     GetPage(
