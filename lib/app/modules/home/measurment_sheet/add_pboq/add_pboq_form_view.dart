@@ -52,6 +52,8 @@ class AddPboqFormView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              Divider(color: AppColors.darkBackground),
+              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               Obx(
                 () => ListView.builder(
                   shrinkWrap: true,
@@ -62,10 +64,9 @@ class AddPboqFormView extends StatelessWidget {
                       children: [
                         _buildDropdownField(
                           label: 'Zone',
-                          value: controller.fieldSets[index].selectedZone.value,
-                          items: controller.zones,
-                          onChanged: (value) =>
-                              controller.onZoneChanged(index, value),
+                          value: controller.selectedZoneName.value,
+                          items: controller.zoneNames,
+                          onChanged: (value) => controller.onZoneChanged(value),
                           validator: (value) => value == null || value.isEmpty
                               ? 'Please select a zone'
                               : null,

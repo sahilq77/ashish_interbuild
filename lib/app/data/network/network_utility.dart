@@ -18,4 +18,12 @@ class Networkutility {
 
   static String getPboq = "${baseUrl + "pboq"}";
   static int getPboqApi = 6;
+
+  static String getZones = "${baseUrl + "zones"}";
+  static int getZonesApi = 7;
 }
+
+
+//<======================= API DOCUMENT ============================>
+
+//https://seekhelp.in/ashish-interbuild/api-docs#

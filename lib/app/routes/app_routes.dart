@@ -1,5 +1,6 @@
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_binding.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_project_name_list/acc_project_list/acc_project_list_binding.dart';
@@ -137,7 +138,7 @@ class AppRoutes {
     GetPage(
       name: addPBOQ,
       page: () => const AddPboqFormView(),
-      bindings: [AddPboqFormBinding(), PackageNameBinding(), PboqNameBinding()],
+      bindings: [AddPboqFormBinding(), PackageNameBinding(), PboqNameBinding(),ZoneBinding()],
     ),
     GetPage(
       name: pboqList,
