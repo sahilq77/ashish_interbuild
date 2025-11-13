@@ -17,6 +17,7 @@ import 'package:ashishinterbuild/app/modules/home/acc/update_acc/update_acc_form
 import 'package:ashishinterbuild/app/modules/home/client_commitment/add_client_commitment/add_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/add_client_commitment/add_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_package_list/client_commitment_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_project_list/client_commitment_project_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/client_commitment_screen.dart';
@@ -113,6 +114,9 @@ class AppRoutes {
   static const String updateAccForm = '/update-acc-form';
   static const String editAccForm = '/edit-acc-form';
   static const String clientCommitmentProject = '/client-commitment-project';
+  static const String clientCommitmentPackageList =
+      '/client-commitment-package-list';
+
   static const String clientCommitmentDashboard =
       '/client-commitment-dashboard';
   static const String clientCommitmentList = '/client-commitment-list';
@@ -274,6 +278,12 @@ class AppRoutes {
       page: () => const ClientCommitmentProject(),
       binding: ClientCommitmentProjectBinding(),
     ),
+    GetPage(
+      name: clientCommitmentPackageList,
+      page: () => const ClientCommitmentPackageList(),
+      binding: PackageListBinding(),
+    ),
+
     GetPage(
       name: clientCommitmentDashboard,
       page: () => const ClientCommitmentDashbord(),
