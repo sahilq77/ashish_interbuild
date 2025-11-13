@@ -27,7 +27,7 @@ class ProjectNameController extends GetxController {
 
   // ── Internal API Params ─────────────────────────────────────────
   final RxString _currentKeyword = ''.obs;
-  final RxString _currentOrderBy = 'desc'.obs;
+  final RxString _currentOrderBy = ''.obs;
   final RxBool isAscending = true.obs; // UI only (icon)
 
   // ── Debounce ─────────────────────────────────────────────────────

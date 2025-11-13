@@ -2,7 +2,6 @@ import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigatio
     show BottomNavigationController;
 import 'package:ashishinterbuild/app/modules/bottom_navigation/cutom_bottom_bar.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_controller.dart';
-import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -20,6 +19,7 @@ class WorkfrontUpdatePackageList extends StatelessWidget {
     final PackageListController controller = Get.find();
 
     ResponsiveHelper.init(context);
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
@@ -28,71 +28,102 @@ class WorkfrontUpdatePackageList extends StatelessWidget {
         color: AppColors.primary,
         child: Column(
           children: [
-            // Search, Filter and Sort row
+            // ── Search + Sort Row ─────────────────────────────────────
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Row(
                 children: [
                   Expanded(child: _buildSearchField(controller)),
                   SizedBox(width: ResponsiveHelper.spacing(8)),
-                  // _buildFilterButton(context, controller),
+                  // _buildFilterButton(context, controller), // optional
                   // SizedBox(width: ResponsiveHelper.spacing(8)),
                   _buildSortButton(controller),
                 ],
               ),
             ),
-            // Expanded to make ListView take remaining space
+
+            // ── Error Message (if any) ───────────────────────────────
+            Obx(() => controller.errorMessage.value.isNotEmpty
+                ? Container(
+                    width: double.infinity,
+                    padding: ResponsiveHelper.padding(12),
+                    margin: ResponsiveHelper.padding(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      controller.errorMessage.value,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )
+                : const SizedBox.shrink()),
+
+            // ── List ─────────────────────────────────────────────────
             Expanded(
-              child: Obx(
-                () => controller.isLoading.value
-                    ? _buildShimmerEffect(context)
-                    : ListView.builder(
-                        padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.filteredPackages.length,
-                        itemBuilder: (context, index) {
-                          final package = controller.filteredPackages[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Get.toNamed(
-                                AppRoutes.workFrontUpdateDashboard,
-                                // arguments: {
-                                //   "project_id": int.parse(package.projectId),
-                                //   "package_id": int.parse(package.packageId),
-                                // },
-                              );
-                            },
-                            child: Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.screenHeight * 0.02,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  // border: Border(
-                                  //   left: BorderSide(
-                                  //     color: AppColors.primary,
-                                  //     width: 5,
-                                  //   ),
-                                  // ),
-                                ),
-                                child: Padding(
-                                  padding: ResponsiveHelper.padding(16),
-                                  child: _buildDetailRow(
-                                    "Project Name",
-                                    package.packageName,
-                                  ),
-                                ),
-                              ),
+              child: Obx(() {
+                // Initial loading
+                if (controller.isLoading.value && controller.packages.isEmpty) {
+                  return _buildShimmerEffect(context);
+                }
+
+                // Empty state
+                if (controller.filteredPackages.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return ListView.builder(
+                  padding: ResponsiveHelper.padding(16),
+                  itemCount: controller.filteredPackages.length +
+                      (controller.hasMoreData.value ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    // ── Load More Trigger ─────────────────────────────
+                    if (index == controller.filteredPackages.length) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        controller.loadMore(context);
+                      });
+                      return _buildLoadMoreIndicator();
+                    }
+
+                    final package = controller.filteredPackages[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed(
+                          AppRoutes.workFrontUpdateDashboard,
+                          arguments: {
+                            "project_id": int.parse(package.projectId),
+                            "package_id": int.parse(package.packageId),
+                          },
+                        );
+                      },
+                      child: Card(
+                        margin: EdgeInsets.only(
+                          bottom: ResponsiveHelper.screenHeight * 0.02,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.white, Colors.grey.shade50],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          );
-                        },
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Padding(
+                            padding: ResponsiveHelper.padding(16),
+                            child: _buildDetailRow(
+                              "Package",
+                              package.packageName,
+                            ),
+                          ),
+                        ),
                       ),
-              ),
+                    );
+                  },
+                );
+              }),
             ),
           ],
         ),
@@ -100,11 +131,15 @@ class WorkfrontUpdatePackageList extends StatelessWidget {
     );
   }
 
+  // ────────────────────────────────────────────────────────────────
+  // UI Components
+  // ────────────────────────────────────────────────────────────────
+
   Widget _buildSearchField(PackageListController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
-        hintText: 'Search...',
+        hintText: 'Search packages...',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         suffixIcon: const Icon(Icons.search, size: 20),
         contentPadding: EdgeInsets.symmetric(
@@ -113,24 +148,6 @@ class WorkfrontUpdatePackageList extends StatelessWidget {
         ),
       ),
       onChanged: controller.searchPackages,
-    );
-  }
-
-  Widget _buildFilterButton(
-    BuildContext context,
-    PackageListController controller,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
-        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-        constraints: const BoxConstraints(),
-      ),
     );
   }
 
@@ -156,149 +173,33 @@ class WorkfrontUpdatePackageList extends StatelessWidget {
     );
   }
 
-  void _showFilterDialog(
-    BuildContext context,
-    PackageListController controller,
-  ) {
-    String? tempSelectedProject = controller.selectedPackageFilter.value;
 
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+  
+
+  Widget _buildLoadMoreIndicator() {
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade400),
+          const SizedBox(height: 16),
+          Text(
+            'No packages found',
+            style: AppStyle.heading2PoppinsGrey.responsive,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: ResponsiveHelper.paddingSymmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(ResponsiveHelper.spacing(20)),
-                  ),
-                ),
-                child: Text(
-                  'Filter Projects',
-                  style: AppStyle.heading1PoppinsWhite.responsive,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Project',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  items: controller.getPackageNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Project',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveHelper.spacing(8),
-                        ),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      tempSelectedProject = value;
-                    });
-                  },
-                  selectedItem: tempSelectedProject,
-                ),
-              ),
-              Padding(
-                padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveHelper.spacing(10),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          controller.clearFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Clear',
-                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: ResponsiveHelper.spacing(16)),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveHelper.spacing(10),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          controller.selectedPackageFilter.value =
-                              tempSelectedProject;
-                          controller.applyFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Apply',
-                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your search or filters',
+            style: AppStyle.bodyBoldPoppinsBlack.responsive,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -306,43 +207,21 @@ class WorkfrontUpdatePackageList extends StatelessWidget {
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5, // Show 5 shimmer cards
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Card(
-            margin: EdgeInsets.only(
-              bottom: ResponsiveHelper.screenHeight * 0.02,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border(
-                  left: BorderSide(color: AppColors.primary, width: 5),
-                ),
-              ),
-              child: Padding(
-                padding: ResponsiveHelper.padding(16),
-                child: Column(children: [_buildShimmerRow()]),
-              ),
+      itemCount: 6,
+      itemBuilder: (context, index) => Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Card(
+          margin: EdgeInsets.only(bottom: ResponsiveHelper.screenHeight * 0.02),
+          child: Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildShimmerRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(width: 130, height: 16, color: Colors.grey.shade300),
-        const SizedBox(width: 8),
-        Text(': ', style: AppStyle.reportCardSubTitle),
-        Expanded(child: Container(height: 16, color: Colors.grey.shade300)),
-      ],
+        ),
+      ),
     );
   }
 
