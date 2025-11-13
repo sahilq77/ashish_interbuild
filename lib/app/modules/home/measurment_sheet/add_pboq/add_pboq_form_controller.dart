@@ -34,16 +34,34 @@ class AddPboqFormController extends GetxController {
   late final ZoneController _zoneCtrl = Get.find<ZoneController>();
   late final ZoneLocationController _zoneLocationCtrl =
       Get.find<ZoneLocationController>();
-
+  //  mesurmentCtrl.packageId;
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
-        _pkgCtrl.fetchPackages(
-          context: Get.context!,
-          projectId: mesurmentCtrl.projectId.value,
-        );
+        _pkgCtrl
+            .fetchPackages(
+              context: Get.context!,
+              projectId: mesurmentCtrl.projectId.value,
+            )
+            .then((_) {
+              // Auto-bind package using mesurmentCtrl.packageId
+              final String? autoPackageId = mesurmentCtrl.packageId.value
+                  .toString();
+              if (autoPackageId != null &&
+                  autoPackageId != 'null' &&
+                  autoPackageId.isNotEmpty) {
+                final String? packageName = _pkgCtrl.getPackageNameById(
+                  autoPackageId,
+                );
+                if (packageName != null && packageName.isNotEmpty) {
+                  selectedPackage.value = packageName;
+                  // Trigger dependent loading
+                  onPackageChanged(packageName);
+                }
+              }
+            });
       }
     });
   }

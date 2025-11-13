@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_binding.dart';
@@ -24,6 +25,7 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_
 import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_binding.dart';
@@ -77,6 +79,7 @@ class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
   static const String home = '/home';
+  static const String measurmentPackageList = '/measurment-package-list';
   static const String measurmentSheetView = '/measurment-sheet-list';
   static const String addPBOQ = '/add-pboq';
   static const String pboqList = '/pboq-list';
@@ -130,6 +133,11 @@ class AppRoutes {
     ),
 
     GetPage(name: home, page: () => const HomeView(), binding: HomeBinding()),
+    GetPage(
+      name: measurmentPackageList,
+      page: () => const MesurmentPackageList(),
+      binding: PackageListBinding(),
+    ),
 
     GetPage(
       name: measurmentSheetView,

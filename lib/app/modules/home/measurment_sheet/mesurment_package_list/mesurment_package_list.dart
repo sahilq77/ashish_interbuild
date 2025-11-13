@@ -1,6 +1,7 @@
 import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart'
     show BottomNavigationController;
 import 'package:ashishinterbuild/app/modules/bottom_navigation/cutom_bottom_bar.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
@@ -11,104 +12,95 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-class MeasurmentProjectNameList extends StatelessWidget {
-  const MeasurmentProjectNameList({super.key});
+class MesurmentPackageList extends StatelessWidget {
+  const MesurmentPackageList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ProjectNameController controller = Get.find();
-    final bottomController = Get.put(BottomNavigationController());
+    final PackageListController controller = Get.find();
+
     ResponsiveHelper.init(context);
-    return PopScope(
-      canPop: false, // Prevent default back navigation
-      onPopInvoked: (didPop) async {
-        if (!didPop) {
-          // Call the same onWillPop logic from BottomNavigationController
-          bool shouldPop = await bottomController.onWillPop();
-          if (shouldPop && context.mounted) {
-            Navigator.of(context).pop();
-          }
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.white,
-        appBar: _buildAppbar(),
-        body: RefreshIndicator(
-          onRefresh: controller.refreshData,
-          color: AppColors.primary,
-          child: Column(
-            children: [
-              // Search, Filter and Sort row
-              Padding(
-                padding: ResponsiveHelper.padding(16),
-                child: Row(
-                  children: [
-                    Expanded(child: _buildSearchField(controller)),
-                    SizedBox(width: ResponsiveHelper.spacing(8)),
-                    // _buildFilterButton(context, controller),
-                    // SizedBox(width: ResponsiveHelper.spacing(8)),
-                    _buildSortButton(controller),
-                  ],
-                ),
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      appBar: _buildAppbar(),
+      body: RefreshIndicator(
+        onRefresh: controller.refreshData,
+        color: AppColors.primary,
+        child: Column(
+          children: [
+            // Search, Filter and Sort row
+            Padding(
+              padding: ResponsiveHelper.padding(16),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSearchField(controller)),
+                  SizedBox(width: ResponsiveHelper.spacing(8)),
+                  // _buildFilterButton(context, controller),
+                  // SizedBox(width: ResponsiveHelper.spacing(8)),
+                  _buildSortButton(controller),
+                ],
               ),
-              // Expanded to make ListView take remaining space
-              Expanded(
-                child: Obx(
-                  () => controller.isLoading.value
-                      ? _buildShimmerEffect(context)
-                      : ListView.builder(
-                          padding: ResponsiveHelper.padding(16),
-                          itemCount: controller.filteredProjects.length,
-                          itemBuilder: (context, index) {
-                            final project = controller.filteredProjects[index];
-                            return GestureDetector(
-                              onTap: () =>
-                                  Get.toNamed(AppRoutes.measurmentPackageList),
-                              child: Card(
-                                margin: EdgeInsets.only(
-                                  bottom: ResponsiveHelper.screenHeight * 0.02,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.white,
-                                        Colors.grey.shade50,
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                    // border: Border(
-                                    //   left: BorderSide(
-                                    //     color: AppColors.primary,
-                                    //     width: 5,
-                                    //   ),
-                                    // ),
+            ),
+            // Expanded to make ListView take remaining space
+            Expanded(
+              child: Obx(
+                () => controller.isLoading.value
+                    ? _buildShimmerEffect(context)
+                    : ListView.builder(
+                        padding: ResponsiveHelper.padding(16),
+                        itemCount: controller.filteredPackages.length,
+                        itemBuilder: (context, index) {
+                          final package = controller.filteredPackages[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Get.toNamed(
+                                AppRoutes.measurmentSheetView,
+                                arguments: {
+                                  "project_id": int.parse(package.projectId),
+                                  "package_id": int.parse(package.packageId),
+                                },
+                              );
+                            },
+                            child: Card(
+                              margin: EdgeInsets.only(
+                                bottom: ResponsiveHelper.screenHeight * 0.02,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.white, Colors.grey.shade50],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
-                                  child: Padding(
-                                    padding: ResponsiveHelper.padding(16),
-                                    child: _buildDetailRow(
-                                      "Project Name",
-                                      project.projectName,
-                                    ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  // border: Border(
+                                  //   left: BorderSide(
+                                  //     color: AppColors.primary,
+                                  //     width: 5,
+                                  //   ),
+                                  // ),
+                                ),
+                                child: Padding(
+                                  padding: ResponsiveHelper.padding(16),
+                                  child: _buildDetailRow(
+                                    "Project Name",
+                                    package.packageName,
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                ),
+                            ),
+                          );
+                        },
+                      ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        bottomNavigationBar: CustomBottomBar(),
       ),
     );
   }
 
-  Widget _buildSearchField(ProjectNameController controller) {
+  Widget _buildSearchField(PackageListController controller) {
     return TextFormField(
       controller: controller.searchController,
       decoration: InputDecoration(
@@ -120,13 +112,13 @@ class MeasurmentProjectNameList extends StatelessWidget {
           vertical: ResponsiveHelper.spacing(12),
         ),
       ),
-      onChanged: controller.searchProjects,
+      onChanged: controller.searchPackages,
     );
   }
 
   Widget _buildFilterButton(
     BuildContext context,
-    ProjectNameController controller,
+    PackageListController controller,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -142,7 +134,7 @@ class MeasurmentProjectNameList extends StatelessWidget {
     );
   }
 
-  Widget _buildSortButton(ProjectNameController controller) {
+  Widget _buildSortButton(PackageListController controller) {
     return Obx(
       () => Container(
         decoration: BoxDecoration(
@@ -166,9 +158,9 @@ class MeasurmentProjectNameList extends StatelessWidget {
 
   void _showFilterDialog(
     BuildContext context,
-    ProjectNameController controller,
+    PackageListController controller,
   ) {
-    String? tempSelectedProject = controller.selectedProjectFilter.value;
+    String? tempSelectedProject = controller.selectedPackageFilter.value;
 
     showDialog(
       context: context,
@@ -214,7 +206,7 @@ class MeasurmentProjectNameList extends StatelessWidget {
                       ),
                     ),
                   ),
-                  items: controller.getProjectNames(),
+                  items: controller.getPackageNames(),
                   dropdownDecoratorProps: DropDownDecoratorProps(
                     dropdownSearchDecoration: InputDecoration(
                       labelText: 'Select Project',
@@ -290,7 +282,7 @@ class MeasurmentProjectNameList extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          controller.selectedProjectFilter.value =
+                          controller.selectedPackageFilter.value =
                               tempSelectedProject;
                           controller.applyFilters();
                           Navigator.pop(context);
@@ -369,7 +361,7 @@ class MeasurmentProjectNameList extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Measurement Project List',
+        'Measurement Package List',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,

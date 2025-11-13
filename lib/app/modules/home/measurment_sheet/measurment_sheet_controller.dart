@@ -19,6 +19,7 @@ class MeasurementSheetController extends GetxController {
   // TextEditingController for the search field
   final TextEditingController searchController = TextEditingController();
   RxInt projectId = 0.obs;
+  RxInt packageId = 0.obs;
 
   @override
   void onInit() {
@@ -28,8 +29,9 @@ class MeasurementSheetController extends GetxController {
     // Initialize filtered list with all measurement sheets
     filteredMeasurementSheets.assignAll(measurementSheets);
 
-    final args = Get.arguments as int;
-    projectId.value = args;
+    final args = Get.arguments as Map<String, dynamic>;
+    projectId.value = args["project_id"];
+    packageId.value = args["package_id"];
   }
 
   @override
