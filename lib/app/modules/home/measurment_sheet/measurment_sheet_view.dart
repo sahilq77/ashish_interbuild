@@ -20,7 +20,7 @@ class MeasurmentSheetView extends StatelessWidget {
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: _buildAppbar(),
+      appBar: _buildAppbar(controller),
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
         color: AppColors.primary,
@@ -521,7 +521,7 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppbar() {
+  AppBar _buildAppbar(MeasurementSheetController controller) {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
       backgroundColor: AppColors.white,

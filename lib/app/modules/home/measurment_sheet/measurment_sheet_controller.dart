@@ -18,6 +18,7 @@ class MeasurementSheetController extends GetxController {
 
   // TextEditingController for the search field
   final TextEditingController searchController = TextEditingController();
+  RxInt projectId = 0.obs;
 
   @override
   void onInit() {
@@ -26,6 +27,9 @@ class MeasurementSheetController extends GetxController {
     loadDummyData();
     // Initialize filtered list with all measurement sheets
     filteredMeasurementSheets.assignAll(measurementSheets);
+
+    final args = Get.arguments as int;
+    projectId.value = args;
   }
 
   @override

@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FieldSet {
@@ -22,24 +24,36 @@ class FieldSet {
 class AddPboqFormController extends GetxController {
   var selectedPackage = ''.obs;
   var selectedPboqName = ''.obs;
-   var selectedZoneName = ''.obs;
+  var selectedZoneName = ''.obs;
   var fieldSets = <FieldSet>[FieldSet()].obs;
 
   // Injected real controller
+  final MeasurementSheetController mesurmentCtrl = Get.find();
   late final PackageNameController _pkgCtrl = Get.find<PackageNameController>();
   late final PboqNameController _pboqCtrl = Get.find<PboqNameController>();
   late final ZoneController _zoneCtrl = Get.find<ZoneController>();
 
-  
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        _pkgCtrl.fetchPackages(
+          context: Get.context!,
+          projectId: mesurmentCtrl.projectId.value,
+        );
+      }
+    });
+  }
+
   // Dynamic package names from API
   List<String> get packageNames => _pkgCtrl.packageNames;
   List<String> get pboqNames => _pboqCtrl.pboqNames;
-    List<String> get zoneNames => _zoneCtrl.zoneNames;
+  List<String> get zoneNames => _zoneCtrl.zoneNames;
 
-  final List<String> zones = ['Zone 1', 'Zone 2', 'Zone 3'];
   final List<String> locations = ['Location A', 'Location B', 'Location C'];
 
-  void onPackageChanged(String? newPackageName) {
+  void onPackageChanged(String? newPackageName) async {
     selectedPackage.value = newPackageName ?? '';
 
     // ---- LOG THE NAME ------------------------------------------------
@@ -49,10 +63,16 @@ class AddPboqFormController extends GetxController {
     final String? pkgId = _pkgCtrl.getPackageIdByName(
       newPackageName.toString(),
     );
+    await _pboqCtrl.fetchPboqs(
+      forceFetch: true,
+      context: Get.context!,
+      projectId: mesurmentCtrl.projectId.value,
+      packageId: int.parse(pkgId.toString()),
+    );
     log('Selected Package ID  : $pkgId');
   }
 
-  void onPboqNameChanged(String? value) {
+  void onPboqNameChanged(String? value) async {
     selectedPboqName.value = value ?? '';
 
     // ---- LOG THE NAME ------------------------------------------------
@@ -61,10 +81,21 @@ class AddPboqFormController extends GetxController {
     // ---- LOG THE ID --------------------------------------------------
     final String? PBOQId = _pboqCtrl.getPboqIdByName(value.toString());
     log('Selected PBOQ ID  : $PBOQId');
+
+    // ---- FETCH ZONES WITH PACKAGE ID & PBOQ ID -----------------------
+    final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
+   
+    await _zoneCtrl.fetchZones(
+      forceFetch: true,
+      context: Get.context!,
+      projectId: mesurmentCtrl.projectId.value,
+      packageId: int.tryParse(pkgId ?? '') ?? 0,
+      pboqId: int.tryParse(PBOQId ?? '') ?? 0,
+    );
   }
 
   void onZoneChanged(String? value) {
-   selectedZoneName.value = value ?? '';
+    selectedZoneName.value = value ?? '';
 
     // ---- LOG THE NAME ------------------------------------------------
     log('Selected Zone Name: $value');

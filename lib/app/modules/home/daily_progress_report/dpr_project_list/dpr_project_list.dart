@@ -1,7 +1,7 @@
 import 'package:ashishinterbuild/app/modules/bottom_navigation/botttom_navigation_controller.dart'
     show BottomNavigationController;
 import 'package:ashishinterbuild/app/modules/bottom_navigation/cutom_bottom_bar.dart';
-import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_project_name/project_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';

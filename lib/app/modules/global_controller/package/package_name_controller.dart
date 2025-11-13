@@ -23,28 +23,33 @@ class PackageNameController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Get.context != null) {
-        fetchPackages(context: Get.context!);
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (Get.context != null) {
+    //     fetchPackages(context: Get.context!);
+    //   }
+    // });
   }
 
   Future<void> fetchPackages({
     required BuildContext context,
     bool forceFetch = false,
+    int projectId = 0,
   }) async {
     log("PackageData API call");
     if (!forceFetch && packageList.isNotEmpty) return;
 
     try {
+      packageList.clear();
       isLoading.value = true;
       errorMessage.value = '';
 
       final response =
           await Networkcall().getMethod(
                 Networkutility.getPackagesListApi,
-                Networkutility.getPackagesList,
+
+                projectId == 0
+                    ? Networkutility.getPackagesList + "?project_id="
+                    : Networkutility.getPackagesList + "?project_id=$projectId",
                 context,
               )
               as List<GetPackageNameResponse>?;

@@ -11,7 +11,7 @@ class ZoneController extends GetxController {
   RxList<ZoneData> zoneList = <ZoneData>[].obs;
   var isLoading = false.obs;
   var errorMessage = ''.obs;
-  RxString? selectedZoneVal;          // ← renamed from selectedPboqVal
+  RxString? selectedZoneVal; // ← renamed from selectedPboqVal
 
   static ZoneController get to => Get.find();
 
@@ -21,31 +21,40 @@ class ZoneController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Get.context != null) {
-        fetchZones(context: Get.context!);
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (Get.context != null) {
+    //     fetchZones(context: Get.context!);
+    //   }
+    // });
   }
 
   /// Fetch the list of zones from the server
   Future<void> fetchZones({
     required BuildContext context,
     bool forceFetch = false,
+    int projectId = 0,
+    int packageId = 0,
+    int pboqId = 0,
   }) async {
     log("ZoneData API call");
 
     if (!forceFetch && zoneList.isNotEmpty) return;
 
     try {
+      zoneList.clear();
       isLoading.value = true;
       errorMessage.value = '';
 
-      final response = await Networkcall().getMethod(
-            Networkutility.getZonesApi,
-            Networkutility.getZones,
-            context,
-          ) as List<GetZoneResponse>?;
+      final response =
+          await Networkcall().getMethod(
+                Networkutility.getZonesApi,
+                projectId == 0 && packageId == 0 && pboqId == 0
+                    ? Networkutility.getZones
+                    : Networkutility.getZones +
+                          "?project_id=$projectId&pboq_id=$pboqId&package_id=$packageId",
+                context,
+              )
+              as List<GetZoneResponse>?;
 
       log(
         'Fetch ZoneData Response: ${response?.isNotEmpty == true ? response![0].toJson() : 'null'}',

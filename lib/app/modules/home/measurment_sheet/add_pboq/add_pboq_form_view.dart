@@ -62,15 +62,18 @@ class AddPboqFormView extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return Column(
                       children: [
-                        _buildDropdownField(
-                          label: 'Zone',
-                          value: controller.selectedZoneName.value,
-                          items: controller.zoneNames,
-                          onChanged: (value) => controller.onZoneChanged(value),
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Please select a zone'
-                              : null,
-                          hint: 'Select a zone',
+                        Obx(
+                          () => _buildDropdownField(
+                            label: 'Zone',
+                            value: controller.selectedZoneName.value,
+                            items: controller.zoneNames,
+                            onChanged: (value) =>
+                                controller.onZoneChanged(value),
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Please select a zone'
+                                : null,
+                            hint: 'Select a zone',
+                          ),
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
                         _buildTextFormField(

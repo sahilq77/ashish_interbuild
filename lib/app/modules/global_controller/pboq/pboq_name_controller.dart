@@ -22,30 +22,36 @@ class PboqNameController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Get.context != null) {
-        fetchPboqs(context: Get.context!);
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (Get.context != null) {
+    //     fetchPboqs(context: Get.context!);
+    //   }
+    // });
   }
 
   /// Fetch the list of PBOQs from the server
   Future<void> fetchPboqs({
     required BuildContext context,
     bool forceFetch = false,
+    int projectId = 0,
+    int packageId = 0,
   }) async {
     log("PboqData API call");
 
     if (!forceFetch && pboqList.isNotEmpty) return;
 
     try {
+      pboqList.clear();
       isLoading.value = true;
       errorMessage.value = '';
 
       final response =
           await Networkcall().getMethod(
                 Networkutility.getPboqApi,
-                Networkutility.getPboq,
+                projectId == 0 && packageId == 0
+                    ? Networkutility.getPboq
+                    : Networkutility.getPboq +
+                          "?project_id=$projectId&package_id=$packageId",
                 context,
               )
               as List<GetPboqNameResponse>?;
