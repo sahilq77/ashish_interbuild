@@ -110,20 +110,19 @@ class _LoginViewState extends State<LoginView> {
                     height: ResponsiveHelper.spacing(50),
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed:
-                          controller.formKey.currentState?.validate() ?? false
-                          ? () {
-                              // hide keyboard
-                              FocusScope.of(context).unfocus();
+                      onPressed: () {
+                        // hide keyboard
+                        if (controller.formKey.currentState!.validate()) {
+                          FocusScope.of(context).unfocus();
 
-                              // call login with real data
-                              controller.login(
-                                mobile: controller.emailController.text.trim(),
-                                password: controller.passwordController.text,
-                                deviceToken: "",
-                              );
-                            }
-                          : null, // disabled when invalid
+                          // call login with real data
+                          controller.login(
+                            mobile: controller.emailController.text.trim(),
+                            password: controller.passwordController.text,
+                            deviceToken: "",
+                          );
+                        }
+                      }, // disabled when invalid
                       style: AppButtonStyles.elevatedLargeBlack(),
                       child: ResponsiveHelper.safeText(
                         'Login',

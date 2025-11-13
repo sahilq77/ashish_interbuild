@@ -68,6 +68,9 @@ class LoginController extends GetxController {
   // -----------------------------------------------------------------
   // LOGIN METHOD
   // -----------------------------------------------------------------
+  // -----------------------------------------------------------------
+  // LOGIN METHOD
+  // -----------------------------------------------------------------
   Future<void> login({
     BuildContext? context,
     required String? mobile,
@@ -92,7 +95,10 @@ class LoginController extends GetxController {
       );
 
       if (list != null && list.isNotEmpty) {
-        List<GetLoginResponse> response = List.from(list);
+        // Properly parse the list using your helper function
+        List<GetLoginResponse> response = getLoginResponseFromJson(
+          jsonEncode(list),
+        );
 
         if (response[0].status == true) {
           log(response[0].data!.userRoleId);
@@ -116,18 +122,28 @@ class LoginController extends GetxController {
           );
 
           Get.offNamed(AppRoutes.home);
-        } else {
+        } else if (response[0].status == false) {
+          // Use actual error or message from API
+          final String errorMessage = response[0].error?.isNotEmpty == true
+              ? response[0].error!
+              : (response[0].message?.isNotEmpty == true
+                    ? response[0].message!
+                    : "Invalid credentials. Please try again.");
+
           AppSnackbarStyles.showError(
             title: 'Login Failed',
-            message:
-                "Your username or password is incorrect.\nPlease try again.",
+            message: errorMessage,
           );
         }
       } else {
         AppSnackbarStyles.showError(
-          title: 'Server Error',
-          message: 'No response from server',
+          title: 'Login Failed',
+          message: "Invalid credentials. Please try again.",
         );
+        // AppSnackbarStyles.showError(
+        //   title: 'Server Error',
+        //   message: 'No response from server',
+        // );
       }
     } on NoInternetException catch (e) {
       Get.back();
@@ -155,12 +171,12 @@ class LoginController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    emailFocusNode.dispose();
-    passwordFocusNode.dispose();
-    super.onClose();
-  }
+  // @override
+  // void onClose() {
+  //   emailController.dispose();
+  //   passwordController.dispose();
+  //   emailFocusNode.dispose();
+  //   passwordFocusNode.dispose();
+  //   super.onClose();
+  // }
 }

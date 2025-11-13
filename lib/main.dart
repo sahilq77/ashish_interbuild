@@ -18,11 +18,15 @@ Future<void> main() async {
   // await AppUtility.initialize();
 
   final NotificationServices notificationServices = NotificationServices();
-    Get.put(ConnectivityService(), permanent: true);
-    Get.lazyPut<PackageNameController>(() => PackageNameController(), fenix: true);
+
+  Get.put(ConnectivityService(), permanent: true);
+  Get.lazyPut<PackageNameController>(
+    () => PackageNameController(),
+    fenix: true,
+  );
   notificationServices.requestNotificationPermission();
   notificationServices.isTokenRefresh();
-   Get.lazyPut<BottomNavigationController>(
+  Get.lazyPut<BottomNavigationController>(
     () => BottomNavigationController(),
     fenix: true,
   );
