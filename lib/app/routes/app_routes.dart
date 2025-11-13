@@ -27,6 +27,7 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/update_clien
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_package_list/dpr_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_package_list/weekly_inspection_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_binding.dart';
@@ -100,6 +101,8 @@ class AppRoutes {
   static const String dprProjectList = '/dpr-project-list';
   static const String weeklyInspectionProjectList =
       '/weekly-inspection-project-list';
+  static const String weeklyInspectionPackageList =
+      '/weekly-inspection-package-list';
   static const String profile = '/profile';
   static const String accProjects = '/acc-projects';
   static const String accScreenList = '/acc-list';
@@ -208,22 +211,26 @@ class AppRoutes {
       binding: NotificationBinding(),
     ),
 
-
     GetPage(
       name: dprProjectList,
       page: () => const DprProjectList(),
       binding: DprProjectListBinding(),
     ),
-GetPage(
+    GetPage(
       name: dprPackageList,
       page: () => const DprPackageList(),
       binding: PackageListBinding(),
     ),
-    
+
     GetPage(
       name: weeklyInspectionProjectList,
       page: () => const WeeklyInspectionProjectList(),
       binding: WeeklyInspectionProjectListBinding(),
+    ),
+    GetPage(
+      name: weeklyInspectionPackageList,
+      page: () => const WeeklyInspectionPackageList(),
+      binding: PackageListBinding(),
     ),
 
     GetPage(
