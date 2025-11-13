@@ -24,11 +24,22 @@ class PackageListController extends GetxController {
   final RxInt offset = 0.obs;
   final int limit = 20; // change to whatever your API expects
   final RxList<PackageData> packageList = <PackageData>[].obs; // internal list
+  RxInt projectId = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchPackages(reset: true, context: Get.context!); // first page
+    final args = Get.arguments as String;
+    projectId.value = int.parse(args);
+    print("id $args");
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await fetchPackages(
+        reset: true,
+        context: Get.context!,
+        id: projectId.value,
+      );
+    });
+
     filteredPackages.assignAll(packages); // keep UI in sync
   }
 
@@ -46,6 +57,7 @@ class PackageListController extends GetxController {
     bool reset = false,
     bool isPagination = false,
     bool forceFetch = false,
+    int id = 0,
   }) async {
     // ---- reset ------------------------------------------------
     if (reset) {
@@ -72,7 +84,8 @@ class PackageListController extends GetxController {
       final response =
           await Networkcall().getMethod(
                 Networkutility.getPackagesListApi, // endpoint constant
-                Networkutility.getPackagesList, // query-params if any
+                Networkutility.getPackagesList +
+                    "?project_id=$id", // query-params if any
                 context,
               )
               as List<GetPackageNameResponse>?;

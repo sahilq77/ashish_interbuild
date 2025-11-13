@@ -38,7 +38,7 @@ class AddPboqFormController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (Get.context != null) {
         _pkgCtrl
             .fetchPackages(
@@ -62,6 +62,13 @@ class AddPboqFormController extends GetxController {
                 }
               }
             });
+
+        await _pboqCtrl.fetchPboqs(
+          forceFetch: true,
+          context: Get.context!,
+          projectId: mesurmentCtrl.projectId.value,
+          packageId: mesurmentCtrl.packageId.value,
+        );
       }
     });
   }
