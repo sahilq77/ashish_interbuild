@@ -100,133 +100,137 @@ class MeasurmentSheetView extends StatelessWidget {
 
                     // Normal item rendering (unchanged)
                     final item = controller.filteredPboqList[i];
-                    final isExpanded = controller.expandedIndex.value == i;
 
                     return GestureDetector(
                       onTap: () => controller.toggleExpanded(i),
-                      child: Card(
-                        margin: EdgeInsets.only(
-                          bottom: ResponsiveHelper.screenHeight * 0.02,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.white, Colors.grey.shade50],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
+                      child: Obx(() {
+                        final isExpanded = controller.expandedIndex.value == i;
+                        return Card(
+                          margin: EdgeInsets.only(
+                            bottom: ResponsiveHelper.screenHeight * 0.02,
                           ),
-                          child: Padding(
-                            padding: ResponsiveHelper.padding(16),
-                            child: Column(
-                              children: [
-                                // ---- Primary row (always visible) ----
-                                _dynamicRow(
-                                  controller.frontDisplayColumns.isNotEmpty
-                                      ? controller.frontDisplayColumns
-                                            .firstWhere(
-                                              (c) => c == "CBOQ No",
-                                              orElse: () => controller
-                                                  .frontDisplayColumns[0],
-                                            )
-                                      : "–",
-                                  _valueForColumn(
-                                    item,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.white, Colors.grey.shade50],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: ResponsiveHelper.padding(16),
+                              child: Column(
+                                children: [
+                                  // ---- Primary row (always visible) ----
+                                  _dynamicRow(
                                     controller.frontDisplayColumns.isNotEmpty
-                                        ? controller.frontDisplayColumns[0]
-                                        : "",
+                                        ? controller.frontDisplayColumns
+                                              .firstWhere(
+                                                (c) => c == "CBOQ No",
+                                                orElse: () => controller
+                                                    .frontDisplayColumns[0],
+                                              )
+                                        : "–",
+                                    _valueForColumn(
+                                      item,
+                                      controller.frontDisplayColumns.isNotEmpty
+                                          ? controller.frontDisplayColumns[0]
+                                          : "",
+                                    ),
                                   ),
-                                ),
 
-                                // ---- Expanded Content (All Columns) ----
-                                if (isExpanded) ...[
-                                  const SizedBox(height: 4),
+                                  // ---- Expanded Content (All Columns) ----
+                                  if (isExpanded) ...[
+                                    const SizedBox(height: 4),
 
-                                  // Remaining front-display columns
-                                  ...controller.frontDisplayColumns
-                                      .skip(1)
-                                      .map(
-                                        (col) => Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 4,
+                                    // Remaining front-display columns
+                                    ...controller.frontDisplayColumns
+                                        .skip(1)
+                                        .map(
+                                          (col) => Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 4,
+                                            ),
+                                            child: _dynamicRow(
+                                              col,
+                                              _valueForColumn(item, col),
+                                            ),
                                           ),
-                                          child: _dynamicRow(
-                                            col,
-                                            _valueForColumn(item, col),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
+                                        )
+                                        .toList(),
 
-                                  // All other columns NOT in frontDisplayColumns
-                                  ...controller.appColumnDetails.value.columns
-                                      .where(
-                                        (col) => !controller.frontDisplayColumns
-                                            .contains(col),
-                                      )
-                                      .map(
-                                        (col) => Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 4,
+                                    // All other columns NOT in frontDisplayColumns
+                                    ...controller.appColumnDetails.value.columns
+                                        .where(
+                                          (col) => !controller
+                                              .frontDisplayColumns
+                                              .value
+                                              .contains(col),
+                                        )
+                                        .map(
+                                          (col) => Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 4,
+                                            ),
+                                            child: _dynamicRow(
+                                              col,
+                                              _valueForColumn(item, col),
+                                            ),
                                           ),
-                                          child: _dynamicRow(
-                                            col,
-                                            _valueForColumn(item, col),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                ],
+                                        )
+                                        .toList(),
+                                  ],
 
-                                const SizedBox(height: 8),
+                                  const SizedBox(height: 8),
 
-                                // ---- Footer row (Qty / Amt / MS Qty button) ----
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        "Qty: ${item.msQty}",
-                                        style: AppStyle
-                                            .labelPrimaryPoppinsBlack
-                                            .responsive
-                                            .copyWith(fontSize: 13),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        "Amt: ${item.msQty}",
-                                        style: AppStyle
-                                            .labelPrimaryPoppinsBlack
-                                            .responsive
-                                            .copyWith(fontSize: 13),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: OutlinedButton(
-                                        style:
-                                            AppButtonStyles.outlinedExtraSmallPrimary(),
-                                        onPressed: () {
-                                          Get.toNamed(AppRoutes.pboqList);
-                                        },
+                                  // ---- Footer row (Qty / Amt / MS Qty button) ----
+                                  Row(
+                                    children: [
+                                      Expanded(
                                         child: Text(
-                                          "Ms Qty: ${item.msQty}",
+                                          "Qty: ${item.msQty}",
                                           style: AppStyle
                                               .labelPrimaryPoppinsBlack
                                               .responsive
-                                              .copyWith(fontSize: 10),
+                                              .copyWith(fontSize: 13),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          "Amt: ${item.msQty}",
+                                          style: AppStyle
+                                              .labelPrimaryPoppinsBlack
+                                              .responsive
+                                              .copyWith(fontSize: 13),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          style:
+                                              AppButtonStyles.outlinedExtraSmallPrimary(),
+                                          onPressed: () {
+                                            Get.toNamed(AppRoutes.pboqList);
+                                          },
+                                          child: Text(
+                                            "Ms Qty: ${item.msQty}",
+                                            style: AppStyle
+                                                .labelPrimaryPoppinsBlack
+                                                .responsive
+                                                .copyWith(fontSize: 10),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     );
                   },
                 );
