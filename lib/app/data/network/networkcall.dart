@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
@@ -98,6 +99,10 @@ class Networkcall {
           case 1:
             final login = getLoginResponseFromJson(str);
             return login;
+   case 11:
+            final addPboqMeasurment = getAddPboqMsResponseFromJson(str);
+            return addPboqMeasurment;
+            
 
           default:
             log("Invalid request code: $requestCode");
@@ -208,6 +213,8 @@ class Networkcall {
              case 10:
             final getPboqMeasurementSheetList = getPboqMeasurementsheetResponseFromJson(str);
             return getPboqMeasurementSheetList;
+
+            
 
           default:
             log("Invalid request code: $requestCode");

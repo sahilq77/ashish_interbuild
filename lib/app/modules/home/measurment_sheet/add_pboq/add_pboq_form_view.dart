@@ -188,6 +188,18 @@ class AddPboqFormView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
+                        // Calculated Quantity (read-only)
+                        Obx(
+                          () => _buildTextFormField(
+                            label: 'Calculated Qty (Nos × L × B × H)',
+                            initialValue: fs.calculatedQty.value,
+                            onChanged: null,
+                            hint: 'Auto-calculated',
+                            readOnly: true,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
                         // Remark
                         _buildTextFormField(
                           label: 'Remark',
