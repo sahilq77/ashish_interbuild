@@ -1,4 +1,4 @@
-import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
+import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list_response.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
@@ -7,207 +7,224 @@ import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:dropdown_search/dropdown_search.dart'; // Add this import
+import 'package:dropdown_search/dropdown_search.dart';
 
 class MeasurmentSheetView extends StatelessWidget {
   const MeasurmentSheetView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final MeasurementSheetController controller = Get.find();
+    final controller = Get.find<MeasurementSheetController>();
     ResponsiveHelper.init(context);
+
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: _buildAppbar(controller),
+      appBar: _buildAppBar(controller),
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
         color: AppColors.primary,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Breadcrumb
             Padding(
-              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Skyline Towers ➔ Measurement Sheet",
+                "Skyline Towers to Measurement Sheet",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
 
-            // Search, Filter, and Sort Row
+            // Search + Filter + Sort
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Row(
                 children: [
-                  Expanded(child: _buildSearchField(controller)),
-                  SizedBox(width: ResponsiveHelper.spacing(8)),
-                  _buildFilterButton(context, controller),
-                  SizedBox(width: ResponsiveHelper.spacing(8)),
-                  _buildSortButton(controller),
+                  Expanded(child: _searchField(controller)),
+                  const SizedBox(width: 8),
+                  _filterButton(context, controller),
+                  const SizedBox(width: 8),
+                  _sortButton(controller),
                 ],
               ),
             ),
 
-            // Expanded ListView
+            // List
             Expanded(
-              child: Obx(
-                () => controller.isLoading.value
-                    ? _buildShimmerEffect(context)
-                    : ListView.builder(
-                        padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.filteredMeasurementSheets.length,
-                        itemBuilder: (context, index) {
-                          final sheet =
-                              controller.filteredMeasurementSheets[index];
-                          return GestureDetector(
-                            onTap: () {
-                              controller.toggleExpanded(index);
-                            },
-                            child: Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.screenHeight * 0.02,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return _shimmer();
+                }
+
+                if (controller.filteredPboqList.isEmpty) {
+                  return const Center(child: Text('No data found'));
+                }
+
+                return ListView.builder(
+                  padding: ResponsiveHelper.padding(16),
+                  itemCount:
+                      controller.filteredPboqList.length +
+                      (controller.hasMoreData.value ? 1 : 0),
+                  itemBuilder: (ctx, i) {
+                    // Load-more trigger
+                    if (i == controller.filteredPboqList.length) {
+                      controller.loadMore(context);
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final item = controller.filteredPboqList[i];
+                    final isExpanded = controller.expandedIndex.value == i;
+
+                    return GestureDetector(
+                      onTap: () => controller.toggleExpanded(i),
+                      child: Card(
+                        margin: EdgeInsets.only(
+                          bottom: ResponsiveHelper.screenHeight * 0.02,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.white, Colors.grey.shade50],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Padding(
+                            padding: ResponsiveHelper.padding(16),
+                            child: Column(
+                              children: [
+                                // ---- Primary row (always visible) ----
+                                _dynamicRow(
+                                  controller.frontDisplayColumns.isNotEmpty
+                                      ? controller.frontDisplayColumns
+                                            .firstWhere(
+                                              (c) => c == "CBOQ No",
+                                              orElse: () => controller
+                                                  .frontDisplayColumns[0],
+                                            )
+                                      : "–",
+                                  _valueForColumn(
+                                    item,
+                                    controller.frontDisplayColumns.isNotEmpty
+                                        ? controller.frontDisplayColumns[0]
+                                        : "",
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  // border: Border(
-                                  //   left: BorderSide(
-                                  //     color: AppColors.primary,
-                                  //     width: 5,
+                                ),
+
+                                // ---- Expanded Content (All Columns) ----
+                                if (isExpanded) ...[
+                                  const SizedBox(height: 4),
+
+                                  // Remaining front-display columns
+                                  ...controller.frontDisplayColumns
+                                      .skip(1)
+                                      .map(
+                                        (col) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
+                                          child: _dynamicRow(
+                                            col,
+                                            _valueForColumn(item, col),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+
+                                  // Divider + Header
+                                  // const Divider(height: 24, thickness: 0.8),
+                                  // Padding(
+                                  //   padding: const EdgeInsets.symmetric(
+                                  //     vertical: 6,
+                                  //   ),
+                                  //   child: Text(
+                                  //     'Additional Details',
+                                  //     style: AppStyle.reportCardTitle.responsive
+                                  //         .copyWith(
+                                  //           fontSize:
+                                  //               ResponsiveHelper.getResponsiveFontSize(
+                                  //                 14,
+                                  //               ),
+                                  //           fontWeight: FontWeight.w600,
+                                  //           color: AppColors.primary,
+                                  //         ),
                                   //   ),
                                   // ),
-                                ),
-                                child: Obx(
-                                  () => Padding(
-                                    padding: ResponsiveHelper.padding(16),
-                                    child: Column(
-                                      children: [
-                                        // _buildDetailRow(
-                                        //   "Package Name",
-                                        //   sheet.packageName,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        _buildDetailRow(
-                                          "CBOQ Name",
-                                          sheet.cboqName,
+
+                                  // All other columns NOT in frontDisplayColumns
+                                  ...controller.appColumnDetails.value.columns
+                                      .where(
+                                        (col) => !controller.frontDisplayColumns
+                                            .contains(col),
+                                      )
+                                      .map(
+                                        (col) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                          ),
+                                          child: _dynamicRow(
+                                            col,
+                                            _valueForColumn(item, col),
+                                          ),
                                         ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow("MS Qty", sheet.msQty),
-                                        if (controller.expandedIndex.value ==
-                                            index) ...[
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOQ Name",
-                                            sheet.pboqName,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("Zones", sheet.zones),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("UOM", sheet.uom),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOQ Qty",
-                                            sheet.pboqQty,
-                                          ),
-                                        ],
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.01,
-                                        // ),
-                                        // Divider(),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                textAlign: TextAlign.start,
-                                                "Qty: ${sheet.msQty}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ResponsiveHelper.screenWidth *
-                                                  0.01,
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                textAlign: TextAlign.start,
-                                                "Amt: ${sheet.msQty}" + "00000",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ResponsiveHelper.screenWidth *
-                                                  0.01,
-                                            ),
-                                            Expanded(
-                                              child: OutlinedButton(
-                                                style:
-                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () {
-                                                  Get.toNamed(
-                                                    AppRoutes.pboqList,
-                                                  );
-                                                },
-                                                child: Text(
-                                                  "Ms Qty: ${sheet.msQty}",
-                                                  style: AppStyle
-                                                      .labelPrimaryPoppinsBlack
-                                                      .responsive
-                                                      .copyWith(fontSize: 10),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                      )
+                                      .toList(),
+                                ],
+
+                                const SizedBox(height: 8),
+
+                                // ---- Footer row (Qty / Amt / MS Qty button) ----
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "Qty: ${item.msQty}",
+                                        style: AppStyle
+                                            .labelPrimaryPoppinsBlack
+                                            .responsive
+                                            .copyWith(fontSize: 13),
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        "Amt: ${item.msQty}",
+                                        style: AppStyle
+                                            .labelPrimaryPoppinsBlack
+                                            .responsive
+                                            .copyWith(fontSize: 13),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        style:
+                                            AppButtonStyles.outlinedExtraSmallPrimary(),
+                                        onPressed: () {
+                                          Get.toNamed(AppRoutes.pboqList);
+                                        },
+                                        child: Text(
+                                          "Ms Qty: ${item.msQty}",
+                                          style: AppStyle
+                                              .labelPrimaryPoppinsBlack
+                                              .responsive
+                                              .copyWith(fontSize: 10),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              ],
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
-              ),
+                    );
+                  },
+                );
+              }),
             ),
           ],
         ),
@@ -215,10 +232,68 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
-  // Search Field
-  TextFormField _buildSearchField(MeasurementSheetController controller) {
+  // -------------------------------------------------------------------------
+  // Helper: get value for any column (dynamic)
+  // -------------------------------------------------------------------------
+  String _valueForColumn(AllData item, String column) {
+    switch (column) {
+      case 'System ID':
+        return item.systemId;
+      case 'PBOQ Name':
+        return item.pboqName;
+      case 'CBOQ No':
+        return item.cboqNo;
+      case 'Package Name':
+        return item.packageName;
+      case 'UOM':
+        return item.uom;
+      case 'Zones':
+        return item.zones;
+      case 'PBOQ Qty':
+        return item.pboqQty;
+      case 'MS Qty':
+        return item.msQty.toString();
+      default:
+        return '';
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Dynamic label-value row
+  // -------------------------------------------------------------------------
+  Widget _dynamicRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 130,
+          child: Text(
+            label,
+            style: AppStyle.reportCardTitle.responsive.copyWith(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(': ', style: AppStyle.reportCardSubTitle),
+        Expanded(
+          child: Text(
+            value,
+            style: AppStyle.reportCardSubTitle.responsive.copyWith(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Search field
+  // -------------------------------------------------------------------------
+  Widget _searchField(MeasurementSheetController c) {
     return TextFormField(
-      controller: controller.searchController,
+      controller: c.searchController,
       decoration: InputDecoration(
         hintText: 'Search....',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -228,15 +303,14 @@ class MeasurmentSheetView extends StatelessWidget {
           vertical: 12,
         ),
       ),
-      onChanged: controller.searchSurveys,
+      onChanged: c.searchSurveys,
     );
   }
 
-  // Filter Button
-  Widget _buildFilterButton(
-    BuildContext context,
-    MeasurementSheetController controller,
-  ) {
+  // -------------------------------------------------------------------------
+  // Filter button + dialog
+  // -------------------------------------------------------------------------
+  Widget _filterButton(BuildContext ctx, MeasurementSheetController c) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.grey),
@@ -244,53 +318,27 @@ class MeasurmentSheetView extends StatelessWidget {
       ),
       child: IconButton(
         icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
+        onPressed: () => _showFilterDialog(ctx, c),
         padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
         constraints: const BoxConstraints(),
       ),
     );
   }
 
-  // Sort Button
-  Widget _buildSortButton(MeasurementSheetController controller) {
-    return Obx(
-      () => Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.grey),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: IconButton(
-          icon: Icon(
-            controller.isAscending.value
-                ? Icons.arrow_upward
-                : Icons.arrow_downward,
-            color: AppColors.primary,
-          ),
-          onPressed: controller.toggleSorting,
-          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-          constraints: const BoxConstraints(),
-        ),
-      ),
-    );
-  }
-
-  // Filter Dialog
-  void _showFilterDialog(
-    BuildContext context,
-    MeasurementSheetController controller,
-  ) {
-    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+  void _showFilterDialog(BuildContext context, MeasurementSheetController c) {
+    String? temp = c.selectedPackageFilter.value;
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Header
               Container(
                 width: double.infinity,
                 padding: ResponsiveHelper.paddingSymmetric(
@@ -299,8 +347,8 @@ class MeasurmentSheetView extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
                   ),
                 ),
                 child: Text(
@@ -309,6 +357,8 @@ class MeasurmentSheetView extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
+
+              // Dropdown
               Padding(
                 padding: ResponsiveHelper.padding(20),
                 child: DropdownSearch<String>(
@@ -325,13 +375,11 @@ class MeasurmentSheetView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  items: controller.getPackageNames(),
+                  items: c.getPackageNames(),
                   dropdownDecoratorProps: DropDownDecoratorProps(
                     dropdownSearchDecoration: InputDecoration(
                       labelText: 'Select Package',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      border: const OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: AppColors.primary,
@@ -345,14 +393,12 @@ class MeasurmentSheetView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      tempSelectedPackage = value;
-                    });
-                  },
-                  selectedItem: tempSelectedPackage,
+                  onChanged: (v) => setState(() => temp = v),
+                  selectedItem: temp,
                 ),
               ),
+
+              // Buttons
               Padding(
                 padding: ResponsiveHelper.paddingSymmetric(
                   horizontal: 20,
@@ -371,7 +417,7 @@ class MeasurmentSheetView extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          controller.clearFilters();
+                          c.clearFilters();
                           Navigator.pop(context);
                         },
                         child: Text(
@@ -380,7 +426,7 @@ class MeasurmentSheetView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -393,9 +439,8 @@ class MeasurmentSheetView extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          controller.selectedPackageFilter.value =
-                              tempSelectedPackage;
-                          controller.applyFilters();
+                          c.selectedPackageFilter.value = temp;
+                          c.applyFilters();
                           Navigator.pop(context);
                         },
                         child: Text(
@@ -414,114 +459,57 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
-  // Shimmer Effect
-  Widget _buildShimmerEffect(BuildContext context) {
+  // -------------------------------------------------------------------------
+  // Sort button
+  // -------------------------------------------------------------------------
+  Widget _sortButton(MeasurementSheetController c) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            c.isAscending.value ? Icons.arrow_upward : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: c.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Shimmer
+  // -------------------------------------------------------------------------
+  Widget _shimmer() {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
       itemCount: 5,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Card(
-            margin: EdgeInsets.only(
-              bottom: ResponsiveHelper.screenHeight * 0.02,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border(
-                  left: BorderSide(color: AppColors.primary, width: 5),
-                ),
-              ),
-              child: Padding(
-                padding: ResponsiveHelper.padding(16),
-                child: Column(
-                  children: [
-                    _buildShimmerRow(),
-                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
-                    _buildShimmerRow(),
-                    SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
-                    Divider(),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
-                        Expanded(
-                          child: Container(
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildShimmerRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(width: 130, height: 16, color: Colors.grey.shade300),
-        const SizedBox(width: 8),
-        Text(': ', style: AppStyle.reportCardSubTitle),
-        Expanded(child: Container(height: 16, color: Colors.grey.shade300)),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 130,
-          child: Text(
-            label,
-            style: AppStyle.reportCardTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+      itemBuilder: (_, __) => Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Card(
+          margin: EdgeInsets.only(bottom: ResponsiveHelper.screenHeight * 0.02),
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
         ),
-        SizedBox(width: 8),
-        Text(
-          ': ',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppStyle.reportCardSubTitle,
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: AppStyle.reportCardSubTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  AppBar _buildAppbar(MeasurementSheetController controller) {
+  // -------------------------------------------------------------------------
+  // AppBar
+  // -------------------------------------------------------------------------
+  AppBar _buildAppBar(MeasurementSheetController c) {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
       backgroundColor: AppColors.white,
@@ -538,26 +526,17 @@ class MeasurmentSheetView extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.defaultBlack, // Change to your primary color
-              width: 0.5,
-            ),
-            borderRadius: BorderRadius.circular(8), // Rounded corners
+            border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(
-              8,
-            ), // Important for ripple effect
-            onTap: () {
-              Get.toNamed(AppRoutes.addPBOQ,);
-            },
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => Get.toNamed(AppRoutes.addPBOQ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Optional icon
-                  // Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(20)),
                   const SizedBox(width: 6),
                   Text(
                     'Add',
@@ -571,22 +550,6 @@ class MeasurmentSheetView extends StatelessWidget {
             ),
           ),
         ),
-        // IconButton(
-        //   onPressed: () {
-        //     Get.toNamed(AppRoutes.addPBOQ);
-        //   },
-        //   icon: Row(
-        //     children: [
-        //       // Icon(Icons.add, size: ResponsiveHelper.getResponsiveFontSize(24)),
-        //       Text(
-        //         'Add',
-        //         style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(
-        //           fontSize: ResponsiveHelper.getResponsiveFontSize(14),
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
