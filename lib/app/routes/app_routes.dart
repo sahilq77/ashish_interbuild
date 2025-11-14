@@ -130,7 +130,7 @@ class AppRoutes {
       '/work-front-update-project-list';
   static const String workFrontUpdatePackageList =
       '/work-front-update-package-list';
-      
+
   static const String workFrontUpdateList = '/work-front-update-list';
 
   static const String workFrontUpdateDetailList =
@@ -138,27 +138,38 @@ class AppRoutes {
 
   static const String workFrontUpdateDashboard = '/work-front-update-dashboard';
 
+  // ──────────────────────────────────────────────────────────────
+  //  Inside your AppRoutes class (replace the whole `routes` list)
+  // ──────────────────────────────────────────────────────────────
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashView()),
 
-    // Add when login module is ready:
     GetPage(
       name: login,
       page: () => const LoginView(),
       binding: LoginBinding(),
+      transition: Transition.rightToLeft, // ← ADD
     ),
 
-    GetPage(name: home, page: () => const HomeView(), binding: HomeBinding()),
+    GetPage(
+      name: home,
+      page: () => const HomeView(),
+      binding: HomeBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    // ─── MEASUREMENT ───────────────────────────────────────
     GetPage(
       name: measurmentPackageList,
       page: () => const MesurmentPackageList(),
       binding: PackageListBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: measurmentSheetView,
       page: () => const MeasurmentSheetView(),
       binding: MeasurmentSheetBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: addPBOQ,
@@ -170,200 +181,232 @@ class AppRoutes {
         ZoneBinding(),
         ZoneLocationBinding(),
       ],
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: pboqList,
       page: () => const PboqMeasurmentDetailsList(),
       binding: PboqMeasurmentDetailsListBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: deductionForm,
       page: () => const DeductionFormView(),
       binding: DeductionFormBinding(),
+      transition: Transition.rightToLeft,
     ),
+
+    // ─── DAILY PROGRESS REPORT ─────────────────────────────
     GetPage(
       name: dailyProgressReport,
       page: () => const DailyProgressReportViiew(),
       binding: DailyProgressReportBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: updateDailyReportList,
       page: () => const UpdateProgressReportList(),
       binding: UpdateProgressReportBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: dailyProgressDashboard,
       page: () => const DailyProgressReportDashboard(),
       binding: DailyProgressReportDashboardBinding(),
+      transition: Transition.rightToLeft,
     ),
+
+    // ─── WEEKLY INSPECTION ─────────────────────────────────
     GetPage(
       name: weeklyInspectionDashboard,
       page: () => const WeeklyInspectionDashboard(),
       binding: WeeklyInspectionDashboardBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: weeklyInspection,
       page: () => const WeeklyInspectionView(),
       binding: WeeklyInspectionBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: updateWeeklyInspection,
       page: () => const UpdateWeeklyInspectionList(),
       binding: UpdateWeeklyInspectionBinding(),
+      transition: Transition.rightToLeft,
     ),
+
+    // ─── PROJECT LISTS ─────────────────────────────────────
     GetPage(
       name: measurmentProjectNameList,
       page: () => const MeasurmentProjectNameList(),
       binding: MeasurmentProjectNameBinding(),
+      transition: Transition.rightToLeft,
     ),
-    GetPage(
-      name: notifications,
-      page: () => const NotificationView(),
-      binding: NotificationBinding(),
-    ),
-
     GetPage(
       name: dprProjectList,
       page: () => const DprProjectList(),
       binding: DprProjectListBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: dprPackageList,
       page: () => const DprPackageList(),
       binding: PackageListBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: weeklyInspectionProjectList,
       page: () => const WeeklyInspectionProjectList(),
       binding: WeeklyInspectionProjectListBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: weeklyInspectionPackageList,
       page: () => const WeeklyInspectionPackageList(),
       binding: PackageListBinding(),
+      transition: Transition.rightToLeft,
     ),
 
+    // ─── PROFILE & NOTIFICATIONS ───────────────────────────
+    GetPage(
+      name: notifications,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+      transition: Transition.rightToLeft,
+    ),
     GetPage(
       name: profile,
       page: () => const ProfileScreenView(),
       binding: ProfileBinding(),
+      transition: Transition.rightToLeft,
     ),
+    GetPage(
+      name: updateProfile,
+      page: () => const UpdateProfileScreenView(),
+      binding: UpdateProfileBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    // ─── ACC MODULE ───────────────────────────────────────
     GetPage(
       name: accProjects,
       page: () => const AccProjectList(),
       binding: AccProjectListBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: accPackageList,
       page: () => const AccPackageList(),
       binding: PackageListBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: accScreenList,
       page: () => const AccScreenView(),
       binding: AccBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: addAccForm,
       page: () => const AddAccIssueFormView(),
       binding: AddAccFormBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: updateAccForm,
       page: () => const UpdateAccFormView(),
       binding: UpdateAccFormBinding(),
+      transition: Transition.rightToLeft,
     ),
+    GetPage(
+      name: editAccForm,
+      page: () => const EditAccFormView(),
+      binding: EditAccBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    // ─── CLIENT COMMITMENT ─────────────────────────────────
     GetPage(
       name: clientCommitmentProject,
       page: () => const ClientCommitmentProject(),
       binding: ClientCommitmentProjectBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: clientCommitmentPackageList,
       page: () => const ClientCommitmentPackageList(),
       binding: PackageListBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: clientCommitmentDashboard,
       page: () => const ClientCommitmentDashbord(),
       binding: ClientCommitmentDashboardBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: clientCommitmentList,
       page: () => const ClientCommitmentScreen(),
       binding: ClientCommitmentBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: addClientCommitment,
       page: () => const AddClientCommitmentFormView(),
       binding: AddClientCommitmentFormBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: updateClientCommitment,
       page: () => const UpdateClientCommitmentFormView(),
       binding: UpdateClientCommitmentFormBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: editClientCommitment,
       page: () => const EditClientCommitmentFormView(),
       binding: EditClientCommitmentBinding(),
+      transition: Transition.rightToLeft,
     ),
 
-    GetPage(
-      name: updateProfile,
-      page: () => const UpdateProfileScreenView(),
-      binding: UpdateProfileBinding(),
-    ),
-    GetPage(
-      name: noInternet,
-      page: () => NoInternetScreen(),
-      transition: Transition.fadeIn,
-    ),
+    // ─── WORK FRONT UPDATE ─────────────────────────────────
     GetPage(
       name: workFrontUpdateProjectList,
-      page: () => WorkFrontUpdateProjectList(),
-
+      page: () => const WorkFrontUpdateProjectList(),
       binding: WorkFrontUpdateProjectListBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: workFrontUpdatePackageList,
-      page: () => WorkfrontUpdatePackageList(),
-
+      page: () => const WorkfrontUpdatePackageList(),
       binding: PackageListBinding(),
+      transition: Transition.rightToLeft,
     ),
-    
     GetPage(
       name: workFrontUpdateDashboard,
-      page: () => WorkFrontUpdateDashboard(),
-
+      page: () => const WorkFrontUpdateDashboard(),
       binding: WorkFrontUpdateDashboardBinding(),
+      transition: Transition.rightToLeft,
     ),
     GetPage(
       name: workFrontUpdateList,
-      page: () => WorkFrontUpdateListView(),
-
+      page: () => const WorkFrontUpdateListView(),
       binding: WorkFrontUpdateListBinding(),
+      transition: Transition.rightToLeft,
     ),
-
     GetPage(
       name: workFrontUpdateDetailList,
-      page: () => WorkFrontUpdateDetailListView(),
-
+      page: () => const WorkFrontUpdateDetailListView(),
       binding: WorkFrontUpdateDetailListBinding(),
+      transition: Transition.rightToLeft,
     ),
 
+    // ─── NO INTERNET ───────────────────────────────────────
     GetPage(
-      name: editAccForm,
-      page: () => EditAccFormView(),
-
-      binding: EditAccBinding(),
+      name: noInternet,
+      page: () => const NoInternetScreen(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }

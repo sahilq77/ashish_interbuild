@@ -42,8 +42,7 @@ class MeasurmentSheetView extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(child: _searchField(controller)),
-                  const SizedBox(width: 8),
-                  _filterButton(context, controller),
+
                   const SizedBox(width: 8),
                   _sortButton(controller),
                 ],
@@ -56,9 +55,53 @@ class MeasurmentSheetView extends StatelessWidget {
                 if (controller.isLoading.value) {
                   return _shimmer();
                 }
-
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: ResponsiveHelper.padding(20),
+                      child: Text(
+                        controller.errorMessage.value,
+                        style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
                 if (controller.filteredPboqList.isEmpty) {
-                  return const Center(child: Text('No data found'));
+                  // NEW: Check if search is active
+                  if (controller.searchController.text.isNotEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: AppColors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No search result found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppColors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try adjusting your search keywords',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const Center(child: Text('No data found'));
+                  }
                 }
 
                 return ListView.builder(
@@ -75,7 +118,9 @@ class MeasurmentSheetView extends StatelessWidget {
                       // Trigger load more only if needed
                       if (controller.hasMoreData.value &&
                           !controller.isLoadingMore.value) {
-                        controller.loadMore(context);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          controller.loadMore(context);
+                        });
                       }
 
                       return Padding(
@@ -100,6 +145,7 @@ class MeasurmentSheetView extends StatelessWidget {
 
                     // Normal item rendering (unchanged)
                     final item = controller.filteredPboqList[i];
+                    print(item);
 
                     return GestureDetector(
                       onTap: () => controller.toggleExpanded(i),
@@ -122,12 +168,14 @@ class MeasurmentSheetView extends StatelessWidget {
                               padding: ResponsiveHelper.padding(16),
                               child: Column(
                                 children: [
-                                  ...controller.frontDisplayColumns.map((col) {
+                                  ...controller.getFrontDisplayColumns().map((
+                                    col,
+                                  ) {
                                     return Padding(
                                       padding: const EdgeInsets.only(bottom: 6),
                                       child: _dynamicRow(
                                         col,
-                                        _valueForColumn(item, col),
+                                        controller.getFieldValue(item, col),
                                       ),
                                     );
                                   }).toList(),
@@ -137,7 +185,8 @@ class MeasurmentSheetView extends StatelessWidget {
                                     // const SizedBox(height: 4),
 
                                     // Remaining front-display columns
-                                    ...controller.frontDisplayColumns
+                                    ...controller
+                                        .getFrontDisplayColumns()
                                         .skip(1)
                                         .map(
                                           (col) => Padding(
@@ -147,18 +196,21 @@ class MeasurmentSheetView extends StatelessWidget {
                                                 ),
                                             child: _dynamicRow(
                                               col,
-                                              _valueForColumn(item, col),
+                                              controller.getFieldValue(
+                                                item,
+                                                col,
+                                              ),
                                             ),
                                           ),
                                         )
                                         .toList(),
 
                                     // All other columns NOT in frontDisplayColumns
-                                    ...controller.appColumnDetails.value.columns
+                                    ...controller
+                                        .getAllColumns()
                                         .where(
                                           (col) => !controller
-                                              .frontDisplayColumns
-                                              .value
+                                              .getFrontDisplayColumns()
                                               .contains(col),
                                         )
                                         .map(
@@ -169,7 +221,10 @@ class MeasurmentSheetView extends StatelessWidget {
                                                 ),
                                             child: _dynamicRow(
                                               col,
-                                              _valueForColumn(item, col),
+                                              controller.getFieldValue(
+                                                item,
+                                                col,
+                                              ),
                                             ),
                                           ),
                                         )
@@ -206,11 +261,11 @@ class MeasurmentSheetView extends StatelessWidget {
                                       const SizedBox(width: 8),
 
                                       // 2. **Dynamic ElevatedButtons** for every button_display_column
-                                      ...controller.buttonDisplayColumns.map((
+                                      ...controller.getButtonDisplayColumns().map((
                                         col,
                                       ) {
                                         final String label =
-                                            "$col: ${_valueForColumn(item, col)}";
+                                            "$col: ${controller.getFieldValue(item, col)}";
 
                                         return Expanded(
                                           child: OutlinedButton(
@@ -253,32 +308,6 @@ class MeasurmentSheetView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // -------------------------------------------------------------------------
-  // Helper: get value for any column (dynamic)
-  // -------------------------------------------------------------------------
-  String _valueForColumn(AllData item, String column) {
-    switch (column) {
-      case 'System ID':
-        return item.systemId;
-      case 'PBOQ Name':
-        return item.pboqName;
-      case 'CBOQ No':
-        return item.cboqNo;
-      case 'Package Name':
-        return item.packageName;
-      case 'UOM':
-        return item.uom;
-      case 'Zones':
-        return item.zones;
-      case 'PBOQ Qty':
-        return item.pboqQty;
-      case 'MS Qty':
-        return item.msQty.toString();
-      default:
-        return '';
-    }
   }
 
   // -------------------------------------------------------------------------
@@ -327,158 +356,6 @@ class MeasurmentSheetView extends StatelessWidget {
         ),
       ),
       onChanged: c.searchSurveys,
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // Filter button + dialog
-  // -------------------------------------------------------------------------
-  Widget _filterButton(BuildContext ctx, MeasurementSheetController c) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(ctx, c),
-        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-        constraints: const BoxConstraints(),
-      ),
-    );
-  }
-
-  void _showFilterDialog(BuildContext context, MeasurementSheetController c) {
-    String? temp = c.selectedPackageFilter.value;
-
-    showDialog(
-      context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setState) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Container(
-                width: double.infinity,
-                padding: ResponsiveHelper.paddingSymmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                ),
-                child: Text(
-                  'Filter Measurement Sheets',
-                  style: AppStyle.heading1PoppinsWhite.responsive,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              // Dropdown
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Package',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  items: c.getPackageNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Package',
-                      border: const OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  onChanged: (v) => setState(() => temp = v),
-                  selectedItem: temp,
-                ),
-              ),
-
-              // Buttons
-              Padding(
-                padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () {
-                          c.clearFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Clear',
-                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () {
-                          c.selectedPackageFilter.value = temp;
-                          c.applyFilters();
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Apply',
-                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

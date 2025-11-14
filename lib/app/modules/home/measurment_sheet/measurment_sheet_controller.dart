@@ -4,7 +4,8 @@ import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
-import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart' show AppSnackbarStyles;
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart'
+    show AppSnackbarStyles;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,7 +56,11 @@ class MeasurementSheetController extends GetxController {
     log(
       "MeasurementSheetController → projectId=${projectId.value} packageId=${packageId.value}",
     );
-    fetchPboq(reset: true, context: Get.context!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        fetchPboq(reset: true, context: Get.context!);
+      }
+    });
   }
 
   @override
@@ -69,13 +74,11 @@ class MeasurementSheetController extends GetxController {
   // Build query string
   // -----------------------------------------------------------------
   String _buildQueryParams({bool includePagination = true}) {
-    final parts = <String>['project_id=${""}', 'package_id=${""}'];
+    final parts = <String>['project_id=$projectId', 'package_id=$packageId'];
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
     }
-    if (_orderBy.value.isNotEmpty) {
-      parts.add('order_by=${_orderBy.value}');
-    }
+    parts.add('order_by=${_orderBy.value}');
     if (includePagination) {
       parts.add('start=${start.value}');
       parts.add('length=$length');
@@ -106,11 +109,13 @@ class MeasurementSheetController extends GetxController {
     try {
       final String query = _buildQueryParams(includePagination: true);
       final String endpoint = Networkutility.getPboqList + query;
-      final response = await Networkcall().getMethod(
-            Networkutility.getPboqListApi,
-            endpoint,
-            context,
-          ) as List<GetPboqListResponse>?;
+      final response =
+          await Networkcall().getMethod(
+                Networkutility.getPboqListApi,
+                endpoint,
+                context,
+              )
+              as List<GetPboqListResponse>?;
 
       if (response != null && response.isNotEmpty) {
         final api = response.first;
@@ -233,6 +238,10 @@ class MeasurementSheetController extends GetxController {
     _orderBy.value = '';
     isAscending.value = true;
     selectedPackageFilter.value = null;
+    start.value = 0;
+    hasMoreData.value = true;
+    filteredPboqList.clear();
+
     await fetchPboq(reset: true, context: Get.context!);
   }
 
@@ -241,6 +250,25 @@ class MeasurementSheetController extends GetxController {
   // -----------------------------------------------------------------
   List<String> getPackageNames() {
     return pboqList.map((e) => e.packageName).toSet().toList();
+  }
+
+  // -----------------------------------------------------------------
+  // Dynamic field helpers
+  // -----------------------------------------------------------------
+  String getFieldValue(AllData item, String columnName) {
+    return item.getField(columnName);
+  }
+
+  List<String> getAllColumns() {
+    return appColumnDetails.value.columns;
+  }
+
+  List<String> getFrontDisplayColumns() {
+    return appColumnDetails.value.frontDisplayColumns;
+  }
+
+  List<String> getButtonDisplayColumns() {
+    return appColumnDetails.value.buttonDisplayColumn;
   }
 
   // -----------------------------------------------------------------

@@ -29,7 +29,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
           ),
         ],
       ),
-      child: _officer(controller),
+      child: Obx(() => _officer(controller)),
     );
   }
 

@@ -93,89 +93,27 @@ class AppColumnDetails {
 }
 
 class AllData {
-    String pboqId;
-    String length;
-    String breadth;
-    String height;
-    int srNo;
-    String systemId;
-    String pboqName;
-    String cboqNo;
-    String packageName;
-    String uom;
-    String zones;
-    String pboqQty;
-    int msQty;
-    String field1;
-    String field2;
-    String field3;
-    String field4;
-    String viewDeductions;
-    String viewDetails;
+    Map<String, dynamic> fields;
 
-    AllData({
-        required this.pboqId,
-        required this.length,
-        required this.breadth,
-        required this.height,
-        required this.srNo,
-        required this.systemId,
-        required this.pboqName,
-        required this.cboqNo,
-        required this.packageName,
-        required this.uom,
-        required this.zones,
-        required this.pboqQty,
-        required this.msQty,
-        required this.field1,
-        required this.field2,
-        required this.field3,
-        required this.field4,
-        required this.viewDeductions,
-        required this.viewDetails,
-    });
+    AllData({required this.fields});
 
     factory AllData.fromJson(Map<String, dynamic> json) => AllData(
-        pboqId: json["pboq_id"]??"",
-        length: json["length"]??"",
-        breadth: json["breadth"]??"",
-        height: json["height"]??"",
-        srNo: json["Sr No"]??"",
-        systemId: json["System ID"]??"",
-        pboqName: json["PBOQ Name"]??"",
-        cboqNo: json["CBOQ No"]??"",
-        packageName: json["Package Name"]??"",
-        uom: json["UOM"]??"",
-        zones: json["Zones"]??"",
-        pboqQty: json["PBOQ Qty"]??"",
-        msQty: json["MS Qty"]??"",
-        field1: json["Field 1"]??"",
-        field2: json["Field 2"]??"",
-        field3: json["Field 3"]??"",
-        field4: json["Field 4"]??"",
-        viewDeductions: json["View Deductions"]??"",
-        viewDetails: json["View Details"]??"",
+        fields: Map<String, dynamic>.from(json),
     );
 
-    Map<String, dynamic> toJson() => {
-        "pboq_id": pboqId,
-        "length": length,
-        "breadth": breadth,
-        "height": height,
-        "Sr No": srNo,
-        "System ID": systemId,
-        "PBOQ Name": pboqName,
-        "CBOQ No": cboqNo,
-        "Package Name": packageName,
-        "UOM": uom,
-        "Zones": zones,
-        "PBOQ Qty": pboqQty,
-        "MS Qty": msQty,
-        "Field 1": field1,
-        "Field 2": field2,
-        "Field 3": field3,
-        "Field 4": field4,
-        "View Deductions": viewDeductions,
-        "View Details": viewDetails,
-    };
+    Map<String, dynamic> toJson() => fields;
+
+    // Helper methods to get common fields
+    String get pboqId => fields["pboq_id"]?.toString() ?? "";
+    String get systemId => fields["System ID"]?.toString() ?? "";
+    String get pboqName => fields["PBOQ Name"]?.toString() ?? "";
+    String get cboqNo => fields["CBOQ No"]?.toString() ?? "";
+    String get packageName => fields["Package Name"]?.toString() ?? "";
+    String get uom => fields["UOM"]?.toString() ?? "";
+    String get zones => fields["Zones"]?.toString() ?? "";
+    String get pboqQty => fields["PBOQ Qty"]?.toString() ?? "";
+    int get msQty => int.tryParse(fields["MS Qty"]?.toString() ?? "0") ?? 0;
+
+    // Dynamic field getter
+    String getField(String key) => fields[key]?.toString() ?? "";
 }
