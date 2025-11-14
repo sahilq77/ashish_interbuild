@@ -36,10 +36,10 @@ class Networkcall {
   }
 
   /// Clear the token (call on logout)
-  static void clearBearerToken() {
-    _bearerToken = null;
-    log('Bearer token cleared');
-  }
+  // static void clearBearerToken() {
+  //   _bearerToken = null;
+  //   log('Bearer token cleared');
+  // }
 
   // ---------- Slow-Internet Snackbar ----------
   static GetSnackBar? _slowInternetSnackBar;
@@ -52,6 +52,7 @@ class Networkcall {
     String url,
     String body,
     BuildContext context,
+ 
   ) async {
     try {
       // ---- Connectivity check ----
@@ -66,8 +67,9 @@ class Networkcall {
 
       // ---- Build headers (add Bearer if present) ----
       final Map<String, String> headers = {'Content-Type': 'application/json'};
-      if (_bearerToken != null && _bearerToken!.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $_bearerToken';
+      if (AppUtility.authToken != null && AppUtility.authToken!.isNotEmpty) {
+        log("Bearer Token: ${AppUtility.authToken}");
+        headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
       }
 
       // ---- POST request ----
@@ -87,32 +89,46 @@ class Networkcall {
       _handleSlowInternet(stopwatch.elapsedMilliseconds);
 
       final data = response.body;
+
+      // ---- Log headers in all cases ----
+      final headersLog = headers.entries
+          .map((e) => '${e.key}: ${e.value}')
+          .join('\n');
+
       if (response.statusCode == 200) {
         log(
-          "POST → $url \nRequestCode: $requestCode \nBody: $body \nResponse: $data",
+          "POST → $url\n"
+          "RequestCode: $requestCode\n"
+          "Headers:\n$headersLog\n"
+          "Body: $body\n"
+          "Response: $data",
         );
-
-        // Wrap in array for the existing parsers
-        final str = "[${response.body}]";
 
         switch (requestCode) {
           case 1:
+            final str = "[${response.body}]";
             final login = getLoginResponseFromJson(str);
             return login;
-   case 11:
-            final addPboqMeasurment = getAddPboqMsResponseFromJson(str);
+          case 11:
+            final parsed = json.decode(response.body) as Map<String, dynamic>;
+            final addPboqMeasurment = [GetAddPboqMsResponse.fromJson(parsed)];
             return addPboqMeasurment;
-            
 
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
         }
       } else if (response.statusCode == 401) {
-        await AppUtility.clearUserInfo();
-        Get.offAllNamed(AppRoutes.login);
-
-        log("POST → $url \nStatus: ${response.statusCode} \nResponse: $data");
+        log(
+          "POST → $url\n"
+          "RequestCode: $requestCode\n"
+          "Headers:\n$headersLog\n"
+          "Body: $body\n"
+          "Response: $data\n"
+          "Status: 401 Unauthorized",
+        );
+        // await AppUtility.clearUserInfo();
+        // Get.offAllNamed(AppRoutes.login);
       } else {
         throw HttpException(
           'Server error: ${response.statusCode}',
@@ -120,25 +136,55 @@ class Networkcall {
         );
       }
     } on NoInternetException catch (e) {
-      log("POST → $url \nError: $e");
+      final headersLog = {
+        'Content-Type': 'application/json',
+        if (_bearerToken != null && _bearerToken!.isNotEmpty)
+          'Authorization': 'Bearer $_bearerToken',
+      }.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+
+      log("POST → $url\nHeaders:\n$headersLog\nError: $e");
       await _navigateToNoInternet();
       return null;
     } on TimeoutException catch (e) {
-      log("POST → $url \nError: $e");
+      final headersLog = {
+        'Content-Type': 'application/json',
+        if (_bearerToken != null && _bearerToken!.isNotEmpty)
+          'Authorization': 'Bearer $_bearerToken',
+      }.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+
+      log("POST → $url\nHeaders:\n$headersLog\nError: $e");
       AppSnackbarStyles.showError(
         title: 'Request Timed Out',
         message: 'The server took too long to respond. Please try again.',
       );
       return null;
     } on HttpException catch (e) {
-      log("POST → $url \nError: $e");
+      final headersLog = {
+        'Content-Type': 'application/json',
+        if (_bearerToken != null && _bearerToken!.isNotEmpty)
+          'Authorization': 'Bearer $_bearerToken',
+      }.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+
+      log("POST → $url\nHeaders:\n$headersLog\nError: $e");
       return null;
     } on SocketException catch (e) {
-      log("POST → $url \nError: $e");
+      final headersLog = {
+        'Content-Type': 'application/json',
+        if (_bearerToken != null && _bearerToken!.isNotEmpty)
+          'Authorization': 'Bearer $_bearerToken',
+      }.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+
+      log("POST → $url\nHeaders:\n$headersLog\nError: $e");
       await _navigateToNoInternet();
       return null;
     } catch (e) {
-      log("POST → $url \nUnexpected: $e");
+      final headersLog = {
+        'Content-Type': 'application/json',
+        if (_bearerToken != null && _bearerToken!.isNotEmpty)
+          'Authorization': 'Bearer $_bearerToken',
+      }.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+
+      log("POST → $url\nHeaders:\n$headersLog\nUnexpected: $e");
       return null;
     }
   }
@@ -210,11 +256,10 @@ class Networkcall {
           case 9:
             final getPboqList = getPboqListResponseFromJson(str);
             return getPboqList;
-             case 10:
-            final getPboqMeasurementSheetList = getPboqMeasurementsheetResponseFromJson(str);
+          case 10:
+            final getPboqMeasurementSheetList =
+                getPboqMeasurementsheetResponseFromJson(str);
             return getPboqMeasurementSheetList;
-
-            
 
           default:
             log("Invalid request code: $requestCode");

@@ -37,8 +37,9 @@ class FieldSet {
     final double nosVal = double.tryParse(nos.value) ?? 0;
     final double lengthVal = double.tryParse(length.value) ?? 0;
     final double breadthVal = double.tryParse(breadth.value) ?? 0;
-    final double heightVal = double.tryParse(height.value) ?? 1; // Default to 1 if empty
-    
+    final double heightVal =
+        double.tryParse(height.value) ?? 1; // Default to 1 if empty
+
     final double result = nosVal * lengthVal * breadthVal * heightVal;
     calculatedQty.value = result.toStringAsFixed(2);
   }
@@ -242,27 +243,27 @@ class AddPboqFormController extends GetxController {
   void onSubLocationChanged(int index, String value) {
     fieldSets[index].subLocation.value = value;
   }
-  
+
   void onNosChanged(int index, String value) {
     fieldSets[index].nos.value = value;
     fieldSets[index].calculateQuantity();
   }
-  
+
   void onLengthChanged(int index, String value) {
     fieldSets[index].length.value = value;
     fieldSets[index].calculateQuantity();
   }
-  
+
   void onBreadthChanged(int index, String value) {
     fieldSets[index].breadth.value = value;
     fieldSets[index].calculateQuantity();
   }
-  
+
   void onHeightChanged(int index, String value) {
     fieldSets[index].height.value = value;
     fieldSets[index].calculateQuantity();
   }
-  
+
   void onRemarkChanged(int index, String value) {
     fieldSets[index].remark.value = value;
   }
@@ -281,11 +282,13 @@ class AddPboqFormController extends GetxController {
   Future<void> addPboqMeasurment({BuildContext? context}) async {
     try {
       final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
-      
+
       final List<Map<String, dynamic>> zonesData = fieldSets.map((fs) {
         final String? zoneId = _zoneCtrl.getZoneIdByName(fs.selectedZone.value);
-        final String? locationId = _zoneLocationCtrl.getZoneLocationIdByName(fs.selectedLocation.value);
-        
+        final String? locationId = _zoneLocationCtrl.getZoneLocationIdByName(
+          fs.selectedLocation.value,
+        );
+
         return {
           "zone_id": int.tryParse(zoneId ?? '0') ?? 0,
           "zone_location_id": int.tryParse(locationId ?? '0') ?? 0,
@@ -297,7 +300,7 @@ class AddPboqFormController extends GetxController {
           "remark": fs.remark.value,
         };
       }).toList();
-      
+
       final jsonBody = {
         "project_id": mesurmentCtrl.projectId.value,
         "pboq_id": pboqId ?? "",
@@ -324,8 +327,9 @@ class AddPboqFormController extends GetxController {
 
           AppSnackbarStyles.showSuccess(
             title: 'Success',
-            message: 'PBOQ MS Added successfully!',
+            message: 'PBOQ Measurement Sheet added successfully!',
           );
+          Get.offNamed(AppRoutes.pboqList);
 
           Get.offNamed(AppRoutes.pboqList);
         } else if (response[0].status == false) {
@@ -334,18 +338,12 @@ class AddPboqFormController extends GetxController {
               ? response[0].error!
               : (response[0].message?.isNotEmpty == true
                     ? response[0].message!
-                    : "Added failed");
+                    : "Failed to add measurement sheet.");
 
-          AppSnackbarStyles.showError(
-            title: 'Failed',
-            message: errorMessage,
-          );
+          AppSnackbarStyles.showError(title: 'Failed', message: errorMessage);
         }
       } else {
-        AppSnackbarStyles.showError(
-          title: 'Login Failed',
-          message: "Invalid credentials. Please try again.",
-        );
+        AppSnackbarStyles.showError(title: 'Failed', message: "Failed");
         // AppSnackbarStyles.showError(
         //   title: 'Server Error',
         //   message: 'No response from server',
