@@ -71,23 +71,27 @@ class Data {
 class AppColumnDetails {
     List<String> columns;
     List<String> frontDisplayColumns;
+    List<String> frontSecondaryDisplayColumns;
     List<String> buttonDisplayColumn;
 
     AppColumnDetails({
         required this.columns,
         required this.frontDisplayColumns,
+        required this.frontSecondaryDisplayColumns,
         required this.buttonDisplayColumn,
     });
 
     factory AppColumnDetails.fromJson(Map<String, dynamic> json) => AppColumnDetails(
         columns: List<String>.from(json["columns"].map((x) => x)),
         frontDisplayColumns: List<String>.from(json["front_display_columns"].map((x) => x)),
+             frontSecondaryDisplayColumns: List<String>.from(json["front_secondary_display_columns"].map((x) => x)),
         buttonDisplayColumn: List<String>.from(json["button_display_column"].map((x) => x)),
     );
 
     Map<String, dynamic> toJson() => {
         "columns": List<dynamic>.from(columns.map((x) => x)),
         "front_display_columns": List<dynamic>.from(frontDisplayColumns.map((x) => x)),
+        "front_secondary_display_columns": List<dynamic>.from(frontSecondaryDisplayColumns.map((x) => x)),
         "button_display_column": List<dynamic>.from(buttonDisplayColumn.map((x) => x)),
     };
 }

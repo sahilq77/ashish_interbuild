@@ -239,15 +239,34 @@ class MeasurmentSheetView extends StatelessWidget {
                                   Row(
                                     children: [
                                       // 1. Fixed “Qty / Amt” (you can keep or remove them)
-                                      Expanded(
-                                        child: Text(
-                                          "PBOQ Qty: ${item.pboqQty}",
-                                          style: AppStyle
-                                              .labelPrimaryPoppinsBlack
-                                              .responsive
-                                              .copyWith(fontSize: 13),
-                                        ),
-                                      ),
+                                      ...controller
+                                          .getFrontSecondaryDisplayColumns()
+                                          .map((col) {
+                                            return Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 6,
+                                                ),
+                                                child: Text(
+                                                  "$col: ${controller.getFieldValue(item, col)}",
+                                                  style: AppStyle
+                                                      .labelPrimaryPoppinsBlack
+                                                      .responsive
+                                                      .copyWith(fontSize: 13),
+                                                ),
+                                              ),
+                                            );
+                                          })
+                                          .toList(),
+                                      // Expanded(
+                                      //   child: Text(
+                                      //     "PBOQ Qty: ${item.pboqQty}",
+                                      //     style: AppStyle
+                                      //         .labelPrimaryPoppinsBlack
+                                      //         .responsive
+                                      //         .copyWith(fontSize: 13),
+                                      //   ),
+                                      // ),
                                       // const SizedBox(width: 4),
                                       // Expanded(
                                       //   child: Text(

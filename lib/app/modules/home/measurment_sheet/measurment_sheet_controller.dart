@@ -43,6 +43,7 @@ class MeasurementSheetController extends GetxController {
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
     columns: [],
     frontDisplayColumns: [],
+    frontSecondaryDisplayColumns: [],
     buttonDisplayColumn: [],
   ).obs;
 
@@ -265,6 +266,10 @@ class MeasurementSheetController extends GetxController {
 
   List<String> getFrontDisplayColumns() {
     return appColumnDetails.value.frontDisplayColumns;
+  }
+
+  List<String> getFrontSecondaryDisplayColumns() {
+    return appColumnDetails.value.frontSecondaryDisplayColumns;
   }
 
   List<String> getButtonDisplayColumns() {
