@@ -261,19 +261,24 @@ class MeasurementSheetController extends GetxController {
   }
 
   List<String> getAllColumns() {
-    return appColumnDetails.value.columns;
+    final allCols = appColumnDetails.value.columns.toSet();
+    final frontCols = appColumnDetails.value.frontDisplayColumns.toSet();
+    final frontSecondaryCols = appColumnDetails.value.frontSecondaryDisplayColumns.toSet();
+    final buttonCols = appColumnDetails.value.buttonDisplayColumn.toSet();
+    
+    return allCols.difference(frontCols).difference(frontSecondaryCols).difference(buttonCols).toList();
   }
 
   List<String> getFrontDisplayColumns() {
-    return appColumnDetails.value.frontDisplayColumns;
+    return appColumnDetails.value.frontDisplayColumns.toSet().toList();
   }
 
   List<String> getFrontSecondaryDisplayColumns() {
-    return appColumnDetails.value.frontSecondaryDisplayColumns;
+    return appColumnDetails.value.frontSecondaryDisplayColumns.toSet().toList();
   }
 
   List<String> getButtonDisplayColumns() {
-    return appColumnDetails.value.buttonDisplayColumn;
+    return appColumnDetails.value.buttonDisplayColumn.toSet().toList();
   }
 
   // -----------------------------------------------------------------
