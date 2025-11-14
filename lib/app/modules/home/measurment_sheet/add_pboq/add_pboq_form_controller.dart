@@ -4,6 +4,7 @@ import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_co
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,6 +16,7 @@ class FieldSet {
   var uom = 'Unit'.obs;
   var nos = ''.obs;
   var length = ''.obs;
+  var breadth = ''.obs; // ← NEW
   var height = ''.obs;
   var remark = ''.obs;
   FieldSet();
@@ -28,6 +30,10 @@ class AddPboqFormController extends GetxController {
   var fieldSets = <FieldSet>[FieldSet()].obs;
 
   // Injected real controller
+  PboqMeasurmentDetailController PBOQMSctr = Get.put(
+    PboqMeasurmentDetailController(),
+  );
+
   final MeasurementSheetController mesurmentCtrl = Get.find();
   late final PackageNameController _pkgCtrl = Get.find<PackageNameController>();
   late final PboqNameController _pboqCtrl = Get.find<PboqNameController>();
@@ -40,13 +46,13 @@ class AddPboqFormController extends GetxController {
     super.onInit();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (Get.context != null) {
-        _pkgCtrl
+        // Fetch packages and auto-bind package
+        await _pkgCtrl
             .fetchPackages(
               context: Get.context!,
               projectId: mesurmentCtrl.projectId.value,
             )
             .then((_) {
-              // Auto-bind package using mesurmentCtrl.packageId
               final String? autoPackageId = mesurmentCtrl.packageId.value
                   .toString();
               if (autoPackageId != null &&
@@ -57,18 +63,30 @@ class AddPboqFormController extends GetxController {
                 );
                 if (packageName != null && packageName.isNotEmpty) {
                   selectedPackage.value = packageName;
-                  // Trigger dependent loading
                   onPackageChanged(packageName);
                 }
               }
             });
 
+        // Fetch PBOQs first
         await _pboqCtrl.fetchPboqs(
           forceFetch: true,
           context: Get.context!,
           projectId: mesurmentCtrl.projectId.value,
           packageId: mesurmentCtrl.packageId.value,
         );
+
+        // === NEW: Auto-bind PBOQ using PBOQMSctr.pboqId.value ===
+        final String? autoPboqId = PBOQMSctr.pboqId.value.toString();
+        if (autoPboqId != null &&
+            autoPboqId != 'null' &&
+            autoPboqId.isNotEmpty) {
+          final String? pboqName = _pboqCtrl.getPboqNameById(autoPboqId);
+          if (pboqName != null && pboqName.isNotEmpty) {
+            selectedPboqName.value = pboqName;
+            onPboqNameChanged(pboqName); // Trigger zone loading
+          }
+        }
       }
     });
   }
@@ -218,6 +236,10 @@ class AddPboqFormController extends GetxController {
 
   void onLengthChanged(int index, String value) {
     fieldSets[index].length.value = value;
+  }
+
+  void onBreadthChanged(int index, String value) {
+    fieldSets[index].breadth.value = value;
   }
 
   void onHeightChanged(int index, String value) {

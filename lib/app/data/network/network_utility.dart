@@ -30,6 +30,9 @@ class Networkutility {
 
   static String getPboqMeasurmentSheetList = "${baseUrl + "pboq-ms"}";
   static int getPboqMeasurmentSheetListApi = 10;
+
+  static String addMeasurementSheet = "${baseUrl + "add-ms"}";
+  static int addMeasurementSheetApi = 11;
 }
 
 

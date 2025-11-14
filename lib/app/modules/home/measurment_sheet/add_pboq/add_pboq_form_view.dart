@@ -52,7 +52,7 @@ class AddPboqFormView extends StatelessWidget {
                       ? 'Please select a PBOQ name'
                       : null,
                   hint: 'Select a PBOQ name',
-                  enabled: true,
+                  enabled: false,
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
@@ -152,7 +152,15 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Enter length',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
+                        _buildTextFormField(
+                          label: 'Breadth',
+                          initialValue:
+                              controller.fieldSets[index].length.value,
+                          onChanged: (value) =>
+                              controller.onLengthChanged(index, value),
+                          hint: 'Enter Breadth',
+                        ),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
                         // HEIGHT
                         _buildTextFormField(
                           label: 'Height',
