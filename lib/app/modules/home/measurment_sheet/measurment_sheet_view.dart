@@ -295,7 +295,9 @@ class MeasurmentSheetView extends StatelessWidget {
                                               Get.toNamed(
                                                 AppRoutes.pboqList,
                                                 arguments: {
-                                                  'pboq_id': item.pboqId,
+                                                  'pboq_id': int.parse(
+                                                    item.pboqId,
+                                                  ),
                                                   'column': col,
                                                 },
                                               );

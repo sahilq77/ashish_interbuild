@@ -27,6 +27,9 @@ class Networkutility {
 
   static String getPboqList = "${baseUrl + "pboq-list"}";
   static int getPboqListApi = 9;
+
+  static String getPboqMeasurmentSheetList = "${baseUrl + "pboq-ms"}";
+  static int getPboqMeasurmentSheetListApi = 10;
 }
 
 
