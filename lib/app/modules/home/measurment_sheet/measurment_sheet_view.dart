@@ -65,14 +65,40 @@ class MeasurmentSheetView extends StatelessWidget {
                   padding: ResponsiveHelper.padding(16),
                   itemCount:
                       controller.filteredPboqList.length +
-                      (controller.hasMoreData.value ? 1 : 0),
+                      (controller.hasMoreData.value ||
+                              controller.isLoadingMore.value
+                          ? 1
+                          : 1),
                   itemBuilder: (ctx, i) {
-                    // Load-more trigger
-                    if (i == controller.filteredPboqList.length) {
-                      controller.loadMore(context);
-                      return const Center(child: CircularProgressIndicator());
+                    // Handle last item: loading or "No more data"
+                    if (i >= controller.filteredPboqList.length) {
+                      // Trigger load more only if needed
+                      if (controller.hasMoreData.value &&
+                          !controller.isLoadingMore.value) {
+                        controller.loadMore(context);
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: controller.hasMoreData.value
+                              ? const CircularProgressIndicator()
+                              : Text(
+                                  'No more data',
+                                  style: TextStyle(
+                                    color: AppColors.grey,
+                                    fontSize:
+                                        ResponsiveHelper.getResponsiveFontSize(
+                                          14,
+                                        ),
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                        ),
+                      );
                     }
 
+                    // Normal item rendering (unchanged)
                     final item = controller.filteredPboqList[i];
                     final isExpanded = controller.expandedIndex.value == i;
 
@@ -132,26 +158,6 @@ class MeasurmentSheetView extends StatelessWidget {
                                         ),
                                       )
                                       .toList(),
-
-                                  // Divider + Header
-                                  // const Divider(height: 24, thickness: 0.8),
-                                  // Padding(
-                                  //   padding: const EdgeInsets.symmetric(
-                                  //     vertical: 6,
-                                  //   ),
-                                  //   child: Text(
-                                  //     'Additional Details',
-                                  //     style: AppStyle.reportCardTitle.responsive
-                                  //         .copyWith(
-                                  //           fontSize:
-                                  //               ResponsiveHelper.getResponsiveFontSize(
-                                  //                 14,
-                                  //               ),
-                                  //           fontWeight: FontWeight.w600,
-                                  //           color: AppColors.primary,
-                                  //         ),
-                                  //   ),
-                                  // ),
 
                                   // All other columns NOT in frontDisplayColumns
                                   ...controller.appColumnDetails.value.columns
