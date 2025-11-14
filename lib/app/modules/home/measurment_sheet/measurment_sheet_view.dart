@@ -122,36 +122,29 @@ class MeasurmentSheetView extends StatelessWidget {
                               padding: ResponsiveHelper.padding(16),
                               child: Column(
                                 children: [
-                                  // ---- Primary row (always visible) ----
-                                  _dynamicRow(
-                                    controller.frontDisplayColumns.isNotEmpty
-                                        ? controller.frontDisplayColumns
-                                              .firstWhere(
-                                                (c) => c == "CBOQ No",
-                                                orElse: () => controller
-                                                    .frontDisplayColumns[0],
-                                              )
-                                        : "–",
-                                    _valueForColumn(
-                                      item,
-                                      controller.frontDisplayColumns.isNotEmpty
-                                          ? controller.frontDisplayColumns[0]
-                                          : "",
-                                    ),
-                                  ),
+                                  ...controller.frontDisplayColumns.map((col) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 6),
+                                      child: _dynamicRow(
+                                        col,
+                                        _valueForColumn(item, col),
+                                      ),
+                                    );
+                                  }).toList(),
 
                                   // ---- Expanded Content (All Columns) ----
                                   if (isExpanded) ...[
-                                    const SizedBox(height: 4),
+                                    // const SizedBox(height: 4),
 
                                     // Remaining front-display columns
                                     ...controller.frontDisplayColumns
                                         .skip(1)
                                         .map(
                                           (col) => Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 4,
-                                            ),
+                                            padding:
+                                                ResponsiveHelper.paddingSymmetric(
+                                                  vertical: 2,
+                                                ),
                                             child: _dynamicRow(
                                               col,
                                               _valueForColumn(item, col),
@@ -170,9 +163,10 @@ class MeasurmentSheetView extends StatelessWidget {
                                         )
                                         .map(
                                           (col) => Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 4,
-                                            ),
+                                            padding:
+                                                ResponsiveHelper.paddingSymmetric(
+                                                  vertical: 2,
+                                                ),
                                             child: _dynamicRow(
                                               col,
                                               _valueForColumn(item, col),
@@ -192,23 +186,23 @@ class MeasurmentSheetView extends StatelessWidget {
                                       // 1. Fixed “Qty / Amt” (you can keep or remove them)
                                       Expanded(
                                         child: Text(
-                                          "Qty: ${item.pboqQty}",
+                                          "PBOQ Qty: ${item.pboqQty}",
                                           style: AppStyle
                                               .labelPrimaryPoppinsBlack
                                               .responsive
                                               .copyWith(fontSize: 13),
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          "Amt: ${item.msQty}", // or any other amount you need
-                                          style: AppStyle
-                                              .labelPrimaryPoppinsBlack
-                                              .responsive
-                                              .copyWith(fontSize: 13),
-                                        ),
-                                      ),
+                                      // const SizedBox(width: 4),
+                                      // Expanded(
+                                      //   child: Text(
+                                      //     "Amt: ${item.msQty}", // or any other amount you need
+                                      //     style: AppStyle
+                                      //         .labelPrimaryPoppinsBlack
+                                      //         .responsive
+                                      //         .copyWith(fontSize: 13),
+                                      //   ),
+                                      // ),
                                       const SizedBox(width: 8),
 
                                       // 2. **Dynamic ElevatedButtons** for every button_display_column
