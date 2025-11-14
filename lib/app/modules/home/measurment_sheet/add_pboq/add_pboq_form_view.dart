@@ -27,19 +27,21 @@ class AddPboqFormView extends StatelessWidget {
           padding: ResponsiveHelper.padding(16),
           child: Column(
             children: [
+              // PACKAGE NAME - READ ONLY
               Obx(
                 () => _buildDropdownField(
                   label: 'Package Name',
                   value: controller.selectedPackage.value,
                   items: controller.packageNames,
-                  onChanged: controller.onPackageChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select a package'
-                      : null,
-                  hint: 'Select a package',
+                  onChanged: null, // Disabled
+                  validator: null, // No validation needed for read-only
+                  hint: 'Selected package',
+                  enabled: false, // Fully disabled
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+              // PBOQ NAME - Editable
               Obx(
                 () => _buildDropdownField(
                   label: 'PBOQ Name',
@@ -50,11 +52,14 @@ class AddPboqFormView extends StatelessWidget {
                       ? 'Please select a PBOQ name'
                       : null,
                   hint: 'Select a PBOQ name',
+                  enabled: true,
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               Divider(color: AppColors.darkBackground),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+              // DYNAMIC FIELD SETS
               Obx(
                 () => ListView.builder(
                   shrinkWrap: true,
@@ -63,6 +68,7 @@ class AddPboqFormView extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return Column(
                       children: [
+                        // ZONE
                         Obx(
                           () => _buildDropdownField(
                             label: 'Zone',
@@ -74,17 +80,22 @@ class AddPboqFormView extends StatelessWidget {
                                 ? 'Please select a zone'
                                 : null,
                             hint: 'Select a zone',
+                            enabled: true,
                           ),
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // PLANNING STATUS (Read-only)
                         _buildTextFormField(
                           label: 'Planning Status',
                           initialValue:
                               controller.fieldSets[index].planningStatus.value,
-                          onChanged: null, // Read-only field
+                          onChanged: null,
                           hint: 'Planning status',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // LOCATION
                         Obx(
                           () => _buildDropdownField(
                             label: 'Location',
@@ -96,9 +107,12 @@ class AddPboqFormView extends StatelessWidget {
                                 ? 'Please select a location'
                                 : null,
                             hint: 'Select a location',
+                            enabled: true,
                           ),
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // SUB LOCATION
                         _buildTextFormField(
                           label: 'Sub Location',
                           initialValue:
@@ -108,13 +122,17 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Enter sub location',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // UOM (Read-only)
                         _buildTextFormField(
                           label: 'UOM',
                           initialValue: controller.fieldSets[index].uom.value,
-                          onChanged: null, // Read-only field
+                          onChanged: null,
                           hint: 'Unit of measure',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // NOS
                         _buildTextFormField(
                           label: 'Nos',
                           initialValue: controller.fieldSets[index].nos.value,
@@ -123,6 +141,8 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Enter number of items',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // LENGTH
                         _buildTextFormField(
                           label: 'Length',
                           initialValue:
@@ -132,6 +152,8 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Enter length',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // HEIGHT
                         _buildTextFormField(
                           label: 'Height',
                           initialValue:
@@ -141,6 +163,8 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Enter height',
                         ),
                         SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                        // REMARK
                         _buildTextFormField(
                           label: 'Remark',
                           initialValue:
@@ -182,6 +206,7 @@ class AddPboqFormView extends StatelessWidget {
     );
   }
 
+  // Updated Dropdown Field with 'enabled' support
   Widget _buildDropdownField({
     required String label,
     required String value,
@@ -189,6 +214,7 @@ class AddPboqFormView extends StatelessWidget {
     required Function(String?)? onChanged,
     String? Function(String?)? validator,
     required String hint,
+    bool enabled = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,7 +226,7 @@ class AddPboqFormView extends StatelessWidget {
           items: items,
           onChanged: onChanged,
           validator: validator,
-          enabled: onChanged != null,
+          enabled: enabled,
           dropdownDecoratorProps: DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
               hintText: hint,
@@ -211,8 +237,8 @@ class AddPboqFormView extends StatelessWidget {
                 horizontal: 16,
                 vertical: 12,
               ),
-              filled: onChanged == null,
-              fillColor: onChanged == null ? Colors.grey[200] : null,
+              filled: !enabled,
+              fillColor: !enabled ? Colors.grey[200] : null,
             ),
           ),
           popupProps: const PopupProps.menu(
@@ -224,6 +250,7 @@ class AddPboqFormView extends StatelessWidget {
     );
   }
 
+  // TextFormField (unchanged)
   Widget _buildTextFormField({
     required String label,
     required String initialValue,
@@ -255,6 +282,7 @@ class AddPboqFormView extends StatelessWidget {
     );
   }
 
+  // AppBar (unchanged)
   AppBar _buildAppbar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
@@ -268,7 +296,6 @@ class AddPboqFormView extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
         child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
