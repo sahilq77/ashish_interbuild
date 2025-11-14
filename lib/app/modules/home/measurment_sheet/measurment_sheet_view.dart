@@ -185,11 +185,14 @@ class MeasurmentSheetView extends StatelessWidget {
                                   const SizedBox(height: 8),
 
                                   // ---- Footer row (Qty / Amt / MS Qty button) ----
+
+                                  // ---- Footer row (dynamic button columns) ----
                                   Row(
                                     children: [
+                                      // 1. Fixed “Qty / Amt” (you can keep or remove them)
                                       Expanded(
                                         child: Text(
-                                          "Qty: ${item.msQty}",
+                                          "Qty: ${item.pboqQty}",
                                           style: AppStyle
                                               .labelPrimaryPoppinsBlack
                                               .responsive
@@ -199,30 +202,46 @@ class MeasurmentSheetView extends StatelessWidget {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          "Amt: ${item.msQty}",
+                                          "Amt: ${item.msQty}", // or any other amount you need
                                           style: AppStyle
                                               .labelPrimaryPoppinsBlack
                                               .responsive
                                               .copyWith(fontSize: 13),
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          style:
-                                              AppButtonStyles.outlinedExtraSmallPrimary(),
-                                          onPressed: () {
-                                            Get.toNamed(AppRoutes.pboqList);
-                                          },
-                                          child: Text(
-                                            "Ms Qty: ${item.msQty}",
-                                            style: AppStyle
-                                                .labelPrimaryPoppinsBlack
-                                                .responsive
-                                                .copyWith(fontSize: 10),
+                                      const SizedBox(width: 8),
+
+                                      // 2. **Dynamic ElevatedButtons** for every button_display_column
+                                      ...controller.buttonDisplayColumns.map((
+                                        col,
+                                      ) {
+                                        final String label =
+                                            "$col: ${_valueForColumn(item, col)}";
+
+                                        return Expanded(
+                                          child: OutlinedButton(
+                                            style:
+                                                AppButtonStyles.outlinedExtraSmallPrimary(),
+                                            onPressed: () {
+                                              // Example navigation – adapt to your real route
+                                              Get.toNamed(
+                                                AppRoutes.pboqList,
+                                                arguments: {
+                                                  'pboq_id': item.pboqId,
+                                                  'column': col,
+                                                },
+                                              );
+                                            },
+                                            child: Text(
+                                              label,
+                                              style: AppStyle
+                                                  .labelPrimaryPoppinsBlack
+                                                  .responsive
+                                                  .copyWith(fontSize: 10),
+                                            ),
                                           ),
-                                        ),
-                                      ),
+                                        );
+                                      }).toList(),
                                     ],
                                   ),
                                 ],
