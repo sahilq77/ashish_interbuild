@@ -1,7 +1,5 @@
 import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
-import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
-import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -9,7 +7,6 @@ import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AddPboqFormView extends StatelessWidget {
   const AddPboqFormView({super.key});
@@ -18,6 +15,7 @@ class AddPboqFormView extends StatelessWidget {
   Widget build(BuildContext context) {
     final AddPboqFormController controller = Get.put(AddPboqFormController());
     ResponsiveHelper.init(context);
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
@@ -27,186 +25,198 @@ class AddPboqFormView extends StatelessWidget {
           padding: ResponsiveHelper.padding(16),
           child: Column(
             children: [
-              // PACKAGE NAME - READ ONLY
+              // Package (read-only)
               Obx(
                 () => _buildDropdownField(
                   label: 'Package Name',
                   value: controller.selectedPackage.value,
                   items: controller.packageNames,
-                  onChanged: null, // Disabled
-                  validator: null, // No validation needed for read-only
+                  onChanged: null,
                   hint: 'Selected package',
-                  enabled: false, // Fully disabled
+                  enabled: false,
                 ),
               ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              const SizedBox(height: 16),
 
-              // PBOQ NAME - Editable
+              // PBOQ (read-only)
               Obx(
                 () => _buildDropdownField(
                   label: 'PBOQ Name',
                   value: controller.selectedPboqName.value,
                   items: controller.pboqNames,
-                  onChanged: controller.onPboqNameChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select a PBOQ name'
-                      : null,
-                  hint: 'Select a PBOQ name',
+                  onChanged: null,
+                  hint: 'Selected PBOQ',
                   enabled: false,
                 ),
               ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Divider(color: AppColors.darkBackground),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              const SizedBox(height: 16),
+              Divider(
+                color: AppColors.darkBackground,
+                thickness: ResponsiveHelper.spacing(2),
+              ),
+              const SizedBox(height: 16),
 
-              // DYNAMIC FIELD SETS
+              // Dynamic Field Sets
               Obx(
                 () => ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.fieldSets.length,
-                  itemBuilder: (context, index) {
+                  itemBuilder: (ctx, index) {
+                    final fs = controller.fieldSets[index];
+
                     return Column(
                       children: [
-                        // ZONE
+                        // Zone Dropdown
                         Obx(
                           () => _buildDropdownField(
                             label: 'Zone',
-                            value: controller.selectedZoneName.value,
+                            value: fs.selectedZone.value,
                             items: controller.zoneNames,
-                            onChanged: (value) =>
-                                controller.onZoneChanged(value),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select a zone'
-                                : null,
-                            hint: 'Select a zone',
+                            onChanged: (v) =>
+                                controller.onFieldZoneChanged(index, v),
+                            hint: 'Select zone',
                             enabled: true,
                           ),
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // PLANNING STATUS (Read-only)
-                        _buildTextFormField(
-                          label: 'Planning Status',
-                          initialValue:
-                              controller.fieldSets[index].planningStatus.value,
-                          onChanged: null,
-                          hint: 'Planning status',
+                        // Planning Status Dropdown
+                        Obx(
+                          () => _buildDropdownField(
+                            label: 'Planning Status',
+                            value: fs.planningStatus.value,
+                            items: controller.planningStatusOptions,
+                            onChanged: (v) =>
+                                controller.onPlanningStatusChanged(index, v),
+                            hint: 'Select status',
+                            enabled: false,
+                          ),
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // LOCATION
+                        // Location Dropdown
                         Obx(
                           () => _buildDropdownField(
                             label: 'Location',
-                            value: controller.selectedZoneLocationName.value,
+                            value: fs.selectedLocation.value,
                             items: controller.zoneLocations,
-                            onChanged: (value) =>
-                                controller.onLocationChanged(value),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select a location'
-                                : null,
-                            hint: 'Select a location',
+                            onChanged: (v) =>
+                                controller.onFieldLocationChanged(index, v),
+                            hint: 'Select location',
                             enabled: true,
                           ),
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // SUB LOCATION
+                        // Sub Location
                         _buildTextFormField(
                           label: 'Sub Location',
-                          initialValue:
-                              controller.fieldSets[index].subLocation.value,
-                          onChanged: (value) =>
-                              controller.onSubLocationChanged(index, value),
-                          hint: 'Enter sub location',
+                          initialValue: fs.subLocation.value,
+                          onChanged: (v) =>
+                              controller.onSubLocationChanged(index, v),
+                          hint: 'Enter sub-location',
+                          readOnly: false,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // UOM (Read-only)
+                        // UOM (read-only)
                         _buildTextFormField(
                           label: 'UOM',
-                          initialValue: controller.fieldSets[index].uom.value,
+                          initialValue: fs.uom.value,
                           onChanged: null,
-                          hint: 'Unit of measure',
+                          hint: 'Unit',
+                          readOnly: true,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // NOS
+                        // Nos
                         _buildTextFormField(
                           label: 'Nos',
-                          initialValue: controller.fieldSets[index].nos.value,
-                          onChanged: (value) =>
-                              controller.onNosChanged(index, value),
-                          hint: 'Enter number of items',
+                          initialValue: fs.nos.value,
+                          onChanged: (v) => controller.onNosChanged(index, v),
+                          hint: 'Enter number',
+                          readOnly: false,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // LENGTH
+                        // Length
                         _buildTextFormField(
                           label: 'Length',
-                          initialValue:
-                              controller.fieldSets[index].length.value,
-                          onChanged: (value) =>
-                              controller.onLengthChanged(index, value),
+                          initialValue: fs.length.value,
+                          onChanged: (v) =>
+                              controller.onLengthChanged(index, v),
                           hint: 'Enter length',
+                          readOnly: controller.lengthEnabled == 1 ? true : false,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
+
+                        // Breadth
                         _buildTextFormField(
                           label: 'Breadth',
-                          initialValue:
-                              controller.fieldSets[index].length.value,
-                          onChanged: (value) =>
-                              controller.onLengthChanged(index, value),
-                          hint: 'Enter Breadth',
+                          initialValue: fs.breadth.value,
+                          onChanged: (v) =>
+                              controller.onBreadthChanged(index, v),
+                          hint: 'Enter breadth',
+                          readOnly: controller.breadthEnabled == 1
+                              ? true
+                              : false,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-                        // HEIGHT
+                        const SizedBox(height: 12),
+
+                        // Height
                         _buildTextFormField(
                           label: 'Height',
-                          initialValue:
-                              controller.fieldSets[index].height.value,
-                          onChanged: (value) =>
-                              controller.onHeightChanged(index, value),
+                          initialValue: fs.height.value,
+                          onChanged: (v) =>
+                              controller.onHeightChanged(index, v),
                           hint: 'Enter height',
+                          readOnly: controller.heightEnabled == 1
+                              ? true
+                              : false,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                        const SizedBox(height: 12),
 
-                        // REMARK
+                        // Remark
                         _buildTextFormField(
                           label: 'Remark',
-                          initialValue:
-                              controller.fieldSets[index].remark.value,
-                          onChanged: (value) =>
-                              controller.onRemarkChanged(index, value),
+                          initialValue: fs.remark.value,
+                          onChanged: (v) =>
+                              controller.onRemarkChanged(index, v),
                           hint: 'Enter remarks',
+                          readOnly: false,
                         ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-                        Divider(),
+                        const SizedBox(height: 16),
+                        Divider(
+                          color: AppColors.grey,
+                          thickness: ResponsiveHelper.spacing(2),
+                        ),
+                        const SizedBox(height: 16),
                       ],
                     );
                   },
                 ),
               ),
 
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              // Buttons
               ElevatedButton(
                 onPressed: controller.addFieldSet,
                 style: AppButtonStyles.elevatedLargeBlack(),
                 child: Text(
-                  "Add More",
+                  'Add More',
                   style: AppStyle.buttonTextPoppinsWhite.responsive,
                 ),
               ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: controller.submitForm,
                 style: AppButtonStyles.elevatedLargeBlack(),
                 child: Text(
-                  "Submit",
+                  'Submit',
                   style: AppStyle.buttonTextPoppinsWhite.responsive,
                 ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -214,13 +224,12 @@ class AddPboqFormView extends StatelessWidget {
     );
   }
 
-  // Updated Dropdown Field with 'enabled' support
+  // Dropdown Field
   Widget _buildDropdownField({
     required String label,
     required String value,
     required List<String> items,
     required Function(String?)? onChanged,
-    String? Function(String?)? validator,
     required String hint,
     bool enabled = true,
   }) {
@@ -233,7 +242,6 @@ class AddPboqFormView extends StatelessWidget {
           selectedItem: value.isNotEmpty ? value : null,
           items: items,
           onChanged: onChanged,
-          validator: validator,
           enabled: enabled,
           dropdownDecoratorProps: DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
@@ -258,12 +266,13 @@ class AddPboqFormView extends StatelessWidget {
     );
   }
 
-  // TextFormField (unchanged)
+  // Text Field
   Widget _buildTextFormField({
     required String label,
     required String initialValue,
     required Function(String)? onChanged,
     required String hint,
+    required bool readOnly,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,6 +280,7 @@ class AddPboqFormView extends StatelessWidget {
         Text(label, style: AppStyle.reportCardRowCount.responsive),
         const SizedBox(height: 8),
         TextFormField(
+          readOnly: readOnly,
           inputFormatters: [SecureTextInputFormatter.deny()],
           initialValue: initialValue,
           onChanged: onChanged,
@@ -290,7 +300,7 @@ class AddPboqFormView extends StatelessWidget {
     );
   }
 
-  // AppBar (unchanged)
+  // AppBar
   AppBar _buildAppbar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),

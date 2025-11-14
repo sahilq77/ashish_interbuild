@@ -168,7 +168,14 @@ class AppRoutes {
     GetPage(
       name: measurmentSheetView,
       page: () => const MeasurmentSheetView(),
-      binding: MeasurmentSheetBinding(),
+      bindings: [
+        MeasurmentSheetBinding(),
+        AddPboqFormBinding(),
+        PackageNameBinding(),
+        PboqNameBinding(),
+        ZoneBinding(),
+        ZoneLocationBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
     GetPage(

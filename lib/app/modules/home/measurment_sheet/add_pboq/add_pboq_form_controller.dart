@@ -10,43 +10,57 @@ import 'package:get/get.dart';
 
 class FieldSet {
   var selectedZone = ''.obs;
-  var planningStatus = 'Not Started'.obs;
   var selectedLocation = ''.obs;
+  var planningStatus = 'Not Started'.obs;
   var subLocation = ''.obs;
   var uom = 'Unit'.obs;
   var nos = ''.obs;
   var length = ''.obs;
-  var breadth = ''.obs; // ← NEW
+  var breadth = ''.obs;
   var height = ''.obs;
   var remark = ''.obs;
+
   FieldSet();
 }
 
 class AddPboqFormController extends GetxController {
+  // Global selections
   var selectedPackage = ''.obs;
   var selectedPboqName = ''.obs;
-  var selectedZoneName = ''.obs;
-  var selectedZoneLocationName = ''.obs;
+  RxString uom = "".obs;
+
+  // Dynamic field sets
   var fieldSets = <FieldSet>[FieldSet()].obs;
 
-  // Injected real controller
-  PboqMeasurmentDetailController PBOQMSctr = Get.put(
+  // Injected controllers
+  final PboqMeasurmentDetailController PBOQMSctr = Get.put(
     PboqMeasurmentDetailController(),
   );
-
   final MeasurementSheetController mesurmentCtrl = Get.find();
   late final PackageNameController _pkgCtrl = Get.find<PackageNameController>();
   late final PboqNameController _pboqCtrl = Get.find<PboqNameController>();
   late final ZoneController _zoneCtrl = Get.find<ZoneController>();
   late final ZoneLocationController _zoneLocationCtrl =
       Get.find<ZoneLocationController>();
-  //  mesurmentCtrl.packageId;
+
+  RxInt lengthEnabled = 0.obs;
+  RxInt breadthEnabled = 0.obs;
+  RxInt heightEnabled = 0.obs;
+
+  // Planning status options (customize as needed)
+  final List<String> planningStatusOptions = [
+    'Not Started',
+    'In Progress',
+    'Completed',
+    'On Hold',
+  ];
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (Get.context != null) {
-        // Fetch packages and auto-bind package
+        // Auto-bind Package
         await _pkgCtrl
             .fetchPackages(
               context: Get.context!,
@@ -68,7 +82,7 @@ class AddPboqFormController extends GetxController {
               }
             });
 
-        // Fetch PBOQs first
+        // Fetch PBOQs
         await _pboqCtrl.fetchPboqs(
           forceFetch: true,
           context: Get.context!,
@@ -76,7 +90,7 @@ class AddPboqFormController extends GetxController {
           packageId: mesurmentCtrl.packageId.value,
         );
 
-        // === NEW: Auto-bind PBOQ using PBOQMSctr.pboqId.value ===
+        // Auto-bind PBOQ
         final String? autoPboqId = PBOQMSctr.pboqId.value.toString();
         if (autoPboqId != null &&
             autoPboqId != 'null' &&
@@ -84,20 +98,20 @@ class AddPboqFormController extends GetxController {
           final String? pboqName = _pboqCtrl.getPboqNameById(autoPboqId);
           if (pboqName != null && pboqName.isNotEmpty) {
             selectedPboqName.value = pboqName;
-            onPboqNameChanged(pboqName); // Trigger zone loading
+            onPboqNameChanged(pboqName);
           }
         }
       }
     });
   }
 
-  // Dynamic package names from API
+  // Getters for dropdowns
   List<String> get packageNames => _pkgCtrl.packageNames;
   List<String> get pboqNames => _pboqCtrl.pboqNames;
   List<String> get zoneNames => _zoneCtrl.zoneNames;
   List<String> get zoneLocations => _zoneLocationCtrl.zoneLocationNames;
 
-  // === NEW: Reset helper for dependent dropdowns ===
+  // Reset helper
   void _resetDependents({
     bool resetPboq = false,
     bool resetZone = false,
@@ -109,11 +123,9 @@ class AddPboqFormController extends GetxController {
       _pboqCtrl.pboqNames.clear();
     }
     if (resetZone) {
-      selectedZoneName.value = '';
       _zoneCtrl.zoneNames.clear();
     }
     if (resetLocation) {
-      selectedZoneLocationName.value = '';
       _zoneLocationCtrl.zoneLocationNames.clear();
     }
     if (resetFieldSets) {
@@ -123,18 +135,18 @@ class AddPboqFormController extends GetxController {
         fs.subLocation.value = '';
         fs.nos.value = '';
         fs.length.value = '';
+        fs.breadth.value = '';
         fs.height.value = '';
         fs.remark.value = '';
         fs.planningStatus.value = 'Not Started';
-        fs.uom.value = 'Unit';
+        fs.uom.value = uom.value;
       }
     }
   }
 
+  // Package changed
   void onPackageChanged(String? newPackageName) async {
     selectedPackage.value = newPackageName ?? '';
-
-    // Reset all dependent fields
     _resetDependents(
       resetPboq: true,
       resetZone: true,
@@ -142,62 +154,50 @@ class AddPboqFormController extends GetxController {
       resetFieldSets: true,
     );
 
-    log('Selected Package Name: $newPackageName');
-    final String? pkgId = _pkgCtrl.getPackageIdByName(
-      newPackageName.toString(),
-    );
+    final String? pkgId = _pkgCtrl.getPackageIdByName(newPackageName ?? '');
+    if (pkgId == null) return;
+
     await _pboqCtrl.fetchPboqs(
       forceFetch: true,
       context: Get.context!,
       projectId: mesurmentCtrl.projectId.value,
-      packageId: int.parse(pkgId.toString()),
+      packageId: int.tryParse(pkgId) ?? 0,
     );
-    log('Selected Package ID : $pkgId');
   }
 
+  // PBOQ changed
   void onPboqNameChanged(String? value) async {
     selectedPboqName.value = value ?? '';
-
-    // Reset dependent fields below PBOQ
     _resetDependents(
       resetZone: true,
       resetLocation: true,
       resetFieldSets: true,
     );
 
-    log('Selected PBOQ Name: $value');
-    final String? PBOQId = _pboqCtrl.getPboqIdByName(value.toString());
-    log('Selected PBOQ ID : $PBOQId');
-
+    final String? pboqId = _pboqCtrl.getPboqIdByName(value ?? '');
     final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
+    if (pboqId == null || pkgId == null) return;
+
     await _zoneCtrl.fetchZones(
       forceFetch: true,
       context: Get.context!,
       projectId: mesurmentCtrl.projectId.value,
-      packageId: int.tryParse(pkgId ?? '') ?? 0,
-      pboqId: int.tryParse(PBOQId ?? '') ?? 0,
+      packageId: int.tryParse(pkgId) ?? 0,
+      pboqId: int.tryParse(pboqId) ?? 0,
     );
   }
 
-  void onZoneChanged(String? value) async {
-    selectedZoneName.value = value ?? '';
+  // FieldSet: Zone changed (per row)
+  void onFieldZoneChanged(int index, String? value) async {
+    fieldSets[index].selectedZone.value = value ?? '';
+    fieldSets[index].selectedLocation.value = ''; // Reset location
 
-    // Reset dependent fields below Zone
-    _resetDependents(resetLocation: true, resetFieldSets: true);
-
-    // === ADD THIS LINE TO CLEAR GLOBAL LOCATION DROPDOWN ===
-    selectedZoneLocationName.value = '';
-
-    log('Selected Zone Name: $value');
-    final String? zoneId = _zoneCtrl.getZoneIdByName(value.toString());
-    log('Selected Zone ID : $zoneId');
-
+    final String? zoneId = _zoneCtrl.getZoneIdByName(value ?? '');
     final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
     final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
-    if (pkgId == null || pboqId == null || zoneId == null) {
-      log('Warning: Missing required IDs – cannot fetch zone locations');
-      return;
-    }
+
+    if (zoneId == null || pkgId == null || pboqId == null) return;
+
     await _zoneLocationCtrl.fetchZoneLocations(
       context: Get.context!,
       forceFetch: true,
@@ -207,106 +207,95 @@ class AddPboqFormController extends GetxController {
       zoneId: int.tryParse(zoneId) ?? 0,
     );
 
-    // Clear previously selected locations in field sets
-    for (final fs in fieldSets) {
-      fs.selectedLocation.value = '';
-    }
+    fieldSets.refresh(); // Refresh UI
   }
 
-  void onLocationChanged(String? value) {
-    selectedZoneLocationName.value = value ?? '';
-
-    // Reset only field set values (keep hierarchy above)
-    _resetDependents(resetFieldSets: true);
-
-    log('Selected Zone Location Name: $value');
-    final String? zoneLocationId = _zoneLocationCtrl.getZoneLocationIdByName(
-      value.toString(),
-    );
-    log('Selected Location ID : $zoneLocationId');
+  // FieldSet: Location changed
+  void onFieldLocationChanged(int index, String? value) {
+    fieldSets[index].selectedLocation.value = value ?? '';
   }
 
-  void onSubLocationChanged(int index, String value) {
-    fieldSets[index].subLocation.value = value;
+  // FieldSet: Planning status
+  void onPlanningStatusChanged(int index, String? value) {
+    fieldSets[index].planningStatus.value = value ?? 'Not Started';
   }
 
-  void onNosChanged(int index, String value) {
-    fieldSets[index].nos.value = value;
-  }
+  // Text field handlers
+  void onSubLocationChanged(int index, String value) =>
+      fieldSets[index].subLocation.value = value;
+  void onNosChanged(int index, String value) =>
+      fieldSets[index].nos.value = value;
+  void onLengthChanged(int index, String value) =>
+      fieldSets[index].length.value = value;
+  void onBreadthChanged(int index, String value) =>
+      fieldSets[index].breadth.value = value;
+  void onHeightChanged(int index, String value) =>
+      fieldSets[index].height.value = value;
+  void onRemarkChanged(int index, String value) =>
+      fieldSets[index].remark.value = value;
 
-  void onLengthChanged(int index, String value) {
-    fieldSets[index].length.value = value;
-  }
-
-  void onBreadthChanged(int index, String value) {
-    fieldSets[index].breadth.value = value;
-  }
-
-  void onHeightChanged(int index, String value) {
-    fieldSets[index].height.value = value;
-  }
-
-  void onRemarkChanged(int index, String value) {
-    fieldSets[index].remark.value = value;
-  }
-
+  // Add new field set
   void addFieldSet() {
     fieldSets.add(FieldSet());
   }
 
+  // Refresh
   Future<void> onRefresh() async {
     await Future.delayed(const Duration(seconds: 1));
     resetForm();
   }
 
+  // Submit
   void submitForm() {
     if (selectedPackage.isEmpty) {
-      Get.snackbar('Error', 'Please select a package name');
+      Get.snackbar('Error', 'Please select a package');
       return;
     }
     if (selectedPboqName.isEmpty) {
-      Get.snackbar('Error', 'Please select a PBOQ name');
+      Get.snackbar('Error', 'Please select a PBOQ');
       return;
     }
+
     for (int i = 0; i < fieldSets.length; i++) {
       final f = fieldSets[i];
       if (f.selectedZone.isEmpty) {
-        Get.snackbar('Error', 'Please select a zone for field set ${i + 1}');
+        Get.snackbar('Error', 'Select zone for row ${i + 1}');
         return;
       }
       if (f.selectedLocation.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Please select a location for field set ${i + 1}',
-        );
+        Get.snackbar('Error', 'Select location for row ${i + 1}');
         return;
       }
     }
+
     print('=== SUBMIT ===');
     print('Package: ${selectedPackage.value}');
     print('PBOQ: ${selectedPboqName.value}');
     for (int i = 0; i < fieldSets.length; i++) {
       final f = fieldSets[i];
-      print('--- Set ${i + 1} ---');
+      print('--- Row ${i + 1} ---');
       print('Zone: ${f.selectedZone.value}');
-      print('Planning: ${f.planningStatus.value}');
       print('Location: ${f.selectedLocation.value}');
+      print('Planning:: ${f.planningStatus.value}');
       print('Sub-Loc: ${f.subLocation.value}');
       print('UOM: ${f.uom.value}');
       print('Nos: ${f.nos.value}');
       print('Length: ${f.length.value}');
+      print('Breadth: ${f.breadth.value}');
       print('Height: ${f.height.value}');
       print('Remark: ${f.remark.value}');
     }
+
+    Get.snackbar('Success', 'Submitted successfully');
     resetForm();
-    Get.snackbar('Success', 'Form submitted successfully');
   }
 
+  // Reset
   void resetForm() {
     selectedPackage.value = '';
     selectedPboqName.value = '';
-
     fieldSets.clear();
     fieldSets.add(FieldSet());
+    _resetDependents(resetPboq: true, resetZone: true, resetLocation: true);
   }
 }
