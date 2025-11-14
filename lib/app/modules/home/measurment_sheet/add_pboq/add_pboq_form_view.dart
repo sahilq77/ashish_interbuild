@@ -1,5 +1,6 @@
 import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -14,6 +15,9 @@ class AddPboqFormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AddPboqFormController controller = Get.put(AddPboqFormController());
+    final PboqMeasurmentDetailController conditionCtrl = Get.put(
+      PboqMeasurmentDetailController(),
+    );
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -140,40 +144,47 @@ class AddPboqFormView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        // Length
-                        _buildTextFormField(
-                          label: 'Length',
-                          initialValue: fs.length.value,
-                          onChanged: (v) =>
-                              controller.onLengthChanged(index, v),
-                          hint: 'Enter length',
-                          readOnly: controller.lengthEnabled == 1 ? true : false,
+                        Obx(
+                          () => _buildTextFormField(
+                            label: 'Length',
+                            initialValue: fs.length.value,
+                            onChanged: (v) =>
+                                controller.onLengthChanged(index, v),
+                            hint: 'Enter length',
+                            readOnly: conditionCtrl.lengthEnabled.value == 1
+                                ? true
+                                : false,
+                          ),
                         ),
                         const SizedBox(height: 12),
 
                         // Breadth
-                        _buildTextFormField(
-                          label: 'Breadth',
-                          initialValue: fs.breadth.value,
-                          onChanged: (v) =>
-                              controller.onBreadthChanged(index, v),
-                          hint: 'Enter breadth',
-                          readOnly: controller.breadthEnabled == 1
-                              ? true
-                              : false,
+                        Obx(
+                          () => _buildTextFormField(
+                            label: 'Breadth',
+                            initialValue: fs.breadth.value,
+                            onChanged: (v) =>
+                                controller.onBreadthChanged(index, v),
+                            hint: 'Enter breadth',
+                            readOnly: conditionCtrl.breadthEnabled.value == 1
+                                ? true
+                                : false,
+                          ),
                         ),
                         const SizedBox(height: 12),
 
                         // Height
-                        _buildTextFormField(
-                          label: 'Height',
-                          initialValue: fs.height.value,
-                          onChanged: (v) =>
-                              controller.onHeightChanged(index, v),
-                          hint: 'Enter height',
-                          readOnly: controller.heightEnabled == 1
-                              ? true
-                              : false,
+                        Obx(
+                          () => _buildTextFormField(
+                            label: 'Height',
+                            initialValue: fs.height.value,
+                            onChanged: (v) =>
+                                controller.onHeightChanged(index, v),
+                            hint: 'Enter height',
+                            readOnly: conditionCtrl.heightEnabled.value == 1
+                                ? true
+                                : false,
+                          ),
                         ),
                         const SizedBox(height: 12),
 
@@ -292,7 +303,7 @@ class AddPboqFormView extends StatelessWidget {
               horizontal: 16,
               vertical: 12,
             ),
-            filled: onChanged == null,
+            filled: readOnly,
             fillColor: onChanged == null ? Colors.grey[200] : null,
           ),
         ),

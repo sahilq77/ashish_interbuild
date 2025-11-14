@@ -305,6 +305,15 @@ class MeasurmentSheetView extends StatelessWidget {
                                                     item.pboqId,
                                                   ),
                                                   'column': col,
+                                                  'length': int.parse(
+                                                    controller.getLength(item),
+                                                  ),
+                                                  'breadth': int.parse(
+                                                    controller.getBreadth(item),
+                                                  ),
+                                                  'height': int.parse(
+                                                    controller.getHeight(item),
+                                                  ),
                                                 },
                                               );
                                             },

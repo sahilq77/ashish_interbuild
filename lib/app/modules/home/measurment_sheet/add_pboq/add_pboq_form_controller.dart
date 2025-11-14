@@ -43,9 +43,7 @@ class AddPboqFormController extends GetxController {
   late final ZoneLocationController _zoneLocationCtrl =
       Get.find<ZoneLocationController>();
 
-  RxInt lengthEnabled = 0.obs;
-  RxInt breadthEnabled = 0.obs;
-  RxInt heightEnabled = 0.obs;
+ 
 
   // Planning status options (customize as needed)
   final List<String> planningStatusOptions = [

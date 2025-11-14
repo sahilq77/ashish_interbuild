@@ -98,6 +98,7 @@ class MesurmentPackageList extends StatelessWidget {
                           arguments: {
                             "project_id": int.parse(package.projectId),
                             "package_id": int.parse(package.packageId),
+                         
                           },
                         );
                       },

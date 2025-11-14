@@ -39,6 +39,9 @@ class PboqMeasurmentDetailController extends GetxController {
   // ── Column info from API (dynamic labels) ───────────────────────
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
+  RxInt lengthEnabled = 0.obs;
+  RxInt breadthEnabled = 0.obs;
+  RxInt heightEnabled = 0.obs;
 
   // ADD: Store full column details
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
@@ -52,12 +55,32 @@ class PboqMeasurmentDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>;
-    // projectId.value = args["project_id"] ?? 0;
-    pboqId.value = args["pboq_id"] ?? 0;
-    log(
-      "MeasurementSheetController → projectId=${projectId.value} packageId=${pboqId.value}",
-    );
+
+    final args = Get.arguments as Map<String, dynamic>?;
+
+    // Log all arguments safely
+    log("MeasurementSheetController → Received Arguments: ${args ?? 'null'}");
+
+    if (args != null) {
+      // Assign values with null safety
+      // projectId.value = args["project_id"] ?? 0;
+      pboqId.value = args["pboq_id"] ?? 0;
+      lengthEnabled.value = args["length"] ?? 0;
+      breadthEnabled.value = args["breadth"] ?? 0;
+      heightEnabled.value = args["height"] ?? 0;
+
+      // Optional: Log individual values for clarity
+      log(
+        "MeasurementSheetController → "
+        "pboq_id: ${pboqId.value}, "
+        "length: ${lengthEnabled.value}, "
+        "breadth: ${breadthEnabled.value}, "
+        "height: ${heightEnabled.value}",
+      );
+    } else {
+      log("MeasurementSheetController → No arguments passed!");
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         fetchPboq(reset: true, context: Get.context!);

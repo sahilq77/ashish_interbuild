@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MeasurementSheetController extends GetxController {
+  
   // ── UI State ─────────────────────────────────────────────────────
   final RxList<AllData> pboqList = <AllData>[].obs;
   final RxList<AllData> filteredPboqList = <AllData>[].obs;
@@ -263,6 +264,11 @@ class MeasurementSheetController extends GetxController {
   String getFieldValue(AllData item, String columnName) {
     return _stripHtmlTags(item.getField(columnName));
   }
+
+  // Helper methods to get dimension values
+  String getLength(AllData item) => item.getField('length');
+  String getBreadth(AllData item) => item.getField('breadth');
+  String getHeight(AllData item) => item.getField('height');
 
   List<String> getAllColumns() {
     final allCols = appColumnDetails.value.columns.toSet();
