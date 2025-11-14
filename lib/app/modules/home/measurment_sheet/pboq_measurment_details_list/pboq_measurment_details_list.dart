@@ -311,6 +311,17 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                                           ),
                                         );
                                       }).toList(),
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          Icons.edit,
+                                          color: AppColors.defaultBlack,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.delete),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -443,33 +454,33 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
         ),
       ),
       actions: [
-        // Container(
-        //   margin: const EdgeInsets.symmetric(horizontal: 16),
-        //   decoration: BoxDecoration(
-        //     border: Border.all(color: AppColors.defaultBlack, width: 0.5),
-        //     borderRadius: BorderRadius.circular(8),
-        //   ),
-        //   child: InkWell(
-        //     borderRadius: BorderRadius.circular(8),
-        //     onTap: () => Get.toNamed(AppRoutes.addPBOQ),
-        //     child: Padding(
-        //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        //       child: Row(
-        //         mainAxisSize: MainAxisSize.min,
-        //         children: [
-        //           const SizedBox(width: 6),
-        //           Text(
-        //             'Add',
-        //             style: AppStyle.labelPrimaryPoppinsBlack.responsive
-        //                 .copyWith(
-        //                   fontSize: ResponsiveHelper.getResponsiveFontSize(14),
-        //                 ),
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => Get.toNamed(AppRoutes.addPBOQ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(width: 6),
+                  Text(
+                    'Add',
+                    style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                        .copyWith(
+                          fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
