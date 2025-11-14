@@ -256,8 +256,12 @@ class MeasurementSheetController extends GetxController {
   // -----------------------------------------------------------------
   // Dynamic field helpers
   // -----------------------------------------------------------------
+  String _stripHtmlTags(String htmlString) {
+    return htmlString.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  }
+
   String getFieldValue(AllData item, String columnName) {
-    return item.getField(columnName);
+    return _stripHtmlTags(item.getField(columnName));
   }
 
   List<String> getAllColumns() {
