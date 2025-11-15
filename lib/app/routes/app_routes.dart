@@ -219,7 +219,10 @@ class AppRoutes {
     GetPage(
       name: deductionForm,
       page: () => const DeductionFormView(),
-      binding: DeductionFormBinding(),
+      bindings: [ DeductionFormBinding(),MeasurmentSheetBinding(),PboqMeasurmentDetailsListBinding()],
+      
+      
+     
       transition: Transition.rightToLeft,
     ),
     GetPage(

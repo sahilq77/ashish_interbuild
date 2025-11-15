@@ -45,6 +45,9 @@ class Networkutility {
 
   static String pboqDeductionsList = "${baseUrl + "pboq-deductions"}";
   static int pboqDeductionsListApi = 15;
+
+  static String addDeductions = "${baseUrl + "add-ms-deduction"}";
+  static int addDeductionsApi = 16;
 }
 
 

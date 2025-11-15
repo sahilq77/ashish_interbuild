@@ -302,10 +302,10 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                               // Example navigation – adapt to your real route
                                               Get.toNamed(
                                                 AppRoutes.deductionForm,
-                                                // arguments: {
-                                                //   'pboq_id': item.pboqId,
-                                                //   'column': col,
-                                                // },
+                                                arguments: {
+                                                  'ms_id': item.getField('ms_id'),
+                                                  'pboq_id':controller.pboqId.value
+                                                },
                                               );
                                             },
                                             child: Text(

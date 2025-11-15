@@ -1,3 +1,5 @@
+import 'package:ashishinterbuild/app/common/custominputformatters/number_input_formatter.dart';
+import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_deduction/deduction_form/deduction_form_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -52,6 +54,13 @@ class _DeductionFormViewState extends State<DeductionFormView> {
                 controller: controller.heightController,
                 hint: 'Enter Height',
               ),
+              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              _buildTextFormField(
+                label: 'Calculated Quantity',
+                controller: controller.calculatedQtyController,
+                hint: 'Auto-calculated',
+                readOnly: true,
+              ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
                 onPressed: controller.submitForm,
@@ -72,6 +81,7 @@ class _DeductionFormViewState extends State<DeductionFormView> {
     required String label,
     required TextEditingController controller,
     required String hint,
+    bool readOnly = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +90,11 @@ class _DeductionFormViewState extends State<DeductionFormView> {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
+          readOnly: readOnly,
+         inputFormatters: [
+                              SecureTextInputFormatter.deny(),
+                              NumberInputFormatter(),
+                            ],
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -87,6 +102,8 @@ class _DeductionFormViewState extends State<DeductionFormView> {
               horizontal: 16,
               vertical: 12,
             ),
+            filled: readOnly,
+            fillColor: readOnly ? Colors.grey[200] : null,
           ),
         ),
       ],
@@ -100,7 +117,7 @@ class _DeductionFormViewState extends State<DeductionFormView> {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Deduction',
+        'Add Deduction',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,

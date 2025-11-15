@@ -9,6 +9,7 @@ import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_loca
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/packages/get_package_name_response.dart';
+import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_add_deduction_response.dart';
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_delete_measurement_sheet_response.dart';
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_edit_pboq_response.dart';
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list_response.dart';
@@ -125,6 +126,10 @@ class Networkcall {
           case 14:
             final str = "[${response.body}]";
             final deleteMS = getDeleteMeasurmentResponseFromJson(str);
+            return deleteMS;
+          case 16:
+            final str = "[${response.body}]";
+            final deleteMS = getAddDeductionResponseFromJson(str);
             return deleteMS;
 
           default:
@@ -274,7 +279,7 @@ class Networkcall {
                 getPboqMeasurementsheetResponseFromJson(str);
             return getPboqMeasurementSheetList;
 
-             case 15:
+          case 15:
             final getPboqList = getPboqListResponseFromJson(str);
             return getPboqList;
 
