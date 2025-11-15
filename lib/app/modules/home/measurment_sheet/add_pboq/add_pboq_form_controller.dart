@@ -32,16 +32,53 @@ class FieldSet {
 
   FieldSet();
 
-  // Calculate quantity based on formula: Nos * Length * Breadth * Height
   void calculateQuantity() {
-    final double nosVal = double.tryParse(nos.value) ?? 0;
-    final double lengthVal = double.tryParse(length.value) ?? 0;
-    final double breadthVal = double.tryParse(breadth.value) ?? 0;
-    final double heightVal =
-        double.tryParse(height.value) ?? 1; // Default to 1 if empty
+    // Parse inputs, treat empty string as null (not 0)
+    final double? nosVal = nos.value.isEmpty
+        ? null
+        : double.tryParse(nos.value);
+    final double? lengthVal = length.value.isEmpty
+        ? null
+        : double.tryParse(length.value);
+    final double? breadthVal = breadth.value.isEmpty
+        ? null
+        : double.tryParse(breadth.value);
+    final double? heightVal = height.value.isEmpty
+        ? null
+        : double.tryParse(height.value) ?? 1;
 
-    final double result = nosVal * lengthVal * breadthVal * heightVal;
+    // Collect non-null values
+    final List<double> values = [
+      if (nosVal != null) nosVal,
+      if (lengthVal != null) lengthVal,
+      if (breadthVal != null) breadthVal,
+      if (heightVal != null) heightVal,
+    ];
+
+    // If no valid values, result = 0
+    if (values.isEmpty) {
+      calculatedQty.value = '0.00';
+      log('CALCULATION → No valid inputs', name: 'FieldSet');
+      return;
+    }
+
+    // Multiply all available values
+    double result = values.reduce((a, b) => a * b);
+
     calculatedQty.value = result.toStringAsFixed(2);
+
+    // Log which fields were used
+    final usedFields = <String>[
+      if (nosVal != null) 'Nos:$nosVal',
+      if (lengthVal != null) 'L:$lengthVal',
+      if (breadthVal != null) 'B:$breadthVal',
+      if (heightVal != null) 'H:$heightVal',
+    ].join(' × ');
+
+    log(
+      'CALCULATION → $usedFields = $result (formatted: ${calculatedQty.value})',
+      name: 'FieldSet',
+    );
   }
 }
 
@@ -66,7 +103,7 @@ class AddPboqFormController extends GetxController {
       Get.find<ZoneLocationController>();
   RxBool isLoading = false.obs;
 
-  // Planning status options (customize as needed)
+  // Planning status options
   final List<String> planningStatusOptions = [
     'Not Started',
     'In Progress',
@@ -124,7 +161,7 @@ class AddPboqFormController extends GetxController {
     });
   }
 
-  // Getters for dropdowns
+  // Getters
   List<String> get packageNames => _pkgCtrl.packageNames;
   List<String> get pboqNames => _pboqCtrl.pboqNames;
   List<String> get zoneNames => _zoneCtrl.zoneNames;
@@ -206,10 +243,10 @@ class AddPboqFormController extends GetxController {
     );
   }
 
-  // FieldSet: Zone changed (per row)
+  // Zone changed per row
   void onFieldZoneChanged(int index, String? value) async {
     fieldSets[index].selectedZone.value = value ?? '';
-    fieldSets[index].selectedLocation.value = ''; // Reset location
+    fieldSets[index].selectedLocation.value = '';
 
     final String? zoneId = _zoneCtrl.getZoneIdByName(value ?? '');
     final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
@@ -226,20 +263,20 @@ class AddPboqFormController extends GetxController {
       zoneId: int.tryParse(zoneId) ?? 0,
     );
 
-    fieldSets.refresh(); // Refresh UI
+    fieldSets.refresh();
   }
 
-  // FieldSet: Location changed
+  // Location changed
   void onFieldLocationChanged(int index, String? value) {
     fieldSets[index].selectedLocation.value = value ?? '';
   }
 
-  // FieldSet: Planning status
+  // Planning status
   void onPlanningStatusChanged(int index, String? value) {
     fieldSets[index].planningStatus.value = value ?? 'Not Started';
   }
 
-  // Text field handlers with auto-calculation
+  // Text field handlers
   void onSubLocationChanged(int index, String value) {
     fieldSets[index].subLocation.value = value;
   }
@@ -268,9 +305,30 @@ class AddPboqFormController extends GetxController {
     fieldSets[index].remark.value = value;
   }
 
-  // Add new field set
+  // Add new row
   void addFieldSet() {
     fieldSets.add(FieldSet());
+  }
+
+  // DELETE ROW - NEW METHOD
+  void removeFieldSet(int index) {
+    if (fieldSets.length > 1) {
+      fieldSets.removeAt(index);
+    } else {
+      // Always keep at least one row — clear instead of delete
+      final fs = fieldSets[0];
+      fs.selectedZone.value = '';
+      fs.selectedLocation.value = '';
+      fs.subLocation.value = '';
+      fs.nos.value = '';
+      fs.length.value = '';
+      fs.breadth.value = '';
+      fs.height.value = '';
+      fs.remark.value = '';
+      fs.planningStatus.value = 'Not Started';
+      fs.uom.value = uom.value;
+      fs.calculateQuantity();
+    }
   }
 
   // Refresh
@@ -279,6 +337,7 @@ class AddPboqFormController extends GetxController {
     resetForm();
   }
 
+  // API Call
   Future<void> addPboqMeasurment({BuildContext? context}) async {
     try {
       final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
@@ -317,23 +376,17 @@ class AddPboqFormController extends GetxController {
       );
 
       if (list != null && list.isNotEmpty) {
-        // Properly parse the list using your helper function
         List<GetAddPboqMsResponse> response = getAddPboqMsResponseFromJson(
           jsonEncode(list),
         );
 
         if (response[0].status == true) {
-          log(response[0].status.toString());
-
           AppSnackbarStyles.showSuccess(
             title: 'Success',
             message: 'PBOQ Measurement Sheet added successfully!',
           );
           Get.offNamed(AppRoutes.pboqList);
-
-          Get.offNamed(AppRoutes.pboqList);
-        } else if (response[0].status == false) {
-          // Use actual error or message from API
+        } else {
           final String errorMessage = response[0].error?.isNotEmpty == true
               ? response[0].error!
               : (response[0].message?.isNotEmpty == true
@@ -343,11 +396,10 @@ class AddPboqFormController extends GetxController {
           AppSnackbarStyles.showError(title: 'Failed', message: errorMessage);
         }
       } else {
-        AppSnackbarStyles.showError(title: 'Failed', message: "Failed");
-        // AppSnackbarStyles.showError(
-        //   title: 'Server Error',
-        //   message: 'No response from server',
-        // );
+        AppSnackbarStyles.showError(
+          title: 'Failed',
+          message: "No response from server",
+        );
       }
     } on NoInternetException catch (e) {
       Get.back();

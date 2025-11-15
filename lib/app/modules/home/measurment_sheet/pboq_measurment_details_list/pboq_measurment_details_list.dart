@@ -8,6 +8,7 @@ import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
@@ -319,7 +320,11 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
                                         ),
                                       ),
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          _showDeleteConfirmationDialog(
+                                            context,
+                                          );
+                                        },
                                         icon: Icon(Icons.delete),
                                       ),
                                     ],
@@ -338,6 +343,63 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: Text(
+            'Delete',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(18),
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete this record ?',
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+            ),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: AppButtonStyles.outlinedSmallBlack(),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: AppStyle.labelPrimaryPoppinsBlack,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: AppButtonStyles.elevatedSmallBlack(),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Delete',
+                      style: AppStyle.labelPrimaryPoppinsWhite,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 

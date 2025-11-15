@@ -12,12 +12,45 @@ import 'package:get/get.dart';
 class AddPboqFormView extends StatelessWidget {
   const AddPboqFormView({super.key});
 
+  // Helper to parse field values and get used dimensions
+  static Map<String, double?> _parseFieldValues(FieldSet fs) {
+    return {
+      'Nos': fs.nos.value.isEmpty ? null : double.tryParse(fs.nos.value),
+      'L': fs.length.value.isEmpty ? null : double.tryParse(fs.length.value),
+      'B': fs.breadth.value.isEmpty ? null : double.tryParse(fs.breadth.value),
+      'H': fs.height.value.isEmpty
+          ? null
+          : double.tryParse(fs.height.value) ?? 1,
+    };
+  }
+
+  // Build dynamic label like "Calculated Qty (Nos × L × B)"
+  static String _buildDynamicLabel(FieldSet fs) {
+    final values = _parseFieldValues(fs);
+    final activeKeys = <String>[];
+
+    if (values['Nos'] != null) activeKeys.add('Nos');
+    if (values['L'] != null) activeKeys.add('L');
+    if (values['B'] != null) activeKeys.add('B');
+
+    // Show H if explicitly entered OR defaulted when others exist
+    final bool hasOtherFields = activeKeys.isNotEmpty;
+    final bool heightExplicit = values['H'] != null && !fs.height.value.isEmpty;
+    final bool heightDefault =
+        values['H'] == 1.0 && fs.height.value.isEmpty && hasOtherFields;
+
+    if (heightExplicit || heightDefault) {
+      activeKeys.add('H');
+    }
+
+    return activeKeys.isEmpty ? '—' : activeKeys.join(' × ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final AddPboqFormController controller = Get.put(AddPboqFormController());
-    final PboqMeasurmentDetailController conditionCtrl = Get.put(
-      PboqMeasurmentDetailController(),
-    );
+    final PboqMeasurmentDetailController conditionCtrl = Get.find();
+
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -71,10 +104,10 @@ class AddPboqFormView extends StatelessWidget {
 
                     return Column(
                       children: [
-                        // Zone Dropdown
+                        // Zone *
                         Obx(
                           () => _buildDropdownField(
-                            label: 'Zone',
+                            label: 'Zone *',
                             value: fs.selectedZone.value,
                             items: controller.zoneNames,
                             onChanged: (v) =>
@@ -85,7 +118,7 @@ class AddPboqFormView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        // Planning Status Dropdown
+                        // Planning Status
                         Obx(
                           () => _buildDropdownField(
                             label: 'Planning Status',
@@ -99,10 +132,10 @@ class AddPboqFormView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        // Location Dropdown
+                        // Location *
                         Obx(
                           () => _buildDropdownField(
-                            label: 'Location',
+                            label: 'Location *',
                             value: fs.selectedLocation.value,
                             items: controller.zoneLocations,
                             onChanged: (v) =>
@@ -115,7 +148,7 @@ class AddPboqFormView extends StatelessWidget {
 
                         // Sub Location
                         _buildTextFormField(
-                          label: 'Sub Location',
+                          label: 'Sub Location *',
                           initialValue: fs.subLocation.value,
                           onChanged: (v) =>
                               controller.onSubLocationChanged(index, v),
@@ -124,7 +157,7 @@ class AddPboqFormView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        // UOM (read-only)
+                        // UOM
                         _buildTextFormField(
                           label: 'UOM',
                           initialValue: fs.uom.value,
@@ -136,7 +169,7 @@ class AddPboqFormView extends StatelessWidget {
 
                         // Nos
                         _buildTextFormField(
-                          label: 'Nos',
+                          label: 'Nos *',
                           initialValue: fs.nos.value,
                           onChanged: (v) => controller.onNosChanged(index, v),
                           hint: 'Enter number',
@@ -144,16 +177,15 @@ class AddPboqFormView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
+                        // Length
                         Obx(
                           () => _buildTextFormField(
-                            label: 'Length',
+                            label: 'Length *',
                             initialValue: fs.length.value,
                             onChanged: (v) =>
                                 controller.onLengthChanged(index, v),
                             hint: 'Enter length',
-                            readOnly: conditionCtrl.lengthEnabled.value == 1
-                                ? true
-                                : false,
+                            readOnly: conditionCtrl.lengthEnabled.value == 1,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -161,14 +193,12 @@ class AddPboqFormView extends StatelessWidget {
                         // Breadth
                         Obx(
                           () => _buildTextFormField(
-                            label: 'Breadth',
+                            label: 'Breadth *',
                             initialValue: fs.breadth.value,
                             onChanged: (v) =>
                                 controller.onBreadthChanged(index, v),
                             hint: 'Enter breadth',
-                            readOnly: conditionCtrl.breadthEnabled.value == 1
-                                ? true
-                                : false,
+                            readOnly: conditionCtrl.breadthEnabled.value == 1,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -176,28 +206,27 @@ class AddPboqFormView extends StatelessWidget {
                         // Height
                         Obx(
                           () => _buildTextFormField(
-                            label: 'Height',
+                            label: 'Height *',
                             initialValue: fs.height.value,
                             onChanged: (v) =>
                                 controller.onHeightChanged(index, v),
                             hint: 'Enter height',
-                            readOnly: conditionCtrl.heightEnabled.value == 1
-                                ? true
-                                : false,
+                            readOnly: conditionCtrl.heightEnabled.value == 1,
                           ),
                         ),
                         const SizedBox(height: 12),
 
-                        // Calculated Quantity (read-only)
-                        Obx(
-                          () => _buildTextFormField(
-                            label: 'Calculated Qty (Nos × L × B × H)',
+                        // Calculated Qty — Dynamic Label
+                        Obx(() {
+                          final formula = _buildDynamicLabel(fs);
+                          return _buildTextFormField(
+                            label: 'Calculated Qty ($formula)',
                             initialValue: fs.calculatedQty.value,
                             onChanged: null,
                             hint: 'Auto-calculated',
                             readOnly: true,
-                          ),
-                        ),
+                          );
+                        }),
                         const SizedBox(height: 12),
 
                         // Remark
@@ -209,7 +238,19 @@ class AddPboqFormView extends StatelessWidget {
                           hint: 'Enter remarks',
                           readOnly: false,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+
+                        // Delete Button
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => controller.removeFieldSet(index),
+                            tooltip: 'Delete row',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
                         Divider(
                           color: AppColors.grey,
                           thickness: ResponsiveHelper.spacing(2),
@@ -221,7 +262,7 @@ class AddPboqFormView extends StatelessWidget {
                 ),
               ),
 
-              // Buttons
+              // Add More Button
               ElevatedButton(
                 onPressed: controller.addFieldSet,
                 style: AppButtonStyles.elevatedLargeBlack(),
@@ -231,6 +272,8 @@ class AddPboqFormView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+
+              // Submit Button
               ElevatedButton(
                 onPressed: controller.submitForm,
                 style: AppButtonStyles.elevatedLargeBlack(),
@@ -316,7 +359,7 @@ class AddPboqFormView extends StatelessWidget {
               vertical: 12,
             ),
             filled: readOnly,
-            fillColor: onChanged == null ? Colors.grey[200] : null,
+            fillColor: readOnly ? Colors.grey[200] : null,
           ),
         ),
       ],
