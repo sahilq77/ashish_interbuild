@@ -491,12 +491,12 @@ class AddPboqFormController extends GetxController {
         log('PBOQ ID is null', name: 'AddPboqFormController');
         return;
       }
-
+   
       final jsonBody = {
         "project_id": mesurmentCtrl.projectId.value,
         "pboq_id": pboqId,
         "zone_qty_data": [
-          {"zone_id": zoneId, "qty": ""},
+          {"zone_id": zoneId, "qty": fieldSets[fieldIndex].calculatedQty.value},
         ],
       };
 

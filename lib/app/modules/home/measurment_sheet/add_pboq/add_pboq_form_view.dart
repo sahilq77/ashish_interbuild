@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/common/custominputformatters/number_input_formatter.dart';
 import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
@@ -7,6 +8,7 @@ import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class AddPboqFormView extends StatefulWidget {
@@ -188,6 +190,7 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                             onChanged: (v) =>
                                 controller.onSubLocationChanged(index, v),
                             hint: 'Enter sub-location',
+                            inputFormatters: [SecureTextInputFormatter.deny()],
                             readOnly: false,
                           ),
                           const SizedBox(height: 12),
@@ -199,6 +202,10 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                             onChanged: null,
                             hint: 'Unit',
                             readOnly: true,
+                            inputFormatters: [
+                              SecureTextInputFormatter.deny(),
+                              NumberInputFormatter(),
+                            ],
                           ),
                           const SizedBox(height: 12),
 
@@ -209,6 +216,10 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                             onChanged: (v) => controller.onNosChanged(index, v),
                             hint: 'Enter number',
                             readOnly: false,
+                            inputFormatters: [
+                              SecureTextInputFormatter.deny(),
+                              NumberInputFormatter(),
+                            ],
                           ),
                           const SizedBox(height: 12),
 
@@ -221,6 +232,10 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                                   controller.onLengthChanged(index, v),
                               hint: 'Enter length',
                               readOnly: conditionCtrl.lengthEnabled.value == 1,
+                              inputFormatters: [
+                                SecureTextInputFormatter.deny(),
+                                NumberInputFormatter(),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -234,6 +249,10 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                                   controller.onBreadthChanged(index, v),
                               hint: 'Enter breadth',
                               readOnly: conditionCtrl.breadthEnabled.value == 1,
+                              inputFormatters: [
+                                SecureTextInputFormatter.deny(),
+                                NumberInputFormatter(),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -247,6 +266,10 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                                   controller.onHeightChanged(index, v),
                               hint: 'Enter height',
                               readOnly: conditionCtrl.heightEnabled.value == 1,
+                              inputFormatters: [
+                                SecureTextInputFormatter.deny(),
+                                NumberInputFormatter(),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -273,7 +296,9 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                                 controller.onRemarkChanged(index, v),
                             hint: 'Enter remarks',
                             readOnly: false,
+                            inputFormatters: [SecureTextInputFormatter.deny()],
                           ),
+
                           const SizedBox(height: 12),
 
                           // Delete Button
@@ -382,6 +407,7 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
     required Function(String)? onChanged,
     required String hint,
     required bool readOnly,
+    required List<TextInputFormatter> inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +416,7 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
         const SizedBox(height: 8),
         TextFormField(
           readOnly: readOnly,
-          inputFormatters: [SecureTextInputFormatter.deny()],
+          inputFormatters: inputFormatters,
           initialValue: initialValue,
           onChanged: onChanged,
           enabled: onChanged != null,
