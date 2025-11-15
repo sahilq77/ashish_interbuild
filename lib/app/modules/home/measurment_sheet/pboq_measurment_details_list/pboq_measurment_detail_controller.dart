@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_delete_measurement_sheet_response.dart';
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_measurmentsheet_response.dart';
 import 'package:ashishinterbuild/app/data/models/pboq/pboq_model.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +18,7 @@ class PboqMeasurmentDetailController extends GetxController {
   final RxList<AllData> pboqList = <AllData>[].obs;
   final RxList<AllData> filteredPboqList = <AllData>[].obs;
   final RxBool isLoading = true.obs;
+  final RxBool isLoadingd = true.obs;
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMoreData = true.obs;
   final RxString errorMessage = ''.obs;
@@ -43,7 +47,7 @@ class PboqMeasurmentDetailController extends GetxController {
   RxInt breadthEnabled = 0.obs;
   RxInt heightEnabled = 0.obs;
   RxString uom = "".obs;
-
+  final MeasurementSheetController mesurmentCtrl = Get.find();
   // ADD: Store full column details
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
     columns: [],
@@ -190,6 +194,79 @@ class PboqMeasurmentDetailController extends GetxController {
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> deleteMS({BuildContext? context, required String msId}) async {
+    try {
+      isLoadingd.value = true;
+      final jsonBody = {
+        "project_id": mesurmentCtrl.projectId.value,
+
+        "ms_id": msId,
+      };
+
+      List<Object?>? list = await Networkcall().postMethod(
+        Networkutility.deleteMeasurementSheetApi,
+        Networkutility.deleteMeasurementSheet,
+        jsonEncode(jsonBody),
+        Get.context!,
+      );
+
+      if (list != null && list.isNotEmpty) {
+        List<GetDeleteMeasurmentResponse> response =
+            getDeleteMeasurmentResponseFromJson(jsonEncode(list));
+
+        if (response[0].status == true) {
+          AppSnackbarStyles.showSuccess(
+            title: 'Deleted',
+            message: 'PBOQ Measurement Sheet deleted successfully!',
+          );
+        } else {
+          final String errorMessage = response[0].error?.isNotEmpty == true
+              ? response[0].error!
+              : (response[0].message?.isNotEmpty == true
+                    ? response[0].message!
+                    : "Failed to delete measurement sheet.");
+
+          AppSnackbarStyles.showError(
+            title: 'Delete Failed',
+            message: errorMessage,
+          );
+        }
+      } else {
+        AppSnackbarStyles.showError(
+          title: 'Failed',
+          message: "No response from server",
+        );
+      }
+    } on NoInternetException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(title: 'No Internet', message: e.message);
+    } on TimeoutException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(title: 'Timeout', message: e.message);
+    } on HttpException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(
+        title: 'HTTP Error',
+        message: '${e.message} (Code: ${e.statusCode})',
+      );
+    } on ParseException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(title: 'Parse Error', message: e.message);
+    } catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(
+        title: 'Unexpected Error',
+        message: 'Unexpected error: $e',
+      );
+    } finally {
+      isLoadingd.value = false;
+      // Refresh the list after successful deletion
+      if (Get.context != null) {
+        fetchPboq(reset: true, context: Get.context!);
+      }
     }
   }
 

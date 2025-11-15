@@ -348,6 +348,7 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                         onPressed: () {
                                           _showDeleteConfirmationDialog(
                                             context,
+                                            item.getField('ms_id'),
                                           );
                                         },
                                         icon: Icon(Icons.delete),
@@ -405,7 +406,9 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDialog(BuildContext context, String msId) {
+    final controller = Get.find<PboqMeasurmentDetailController>();
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -447,6 +450,7 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                     style: AppButtonStyles.elevatedSmallBlack(),
                     onPressed: () {
                       Navigator.of(context).pop();
+                      controller.deleteMS(context: context, msId: msId);
                     },
                     child: Text(
                       'Delete',

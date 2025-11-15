@@ -36,8 +36,12 @@ class Networkutility {
 
   static String getPlanningStatus = "${baseUrl + "zone-ms-status"}";
   static int getPlanningStatusApi = 12;
+
   static String editMeasurementSheet = "${baseUrl + "update-ms"}";
   static int editMeasurementSheetApi = 13;
+
+  static String deleteMeasurementSheet = "${baseUrl + "delete-ms"}";
+  static int deleteMeasurementSheetApi = 14;
 }
 
 
