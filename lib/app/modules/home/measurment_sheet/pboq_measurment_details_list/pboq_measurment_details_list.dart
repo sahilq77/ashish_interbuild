@@ -334,6 +334,7 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                               'breadth': item.getField('Breadth'),
                                               'height': item.getField('Height'),
                                               'remark': item.getField('Remark'),
+                                              'deduction': item.getField('Deduction'),
                                               'selected_item': item,
                                             },
                                           );

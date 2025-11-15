@@ -163,9 +163,9 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
                           const SizedBox(height: 12),
 
                           // Sub Location
-                          _buildTextFormField(
+                          _buildTextFormFieldWithController(
                             label: 'Sub Location *',
-                            initialValue: fs.subLocation.value,
+                            controller: fs.subLocationController,
                             onChanged: (v) =>
                                 controller.onSubLocationChanged(index, v),
                             hint: 'Enter sub-location',
@@ -185,9 +185,9 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
                           // const SizedBox(height: 12),
 
                           // Nos
-                          _buildTextFormField(
+                          _buildTextFormFieldWithController(
                             label: 'Nos *',
-                            initialValue: fs.nos.value,
+                            controller: fs.nosController,
                             onChanged: (v) => controller.onNosChanged(index, v),
                             hint: 'Enter number',
                             readOnly: false,
@@ -200,13 +200,13 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
 
                           // Length
                           Obx(
-                            () => _buildTextFormField(
+                            () => _buildTextFormFieldWithController(
                               label: 'Length *',
-                              initialValue: fs.length.value,
+                              controller: fs.lengthController,
                               onChanged: (v) =>
                                   controller.onLengthChanged(index, v),
                               hint: 'Enter length',
-                              readOnly: conditionCtrl.lengthEnabled.value == 1,
+                              readOnly: conditionCtrl.lengthEnabled.value == 0,
                               inputFormatters: [
                                 SecureTextInputFormatter.deny(),
                                 NumberInputFormatter(),
@@ -217,13 +217,13 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
 
                           // Breadth
                           Obx(
-                            () => _buildTextFormField(
+                            () => _buildTextFormFieldWithController(
                               label: 'Breadth *',
-                              initialValue: fs.breadth.value,
+                              controller: fs.breadthController,
                               onChanged: (v) =>
                                   controller.onBreadthChanged(index, v),
                               hint: 'Enter breadth',
-                              readOnly: conditionCtrl.breadthEnabled.value == 1,
+                              readOnly: conditionCtrl.breadthEnabled.value == 0,
                               inputFormatters: [
                                 SecureTextInputFormatter.deny(),
                                 NumberInputFormatter(),
@@ -234,13 +234,13 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
 
                           // Height
                           Obx(
-                            () => _buildTextFormField(
+                            () => _buildTextFormFieldWithController(
                               label: 'Height *',
-                              initialValue: fs.height.value,
+                              controller: fs.heightController,
                               onChanged: (v) =>
                                   controller.onHeightChanged(index, v),
                               hint: 'Enter height',
-                              readOnly: conditionCtrl.heightEnabled.value == 1,
+                              readOnly: conditionCtrl.heightEnabled.value == 0,
                               inputFormatters: [
                                 SecureTextInputFormatter.deny(),
                                 NumberInputFormatter(),
@@ -262,25 +262,18 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
                             );
                           }),
                           const SizedBox(height: 12),
-                          Obx(
-                            () => _buildTextFormField(
-                              label: 'Deduction ',
-                              initialValue: fs.height.value,
-                              onChanged: (v) =>
-                                  controller.onHeightChanged(index, v),
-                              hint: 'Deduction value',
-                              readOnly: true,
-                              inputFormatters: [
-                                SecureTextInputFormatter.deny(),
-                              ],
-                            ),
+                          _buildTextFormFieldWithController(
+                            label: 'Deduction',
+                            controller: fs.deductionController,
+                            hint: 'Deduction value',
+                            readOnly: true,
                           ),
                           const SizedBox(height: 12),
 
                           // Remark
-                          _buildTextFormField(
+                          _buildTextFormFieldWithController(
                             label: 'Remark',
-                            initialValue: fs.remark.value,
+                            controller: fs.remarkController,
                             onChanged: (v) =>
                                 controller.onRemarkChanged(index, v),
                             hint: 'Enter remarks',
@@ -418,6 +411,8 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
     required TextEditingController controller,
     required String hint,
     required bool readOnly,
+    Function(String)? onChanged,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,6 +422,17 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
         TextFormField(
           readOnly: readOnly,
           controller: controller,
+          onChanged: onChanged,
+          inputFormatters: inputFormatters,
+          enabled: onChanged != null || !readOnly,
+          validator: label.contains('*') && !readOnly
+              ? (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return '${label.replaceAll('*', '').trim()} is required';
+                  }
+                  return null;
+                }
+              : null,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

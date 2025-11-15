@@ -30,14 +30,36 @@ class FieldSet {
   var breadth = ''.obs;
   var height = ''.obs;
   var remark = ''.obs;
+  var deduction = ''.obs;
   var calculatedQty = '0'.obs;
   late final TextEditingController calculatedQtyController;
+  late final TextEditingController subLocationController;
+  late final TextEditingController nosController;
+  late final TextEditingController lengthController;
+  late final TextEditingController breadthController;
+  late final TextEditingController heightController;
+  late final TextEditingController remarkController;
+  late final TextEditingController deductionController;
 
   FieldSet() {
     calculatedQtyController = TextEditingController();
-    ever(calculatedQty, (value) {
-      calculatedQtyController.text = value;
-    });
+    subLocationController = TextEditingController();
+    nosController = TextEditingController();
+    lengthController = TextEditingController();
+    breadthController = TextEditingController();
+    heightController = TextEditingController();
+    remarkController = TextEditingController();
+    deductionController = TextEditingController();
+    
+    // Listen to observable changes and update controllers
+    ever(calculatedQty, (value) => calculatedQtyController.text = value);
+    ever(subLocation, (value) => subLocationController.text = value);
+    ever(nos, (value) => nosController.text = value);
+    ever(length, (value) => lengthController.text = value);
+    ever(breadth, (value) => breadthController.text = value);
+    ever(height, (value) => heightController.text = value);
+    ever(remark, (value) => remarkController.text = value);
+    ever(deduction, (value) => deductionController.text = value);
   }
 
   void calculateQuantity() {
@@ -265,6 +287,7 @@ class EditPboqFormController extends GetxController {
     argumentValues['breadth'] = args['breadth'] ?? '';
     argumentValues['height'] = args['height'] ?? '';
     argumentValues['remark'] = args['remark'] ?? '';
+    argumentValues['deduction'] = args['deduction'] ?? '';
   }
 
   @override
@@ -407,6 +430,7 @@ class EditPboqFormController extends GetxController {
       fs.breadth.value = argumentValues['breadth'] ?? '';
       fs.height.value = argumentValues['height'] ?? '';
       fs.remark.value = argumentValues['remark'] ?? '';
+      fs.deduction.value = argumentValues['deduction'] ?? '';
 
       log('Binding complete. Zone: ${fs.selectedZone.value}, Location: ${fs.selectedLocation.value}', name: 'EditPboqFormController');
 
