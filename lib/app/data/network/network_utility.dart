@@ -42,6 +42,9 @@ class Networkutility {
 
   static String deleteMeasurementSheet = "${baseUrl + "delete-ms"}";
   static int deleteMeasurementSheetApi = 14;
+
+  static String pboqDeductionsList = "${baseUrl + "pboq-deductions"}";
+  static int pboqDeductionsListApi = 15;
 }
 
 

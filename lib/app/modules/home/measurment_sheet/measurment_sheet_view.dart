@@ -349,10 +349,15 @@ class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
                                             Get.toNamed(
                                               AppRoutes
                                                   .measurmentSheetDeductionList,
-                                              // arguments: {
-                                              //   'pboq_id': item.pboqId,
-                                              //   'column': col,
-                                              // },
+                                              arguments: {
+                                                'project_id':
+                                                    controller.projectId.value,
+                                                'package_id':
+                                                    controller.packageId.value,
+                                                'pboq_id': int.parse(
+                                                  item.pboqId,
+                                                ),
+                                              },
                                             );
                                           },
                                           child:
