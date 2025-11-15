@@ -310,7 +310,7 @@ class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
                                                     item.pboqId,
                                                   ),
                                                   'column': col,
-                                                  'uom':item.uom,
+                                                  'uom': item.uom,
                                                   'length': int.parse(
                                                     controller.getLength(item),
                                                   ),
@@ -333,6 +333,39 @@ class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
                                           ),
                                         );
                                       }).toList(),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(width: double.infinity),
+                                      ),
+                                      Expanded(
+                                        child: SizedBox(width: double.infinity),
+                                      ),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          style:
+                                              AppButtonStyles.outlinedExtraSmallBlack(),
+                                          onPressed: () {
+                                            // Example navigation – adapt to your real route
+                                            Get.toNamed(
+                                              AppRoutes.measurmentSheetDeductionList,
+                                              // arguments: {
+                                              //   'pboq_id': item.pboqId,
+                                              //   'column': col,
+                                              // },
+                                            );
+                                          },
+                                          child: Text(
+                                            "View Deduction",
+                                            style: AppStyle
+                                                .labelPrimaryPoppinsBlack
+                                                .responsive
+                                                .copyWith(fontSize: 10),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],

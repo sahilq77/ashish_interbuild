@@ -335,9 +335,43 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                       ),
                                     ],
                                   ),
-                                  InkWell(child: Align(
-                                    
-                                    child: Icon(Icons.list))),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(width: double.infinity),
+                                      ),
+                                      Expanded(
+                                        child: SizedBox(width: double.infinity),
+                                      ),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          style:
+                                              AppButtonStyles.outlinedExtraSmallBlack(),
+                                          onPressed: () {
+                                            // Example navigation – adapt to your real route
+                                            Get.toNamed(
+                                              AppRoutes
+                                                  .measurmentSheetDeductionList,
+                                              // arguments: {
+                                              //   'pboq_id': item.pboqId,
+                                              //   'column': col,
+                                              // },
+                                            );
+                                          },
+                                          child: Text(
+                                            "View Deduction",
+                                            style: AppStyle
+                                                .labelPrimaryPoppinsBlack
+                                                .responsive
+                                                .copyWith(fontSize: 10),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  // InkWell(
+                                  //   child: Align(child: Icon(Icons.list)),
+                                  // ),
                                 ],
                               ),
                             ),
