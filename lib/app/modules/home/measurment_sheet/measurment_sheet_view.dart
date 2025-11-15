@@ -310,6 +310,7 @@ class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
                                                     item.pboqId,
                                                   ),
                                                   'column': col,
+                                                  'uom':item.uom,
                                                   'length': int.parse(
                                                     controller.getLength(item),
                                                   ),

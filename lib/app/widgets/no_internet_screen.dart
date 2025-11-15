@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
-
 class NoInternetScreen extends StatefulWidget {
   const NoInternetScreen({super.key});
 
@@ -114,7 +112,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
       },
       child: Scaffold(
         body: Container(
-          color: AppColors.primary,
+          color: AppColors.white,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -126,7 +124,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.defaultBlack,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -135,7 +133,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: Colors.white70,
+                    color: AppColors.defaultBlack,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -180,7 +178,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                             }
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,
@@ -202,7 +200,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                             'Retry',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
-                              color: AppColors.primary,
+                              color: AppColors.white,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

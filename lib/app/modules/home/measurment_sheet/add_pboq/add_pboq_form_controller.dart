@@ -202,7 +202,7 @@ class AddPboqFormController extends GetxController {
         fs.height.value = '';
         fs.remark.value = '';
         fs.planningStatus.value = 'Not Started';
-        fs.uom.value = uom.value;
+        fs.uom.value = PBOQMSctr.uom.value;
       }
     }
   }
@@ -333,7 +333,7 @@ class AddPboqFormController extends GetxController {
       fs.height.value = '';
       fs.remark.value = '';
       fs.planningStatus.value = 'Not Started';
-      fs.uom.value = uom.value;
+      fs.uom.value = PBOQMSctr.uom.value;
       fs.calculateQuantity();
     }
   }

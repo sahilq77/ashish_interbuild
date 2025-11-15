@@ -42,6 +42,7 @@ class PboqMeasurmentDetailController extends GetxController {
   RxInt lengthEnabled = 0.obs;
   RxInt breadthEnabled = 0.obs;
   RxInt heightEnabled = 0.obs;
+  RxString uom = "".obs;
 
   // ADD: Store full column details
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
@@ -68,14 +69,16 @@ class PboqMeasurmentDetailController extends GetxController {
       lengthEnabled.value = args["length"] ?? 0;
       breadthEnabled.value = args["breadth"] ?? 0;
       heightEnabled.value = args["height"] ?? 0;
+      uom.value = args["uom"] as String;
 
       // Optional: Log individual values for clarity
       log(
         "MeasurementSheetController → "
         "pboq_id: ${pboqId.value}, "
+        "uom: ${uom.value}, "
         "length: ${lengthEnabled.value}, "
         "breadth: ${breadthEnabled.value}, "
-        "height: ${heightEnabled.value}",
+        "height: ${heightEnabled.value},",
       );
     } else {
       log("MeasurementSheetController → No arguments passed!");
