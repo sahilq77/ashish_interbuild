@@ -219,10 +219,9 @@ class AddPboqFormView extends StatelessWidget {
                         // Calculated Qty — Dynamic Label
                         Obx(() {
                           final formula = _buildDynamicLabel(fs);
-                          return _buildTextFormField(
+                          return _buildTextFormFieldWithController(
                             label: 'Calculated Qty ($formula)',
-                            initialValue: fs.calculatedQty.value,
-                            onChanged: null,
+                            controller: fs.calculatedQtyController,
                             hint: 'Auto-calculated',
                             readOnly: true,
                           );
@@ -351,6 +350,36 @@ class AddPboqFormView extends StatelessWidget {
           initialValue: initialValue,
           onChanged: onChanged,
           enabled: onChanged != null,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            filled: readOnly,
+            fillColor: readOnly ? Colors.grey[200] : null,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Text Field with Controller
+  Widget _buildTextFormFieldWithController({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required bool readOnly,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppStyle.reportCardRowCount.responsive),
+        const SizedBox(height: 8),
+        TextFormField(
+          readOnly: readOnly,
+          controller: controller,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

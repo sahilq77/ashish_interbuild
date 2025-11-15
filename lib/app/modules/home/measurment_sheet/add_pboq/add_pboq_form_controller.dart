@@ -29,8 +29,15 @@ class FieldSet {
   var height = ''.obs;
   var remark = ''.obs;
   var calculatedQty = '0'.obs;
+  late final TextEditingController calculatedQtyController;
 
-  FieldSet();
+  FieldSet() {
+    calculatedQtyController = TextEditingController();
+    // Listen to calculatedQty changes and update controller
+    ever(calculatedQty, (value) {
+      calculatedQtyController.text = value;
+    });
+  }
 
   void calculateQuantity() {
     // Parse inputs, treat empty string as null (not 0)
