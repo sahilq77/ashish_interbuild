@@ -16,7 +16,8 @@ class PboqMeasurmentDetailsList extends StatefulWidget {
   const PboqMeasurmentDetailsList({super.key});
 
   @override
-  State<PboqMeasurmentDetailsList> createState() => _PboqMeasurmentDetailsListState();
+  State<PboqMeasurmentDetailsList> createState() =>
+      _PboqMeasurmentDetailsListState();
 }
 
 class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
@@ -300,11 +301,11 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                             onPressed: () {
                                               // Example navigation – adapt to your real route
                                               Get.toNamed(
-                                                AppRoutes.pboqList,
-                                                arguments: {
-                                                  'pboq_id': item.pboqId,
-                                                  'column': col,
-                                                },
+                                                AppRoutes.deductionForm,
+                                                // arguments: {
+                                                //   'pboq_id': item.pboqId,
+                                                //   'column': col,
+                                                // },
                                               );
                                             },
                                             child: Text(
