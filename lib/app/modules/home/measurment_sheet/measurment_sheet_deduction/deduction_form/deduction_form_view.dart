@@ -63,7 +63,10 @@ class _DeductionFormViewState extends State<DeductionFormView> {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
-                onPressed: controller.submitForm,
+                onPressed: () {
+                  controller.submitForm();
+                  Navigator.pop(context);
+                },
                 style: AppButtonStyles.elevatedLargeBlack(),
                 child: Text(
                   "Submit",
@@ -91,10 +94,10 @@ class _DeductionFormViewState extends State<DeductionFormView> {
         TextFormField(
           controller: controller,
           readOnly: readOnly,
-         inputFormatters: [
-                              SecureTextInputFormatter.deny(),
-                              NumberInputFormatter(),
-                            ],
+          inputFormatters: [
+            SecureTextInputFormatter.deny(),
+            NumberInputFormatter(),
+          ],
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

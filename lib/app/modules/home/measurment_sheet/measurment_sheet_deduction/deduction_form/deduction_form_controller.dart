@@ -146,7 +146,6 @@ class DeductionFormController extends GetxController {
             title: 'Success',
             message: 'Deduction added successfully',
           );
-        Navigator.pop(context!);
         } else {
           final String errorMessage = response[0].error?.isNotEmpty == true
               ? response[0].error!
