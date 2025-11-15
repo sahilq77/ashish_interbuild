@@ -335,6 +335,9 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                       ),
                                     ],
                                   ),
+                                  InkWell(child: Align(
+                                    
+                                    child: Icon(Icons.list))),
                                 ],
                               ),
                             ),

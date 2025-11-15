@@ -28,6 +28,7 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_package_list/dpr_package_list.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_deduction/deduction_form/measurment_sheet_deduction_list/measurment_sheet_deduction_list.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_package_list/weekly_inspection_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
@@ -89,6 +90,8 @@ class AppRoutes {
   static const String addPBOQ = '/add-pboq';
   static const String pboqList = '/pboq-list';
   static const String deductionForm = '/deduction-form';
+  static const String measurmentSheetDeductionList =
+      '/measurment-sheet-deduction-list';
   static const String dailyProgressReport = '/daily-progress-report';
   static const String dprPackageList = '/dpr-package-list';
   static const String updateDailyReportList =
@@ -200,6 +203,12 @@ class AppRoutes {
       name: deductionForm,
       page: () => const DeductionFormView(),
       binding: DeductionFormBinding(),
+      transition: Transition.rightToLeft,
+    ),
+      GetPage(
+      name: measurmentSheetDeductionList,
+      page: () => const MeasurmentSheetDeductionList(),
+      binding: DailyProgressReportBinding(),
       transition: Transition.rightToLeft,
     ),
 
