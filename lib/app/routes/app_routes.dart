@@ -28,6 +28,8 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_package_list/dpr_package_list.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/edit_pboq/edit_pboq_form_binding.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/edit_pboq/edit_pboq_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_deduction/deduction_form/measurment_sheet_deduction_list/measurment_sheet_deduction_list.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_package_list/weekly_inspection_package_list.dart';
@@ -88,6 +90,7 @@ class AppRoutes {
   static const String measurmentPackageList = '/measurment-package-list';
   static const String measurmentSheetView = '/measurment-sheet-list';
   static const String addPBOQ = '/add-pboq';
+  static const String editPBOQ = '/edit-pboq';
   static const String pboqList = '/pboq-list';
   static const String deductionForm = '/deduction-form';
   static const String measurmentSheetDeductionList =
@@ -193,6 +196,19 @@ class AppRoutes {
       ],
       transition: Transition.rightToLeft,
     ),
+    GetPage(
+      name: editPBOQ,
+      page: () => const EditPboqFormView(),
+      bindings: [
+        EditPboqFormBinding(),
+        PackageNameBinding(),
+        PboqNameBinding(),
+        ZoneBinding(),
+        ZoneLocationBinding(),
+      ],
+      transition: Transition.rightToLeft,
+    ),
+    
     GetPage(
       name: pboqList,
       page: () => const PboqMeasurmentDetailsList(),

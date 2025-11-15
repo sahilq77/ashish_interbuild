@@ -319,7 +319,15 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                         );
                                       }).toList(),
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Get.toNamed(
+                                            AppRoutes.editPBOQ,
+                                            arguments: {
+                                              'pboq_id': item.pboqId,
+                                              // 'column': col,
+                                            },
+                                          );
+                                        },
                                         icon: Icon(
                                           Icons.edit,
                                           color: AppColors.defaultBlack,
