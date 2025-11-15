@@ -22,7 +22,7 @@ class FieldSet {
   var selectedLocation = ''.obs;
   var planningStatus = 'Not Started'.obs;
   var subLocation = ''.obs;
-  var uom = 'Unit'.obs;
+  var uom = ''.obs;
   var nos = ''.obs;
   var length = ''.obs;
   var breadth = ''.obs;
@@ -96,7 +96,7 @@ class AddPboqFormController extends GetxController {
   RxString uom = "".obs;
 
   // Dynamic field sets
-  var fieldSets = <FieldSet>[FieldSet()].obs;
+  var fieldSets = <FieldSet>[].obs;
 
   // Injected controllers
   final PboqMeasurmentDetailController PBOQMSctr = Get.put(
@@ -153,6 +153,13 @@ class AddPboqFormController extends GetxController {
           packageId: mesurmentCtrl.packageId.value,
         );
 
+        // Initialize first field set with correct UOM
+        if (fieldSets.isEmpty) {
+          final initialFieldSet = FieldSet();
+          initialFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+          fieldSets.add(initialFieldSet);
+        }
+
         // Auto-bind PBOQ
         final String? autoPboqId = PBOQMSctr.pboqId.value.toString();
         if (autoPboqId != null &&
@@ -202,7 +209,7 @@ class AddPboqFormController extends GetxController {
         fs.height.value = '';
         fs.remark.value = '';
         fs.planningStatus.value = 'Not Started';
-        fs.uom.value = PBOQMSctr.uom.value;
+        fs.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
       }
     }
   }
@@ -248,6 +255,11 @@ class AddPboqFormController extends GetxController {
       packageId: int.tryParse(pkgId) ?? 0,
       pboqId: int.tryParse(pboqId) ?? 0,
     );
+
+    // Update UOM for all field sets
+    for (final fs in fieldSets) {
+      fs.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+    }
   }
 
   // Zone changed per row
@@ -314,7 +326,9 @@ class AddPboqFormController extends GetxController {
 
   // Add new row
   void addFieldSet() {
-    fieldSets.add(FieldSet());
+    final newFieldSet = FieldSet();
+    newFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+    fieldSets.add(newFieldSet);
   }
 
   // DELETE ROW - NEW METHOD
@@ -465,7 +479,9 @@ class AddPboqFormController extends GetxController {
     selectedPackage.value = '';
     selectedPboqName.value = '';
     fieldSets.clear();
-    fieldSets.add(FieldSet());
+    final newFieldSet = FieldSet();
+    newFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+    fieldSets.add(newFieldSet);
     _resetDependents(resetPboq: true, resetZone: true, resetLocation: true);
   }
 }
