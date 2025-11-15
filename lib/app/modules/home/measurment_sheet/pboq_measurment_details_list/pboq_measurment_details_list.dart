@@ -323,8 +323,18 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                           Get.toNamed(
                                             AppRoutes.editPBOQ,
                                             arguments: {
-                                              'pboq_id': item.pboqId,
-                                              // 'column': col,
+                                              'ms_id': item.getField('ms_id'),
+                                              'zone_id': item.getField('zone_id'),
+                                              'zone_location_id': item.getField('zone_location_id'),
+                                              'zone_name': item.getField('Zone'),
+                                              'location_name': item.getField('Location'),
+                                              'sub_location': item.getField('Sub Location'),
+                                              'nos': item.getField('Nos'),
+                                              'length': item.getField('Length'),
+                                              'breadth': item.getField('Breadth'),
+                                              'height': item.getField('Height'),
+                                              'remark': item.getField('Remark'),
+                                              'selected_item': item,
                                             },
                                           );
                                         },

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
+import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_measurmentsheet_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
@@ -103,61 +104,6 @@ class EditPboqFormController extends GetxController {
   RxBool isLoadingMore = false.obs;
   RxString errorMessage = ''.obs;
   RxMap<int, PlanningStatus> planningStatusData = <int, PlanningStatus>{}.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (Get.context != null) {
-        await _pkgCtrl
-            .fetchPackages(
-              context: Get.context!,
-              projectId: mesurmentCtrl.projectId.value,
-            )
-            .then((_) {
-              final String? autoPackageId = mesurmentCtrl.packageId.value
-                  .toString();
-              if (autoPackageId != null &&
-                  autoPackageId != 'null' &&
-                  autoPackageId.isNotEmpty) {
-                final String? packageName = _pkgCtrl.getPackageNameById(
-                  autoPackageId,
-                );
-                if (packageName != null && packageName.isNotEmpty) {
-                  selectedPackage.value = packageName;
-                  onPackageChanged(packageName);
-                }
-              }
-            });
-
-        await _pboqCtrl.fetchPboqs(
-          forceFetch: true,
-          context: Get.context!,
-          projectId: mesurmentCtrl.projectId.value,
-          packageId: mesurmentCtrl.packageId.value,
-        );
-
-        // Always ensure exactly ONE field set
-        fieldSets.clear();
-        final initialFieldSet = FieldSet();
-        initialFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty
-            ? PBOQMSctr.uom.value
-            : 'Unit';
-        fieldSets.add(initialFieldSet);
-
-        final String? autoPboqId = PBOQMSctr.pboqId.value.toString();
-        if (autoPboqId != null &&
-            autoPboqId != 'null' &&
-            autoPboqId.isNotEmpty) {
-          final String? pboqName = _pboqCtrl.getPboqNameById(autoPboqId);
-          if (pboqName != null && pboqName.isNotEmpty) {
-            selectedPboqName.value = pboqName;
-            onPboqNameChanged(pboqName);
-          }
-        }
-      }
-    });
-  }
 
   List<String> get packageNames => _pkgCtrl.packageNames;
   List<String> get pboqNames => _pboqCtrl.pboqNames;
@@ -305,7 +251,174 @@ class EditPboqFormController extends GetxController {
     fieldSets[index].remark.value = value;
   }
 
-  // ADD FIELDSET & REMOVE FIELDSET REMOVED
+  // Store selected item data for auto-binding
+  var selectedMsId = ''.obs;
+  var selectedItemData = Rxn<AllData>();
+  var argumentValues = <String, String>{}.obs;
+
+  void _storeArgumentValues(Map<String, dynamic> args) {
+    argumentValues['zone_name'] = args['zone_name'] ?? '';
+    argumentValues['location_name'] = args['location_name'] ?? '';
+    argumentValues['sub_location'] = args['sub_location'] ?? '';
+    argumentValues['nos'] = args['nos'] ?? '';
+    argumentValues['length'] = args['length'] ?? '';
+    argumentValues['breadth'] = args['breadth'] ?? '';
+    argumentValues['height'] = args['height'] ?? '';
+    argumentValues['remark'] = args['remark'] ?? '';
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // Get selected item data from arguments
+    final args = Get.arguments as Map<String, dynamic>?;
+
+    // LOG ARGUMENTS
+    if (args != null) {
+      log(
+        'Arguments received in EditPboqFormController: ${jsonEncode(args)}',
+        name: 'EditPboqFormController',
+      );
+    } else {
+      log(
+        'No arguments passed to EditPboqFormController',
+        name: 'EditPboqFormController',
+      );
+    }
+
+    if (args != null) {
+      selectedMsId.value = args['ms_id'] ?? '';
+      if (args['selected_item'] != null) {
+        selectedItemData.value = args['selected_item'] as AllData;
+      }
+      // Store individual field values for easier access
+      _storeArgumentValues(args);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (Get.context != null) {
+        await _pkgCtrl
+            .fetchPackages(
+              context: Get.context!,
+              projectId: mesurmentCtrl.projectId.value,
+            )
+            .then((_) {
+              final String? autoPackageId = mesurmentCtrl.packageId.value
+                  .toString();
+              if (autoPackageId != null &&
+                  autoPackageId != 'null' &&
+                  autoPackageId.isNotEmpty) {
+                final String? packageName = _pkgCtrl.getPackageNameById(
+                  autoPackageId,
+                );
+                if (packageName != null && packageName.isNotEmpty) {
+                  selectedPackage.value = packageName;
+                  onPackageChanged(packageName);
+                }
+              }
+            });
+
+        await _pboqCtrl.fetchPboqs(
+          forceFetch: true,
+          context: Get.context!,
+          projectId: mesurmentCtrl.projectId.value,
+          packageId: mesurmentCtrl.packageId.value,
+        );
+
+        // Always ensure exactly ONE field set
+        fieldSets.clear();
+        final initialFieldSet = FieldSet();
+        initialFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty
+            ? PBOQMSctr.uom.value
+            : 'Unit';
+        fieldSets.add(initialFieldSet);
+
+        final String? autoPboqId = PBOQMSctr.pboqId.value.toString();
+        if (autoPboqId != null &&
+            autoPboqId != 'null' &&
+            autoPboqId.isNotEmpty) {
+          final String? pboqName = _pboqCtrl.getPboqNameById(autoPboqId);
+          if (pboqName != null && pboqName.isNotEmpty) {
+            selectedPboqName.value = pboqName;
+             onPboqNameChanged(pboqName);
+          }
+        }
+
+        // Auto-bind selected item data if arguments exist
+        if (argumentValues.isNotEmpty) {
+           _bindSelectedItemData();
+        }
+      }
+    });
+  }
+
+  void _bindSelectedItemData() async {
+    log('Starting _bindSelectedItemData', name: 'EditPboqFormController');
+    log('ArgumentValues: ${argumentValues.toString()}', name: 'EditPboqFormController');
+    
+    // First load zones and locations
+    final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
+    final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
+
+    log('PBOQ ID: $pboqId, Package ID: $pkgId', name: 'EditPboqFormController');
+
+    if (pboqId != null && pkgId != null) {
+      await _zoneCtrl.fetchZones(
+        forceFetch: true,
+        context: Get.context!,
+        projectId: mesurmentCtrl.projectId.value,
+        packageId: int.tryParse(pkgId) ?? 0,
+        pboqId: int.tryParse(pboqId) ?? 0,
+      );
+
+      log('Available zones: ${_zoneCtrl.zoneNames}', name: 'EditPboqFormController');
+
+      // Then bind the data from arguments
+      final fs = fieldSets[0];
+      fs.selectedZone.value = argumentValues['zone_name'] ?? '';
+      
+      log('Setting zone to: ${argumentValues['zone_name']}', name: 'EditPboqFormController');
+
+      // Load locations for the selected zone
+      final String? zoneId = _zoneCtrl.getZoneIdByName(
+        argumentValues['zone_name'] ?? '',
+      );
+      
+      log('Zone ID found: $zoneId', name: 'EditPboqFormController');
+      
+      if (zoneId != null) {
+        await _zoneLocationCtrl.fetchZoneLocations(
+          context: Get.context!,
+          forceFetch: true,
+          projectId: mesurmentCtrl.projectId.value,
+          packageId: int.tryParse(pkgId) ?? 0,
+          pboqId: int.tryParse(pboqId) ?? 0,
+          zoneId: int.tryParse(zoneId) ?? 0,
+        );
+        
+        log('Available locations: ${_zoneLocationCtrl.zoneLocationNames}', name: 'EditPboqFormController');
+      }
+
+      fs.selectedLocation.value = argumentValues['location_name'] ?? '';
+      fs.subLocation.value = argumentValues['sub_location'] ?? '';
+      fs.nos.value = argumentValues['nos'] ?? '';
+      fs.length.value = argumentValues['length'] ?? '';
+      fs.breadth.value = argumentValues['breadth'] ?? '';
+      fs.height.value = argumentValues['height'] ?? '';
+      fs.remark.value = argumentValues['remark'] ?? '';
+
+      log('Binding complete. Zone: ${fs.selectedZone.value}, Location: ${fs.selectedLocation.value}', name: 'EditPboqFormController');
+
+      // Calculate quantity
+      fs.calculateQuantity();
+      
+      // Force UI refresh
+      fieldSets.refresh();
+    } else {
+      log('Cannot bind data - missing PBOQ ID or Package ID', name: 'EditPboqFormController');
+    }
+  }
 
   Future<void> onRefresh() async {
     await Future.delayed(const Duration(seconds: 1));
@@ -315,21 +428,24 @@ class EditPboqFormController extends GetxController {
   Future<void> editPboqMeasurment({BuildContext? context}) async {
     try {
       final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
-
-     
+      final fs = fieldSets[0];
+      final String? zoneId = _zoneCtrl.getZoneIdByName(fs.selectedZone.value);
+      final String? locationId = _zoneLocationCtrl.getZoneLocationIdByName(
+        fs.selectedLocation.value,
+      );
 
       final jsonBody = {
         "project_id": mesurmentCtrl.projectId.value,
         "pboq_id": pboqId ?? "",
-        "ms_id": "",
-        "zone_id": "",
-        "zone_location_id": "",
-        "sub_location": "",
-        "nos": "",
-        "length": "",
-        "breadth": "",
-        "height": "",
-        "remark": "",
+        "ms_id": selectedMsId.value,
+        "zone_id": zoneId ?? "",
+        "zone_location_id": locationId ?? "",
+        "sub_location": fs.subLocation.value,
+        "nos": fs.nos.value,
+        "length": fs.length.value,
+        "breadth": fs.breadth.value,
+        "height": fs.height.value,
+        "remark": fs.remark.value,
       };
 
       isLoading.value = true;

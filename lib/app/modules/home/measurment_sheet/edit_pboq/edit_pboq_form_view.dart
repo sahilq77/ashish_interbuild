@@ -306,7 +306,7 @@ class _AddPboqFormViewState extends State<EditPboqFormView> {
                   },
                   style: AppButtonStyles.elevatedLargeBlack(),
                   child: Text(
-                    'Submit',
+                    'SAVE',
                     style: AppStyle.buttonTextPoppinsWhite.responsive,
                   ),
                 ),
