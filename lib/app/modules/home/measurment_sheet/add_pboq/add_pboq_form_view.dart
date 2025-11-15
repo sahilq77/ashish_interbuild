@@ -9,7 +9,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddPboqFormView extends StatelessWidget {
+class AddPboqFormView extends StatefulWidget {
   const AddPboqFormView({super.key});
 
   // Helper to parse field values and get used dimensions
@@ -47,6 +47,13 @@ class AddPboqFormView extends StatelessWidget {
   }
 
   @override
+  State<AddPboqFormView> createState() => _AddPboqFormViewState();
+}
+
+class _AddPboqFormViewState extends State<AddPboqFormView> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
   Widget build(BuildContext context) {
     final AddPboqFormController controller = Get.put(AddPboqFormController());
     final PboqMeasurmentDetailController conditionCtrl = Get.find();
@@ -58,231 +65,241 @@ class AddPboqFormView extends StatelessWidget {
       appBar: _buildAppbar(),
       body: RefreshIndicator(
         onRefresh: controller.onRefresh,
-        child: SingleChildScrollView(
-          padding: ResponsiveHelper.padding(16),
-          child: Column(
-            children: [
-              // Package (read-only)
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Package Name',
-                  value: controller.selectedPackage.value,
-                  items: controller.packageNames,
-                  onChanged: null,
-                  hint: 'Selected package',
-                  enabled: false,
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUnfocus,
+          child: SingleChildScrollView(
+            padding: ResponsiveHelper.padding(16),
+            child: Column(
+              children: [
+                // Package (read-only)
+                Obx(
+                  () => _buildDropdownField(
+                    label: 'Package Name',
+                    value: controller.selectedPackage.value,
+                    items: controller.packageNames,
+                    onChanged: null,
+                    hint: 'Selected package',
+                    enabled: false,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // PBOQ (read-only)
-              Obx(
-                () => _buildDropdownField(
-                  label: 'PBOQ Name',
-                  value: controller.selectedPboqName.value,
-                  items: controller.pboqNames,
-                  onChanged: null,
-                  hint: 'Selected PBOQ',
-                  enabled: false,
+                // PBOQ (read-only)
+                Obx(
+                  () => _buildDropdownField(
+                    label: 'PBOQ Name',
+                    value: controller.selectedPboqName.value,
+                    items: controller.pboqNames,
+                    onChanged: null,
+                    hint: 'Selected PBOQ',
+                    enabled: false,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Divider(
-                color: AppColors.darkBackground,
-                thickness: ResponsiveHelper.spacing(2),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+                Divider(
+                  color: AppColors.darkBackground,
+                  thickness: ResponsiveHelper.spacing(2),
+                ),
+                const SizedBox(height: 16),
 
-              // Dynamic Field Sets
-              Obx(
-                () => ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.fieldSets.length,
-                  itemBuilder: (ctx, index) {
-                    final fs = controller.fieldSets[index];
+                // Dynamic Field Sets
+                Obx(
+                  () => ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.fieldSets.length,
+                    itemBuilder: (ctx, index) {
+                      final fs = controller.fieldSets[index];
 
-                    return Column(
-                      children: [
-                        // Zone *
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Zone *',
-                            value: fs.selectedZone.value,
-                            items: controller.zoneNames,
-                            onChanged: (v) =>
-                                controller.onFieldZoneChanged(index, v),
-                            hint: 'Select zone',
-                            enabled: true,
+                      return Column(
+                        children: [
+                          // Zone *
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Zone *',
+                              value: fs.selectedZone.value,
+                              items: controller.zoneNames,
+                              onChanged: (v) =>
+                                  controller.onFieldZoneChanged(index, v),
+                              hint: 'Select zone',
+                              enabled: true,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                        // Planning Status
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Planning Status',
-                            value: fs.planningStatus.value,
-                            items: controller.planningStatusOptions,
-                            onChanged: (v) =>
-                                controller.onPlanningStatusChanged(index, v),
-                            hint: 'Select status',
-                            enabled: false,
+                          // Planning Status
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Planning Status',
+                              value: fs.planningStatus.value,
+                              items: controller.planningStatusOptions,
+                              onChanged: (v) =>
+                                  controller.onPlanningStatusChanged(index, v),
+                              hint: 'Select status',
+                              enabled: false,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                        // Location *
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Location *',
-                            value: fs.selectedLocation.value,
-                            items: controller.zoneLocations,
-                            onChanged: (v) =>
-                                controller.onFieldLocationChanged(index, v),
-                            hint: 'Select location',
-                            enabled: true,
+                          // Location *
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Location *',
+                              value: fs.selectedLocation.value,
+                              items: controller.zoneLocations,
+                              onChanged: (v) =>
+                                  controller.onFieldLocationChanged(index, v),
+                              hint: 'Select location',
+                              enabled: true,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                        // Sub Location
-                        _buildTextFormField(
-                          label: 'Sub Location *',
-                          initialValue: fs.subLocation.value,
-                          onChanged: (v) =>
-                              controller.onSubLocationChanged(index, v),
-                          hint: 'Enter sub-location',
-                          readOnly: false,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // UOM
-                        _buildTextFormField(
-                          label: 'UOM',
-                          initialValue: fs.uom.value,
-                          onChanged: null,
-                          hint: 'Unit',
-                          readOnly: true,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Nos
-                        _buildTextFormField(
-                          label: 'Nos *',
-                          initialValue: fs.nos.value,
-                          onChanged: (v) => controller.onNosChanged(index, v),
-                          hint: 'Enter number',
-                          readOnly: false,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Length
-                        Obx(
-                          () => _buildTextFormField(
-                            label: 'Length *',
-                            initialValue: fs.length.value,
+                          // Sub Location
+                          _buildTextFormField(
+                            label: 'Sub Location *',
+                            initialValue: fs.subLocation.value,
                             onChanged: (v) =>
-                                controller.onLengthChanged(index, v),
-                            hint: 'Enter length',
-                            readOnly: conditionCtrl.lengthEnabled.value == 1,
+                                controller.onSubLocationChanged(index, v),
+                            hint: 'Enter sub-location',
+                            readOnly: false,
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                        // Breadth
-                        Obx(
-                          () => _buildTextFormField(
-                            label: 'Breadth *',
-                            initialValue: fs.breadth.value,
-                            onChanged: (v) =>
-                                controller.onBreadthChanged(index, v),
-                            hint: 'Enter breadth',
-                            readOnly: conditionCtrl.breadthEnabled.value == 1,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Height
-                        Obx(
-                          () => _buildTextFormField(
-                            label: 'Height *',
-                            initialValue: fs.height.value,
-                            onChanged: (v) =>
-                                controller.onHeightChanged(index, v),
-                            hint: 'Enter height',
-                            readOnly: conditionCtrl.heightEnabled.value == 1,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Calculated Qty — Dynamic Label
-                        Obx(() {
-                          final formula = _buildDynamicLabel(fs);
-                          return _buildTextFormFieldWithController(
-                            label: 'Calculated Qty ($formula)',
-                            controller: fs.calculatedQtyController,
-                            hint: 'Auto-calculated',
+                          // UOM
+                          _buildTextFormField(
+                            label: 'UOM',
+                            initialValue: fs.uom.value,
+                            onChanged: null,
+                            hint: 'Unit',
                             readOnly: true,
-                          );
-                        }),
-                        const SizedBox(height: 12),
-
-                        // Remark
-                        _buildTextFormField(
-                          label: 'Remark',
-                          initialValue: fs.remark.value,
-                          onChanged: (v) =>
-                              controller.onRemarkChanged(index, v),
-                          hint: 'Enter remarks',
-                          readOnly: false,
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Delete Button
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => controller.removeFieldSet(index),
-                            tooltip: 'Delete row',
                           ),
-                        ),
-                        const SizedBox(height: 8),
+                          const SizedBox(height: 12),
 
-                        Divider(
-                          color: AppColors.grey,
-                          thickness: ResponsiveHelper.spacing(2),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    );
+                          // Nos
+                          _buildTextFormField(
+                            label: 'Nos *',
+                            initialValue: fs.nos.value,
+                            onChanged: (v) => controller.onNosChanged(index, v),
+                            hint: 'Enter number',
+                            readOnly: false,
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Length
+                          Obx(
+                            () => _buildTextFormField(
+                              label: 'Length *',
+                              initialValue: fs.length.value,
+                              onChanged: (v) =>
+                                  controller.onLengthChanged(index, v),
+                              hint: 'Enter length',
+                              readOnly: conditionCtrl.lengthEnabled.value == 1,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Breadth
+                          Obx(
+                            () => _buildTextFormField(
+                              label: 'Breadth *',
+                              initialValue: fs.breadth.value,
+                              onChanged: (v) =>
+                                  controller.onBreadthChanged(index, v),
+                              hint: 'Enter breadth',
+                              readOnly: conditionCtrl.breadthEnabled.value == 1,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Height
+                          Obx(
+                            () => _buildTextFormField(
+                              label: 'Height *',
+                              initialValue: fs.height.value,
+                              onChanged: (v) =>
+                                  controller.onHeightChanged(index, v),
+                              hint: 'Enter height',
+                              readOnly: conditionCtrl.heightEnabled.value == 1,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Calculated Qty — Dynamic Label
+                          Obx(() {
+                            final formula = AddPboqFormView._buildDynamicLabel(
+                              fs,
+                            );
+                            return _buildTextFormFieldWithController(
+                              label: 'Calculated Qty ($formula)',
+                              controller: fs.calculatedQtyController,
+                              hint: 'Auto-calculated',
+                              readOnly: true,
+                            );
+                          }),
+                          const SizedBox(height: 12),
+
+                          // Remark
+                          _buildTextFormField(
+                            label: 'Remark',
+                            initialValue: fs.remark.value,
+                            onChanged: (v) =>
+                                controller.onRemarkChanged(index, v),
+                            hint: 'Enter remarks',
+                            readOnly: false,
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Delete Button
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => controller.removeFieldSet(index),
+                              tooltip: 'Delete row',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          Divider(
+                            color: AppColors.grey,
+                            thickness: ResponsiveHelper.spacing(2),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+
+                // Add More Button
+                ElevatedButton(
+                  onPressed: controller.addFieldSet,
+                  style: AppButtonStyles.elevatedLargeBlack(),
+                  child: Text(
+                    'Add More',
+                    style: AppStyle.buttonTextPoppinsWhite.responsive,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Submit Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      controller.submitForm();
+                    }
                   },
+                  style: AppButtonStyles.elevatedLargeBlack(),
+                  child: Text(
+                    'Submit',
+                    style: AppStyle.buttonTextPoppinsWhite.responsive,
+                  ),
                 ),
-              ),
-
-              // Add More Button
-              ElevatedButton(
-                onPressed: controller.addFieldSet,
-                style: AppButtonStyles.elevatedLargeBlack(),
-                child: Text(
-                  'Add More',
-                  style: AppStyle.buttonTextPoppinsWhite.responsive,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Submit Button
-              ElevatedButton(
-                onPressed: controller.submitForm,
-                style: AppButtonStyles.elevatedLargeBlack(),
-                child: Text(
-                  'Submit',
-                  style: AppStyle.buttonTextPoppinsWhite.responsive,
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
@@ -308,6 +325,14 @@ class AddPboqFormView extends StatelessWidget {
           items: items,
           onChanged: onChanged,
           enabled: enabled,
+          validator: label.contains('*') && enabled
+              ? (value) {
+                  if (value == null || value.isEmpty) {
+                    return '${label.replaceAll('*', '').trim()} is required';
+                  }
+                  return null;
+                }
+              : null,
           dropdownDecoratorProps: DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
               hintText: hint,
@@ -350,6 +375,14 @@ class AddPboqFormView extends StatelessWidget {
           initialValue: initialValue,
           onChanged: onChanged,
           enabled: onChanged != null,
+          validator: label.contains('*') && !readOnly
+              ? (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return '${label.replaceAll('*', '').trim()} is required';
+                  }
+                  return null;
+                }
+              : null,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

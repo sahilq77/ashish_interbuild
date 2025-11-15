@@ -12,9 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-class MesurmentPackageList extends StatelessWidget {
+class MesurmentPackageList extends StatefulWidget {
   const MesurmentPackageList({super.key});
 
+  @override
+  State<MesurmentPackageList> createState() => _MesurmentPackageListState();
+}
+
+class _MesurmentPackageListState extends State<MesurmentPackageList> {
   @override
   Widget build(BuildContext context) {
     final PackageListController controller = Get.find();
@@ -136,9 +141,6 @@ class MesurmentPackageList extends StatelessWidget {
   }
 
   // ────────────────────────────────────────────────────────────────
-  // UI Components
-  // ────────────────────────────────────────────────────────────────
-
   Widget _buildSearchField(PackageListController controller) {
     return TextFormField(
       controller: controller.searchController,
@@ -178,10 +180,6 @@ class MesurmentPackageList extends StatelessWidget {
   }
 
   // Optional: Keep filter dropdown (client-side)
-
-
- 
-
   Widget _buildLoadMoreIndicator() {
     return const Padding(
       padding: EdgeInsets.all(16.0),

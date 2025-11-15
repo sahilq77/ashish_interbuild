@@ -436,14 +436,14 @@ class AddPboqFormController extends GetxController {
 
   // Submit
   void submitForm() {
-    if (selectedPackage.isEmpty) {
-      Get.snackbar('Error', 'Please select a package');
-      return;
-    }
-    if (selectedPboqName.isEmpty) {
-      Get.snackbar('Error', 'Please select a PBOQ');
-      return;
-    }
+    // if (selectedPackage.isEmpty) {
+    //   Get.snackbar('Error', 'Please select a package');
+    //   return;
+    // }
+    // if (selectedPboqName.isEmpty) {
+    //   Get.snackbar('Error', 'Please select a PBOQ');
+    //   return;
+    // }
 
     for (int i = 0; i < fieldSets.length; i++) {
       final f = fieldSets[i];

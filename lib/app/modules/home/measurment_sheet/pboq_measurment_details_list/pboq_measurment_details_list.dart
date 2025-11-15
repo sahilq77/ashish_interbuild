@@ -12,9 +12,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
-class PboqMeasurmentDetailsList extends StatelessWidget {
+class PboqMeasurmentDetailsList extends StatefulWidget {
   const PboqMeasurmentDetailsList({super.key});
 
+  @override
+  State<PboqMeasurmentDetailsList> createState() => _PboqMeasurmentDetailsListState();
+}
+
+class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PboqMeasurmentDetailController>();
@@ -404,8 +409,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
   }
 
   // -------------------------------------------------------------------------
-  // Dynamic label-value row
-  // -------------------------------------------------------------------------
   Widget _dynamicRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,8 +437,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
   }
 
   // -------------------------------------------------------------------------
-  // Search field
-  // -------------------------------------------------------------------------
   Widget _searchField(PboqMeasurmentDetailController c) {
     return TextFormField(
       controller: c.searchController,
@@ -452,8 +453,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Sort button
   // -------------------------------------------------------------------------
   Widget _sortButton(PboqMeasurmentDetailController c) {
     return Obx(
@@ -476,8 +475,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
   }
 
   // -------------------------------------------------------------------------
-  // Shimmer
-  // -------------------------------------------------------------------------
   Widget _shimmer() {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
@@ -499,8 +496,6 @@ class PboqMeasurmentDetailsList extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // AppBar
   // -------------------------------------------------------------------------
   AppBar _buildAppBar(PboqMeasurmentDetailController c) {
     return AppBar(

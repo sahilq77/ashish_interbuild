@@ -10,9 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-class MeasurmentProjectNameList extends StatelessWidget {
+class MeasurmentProjectNameList extends StatefulWidget {
   const MeasurmentProjectNameList({super.key});
 
+  @override
+  State<MeasurmentProjectNameList> createState() =>
+      _MeasurmentProjectNameListState();
+}
+
+class _MeasurmentProjectNameListState extends State<MeasurmentProjectNameList> {
   @override
   Widget build(BuildContext context) {
     // Reuse the same controller instance

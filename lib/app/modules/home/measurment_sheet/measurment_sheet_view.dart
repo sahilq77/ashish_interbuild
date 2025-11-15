@@ -11,9 +11,14 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
-class MeasurmentSheetView extends StatelessWidget {
+class MeasurmentSheetView extends StatefulWidget {
   const MeasurmentSheetView({super.key});
 
+  @override
+  State<MeasurmentSheetView> createState() => _MeasurmentSheetViewState();
+}
+
+class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<MeasurementSheetController>();
@@ -347,8 +352,6 @@ class MeasurmentSheetView extends StatelessWidget {
   }
 
   // -------------------------------------------------------------------------
-  // Dynamic label-value row
-  // -------------------------------------------------------------------------
   Widget _dynamicRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,8 +380,6 @@ class MeasurmentSheetView extends StatelessWidget {
   }
 
   // -------------------------------------------------------------------------
-  // Search field
-  // -------------------------------------------------------------------------
   Widget _searchField(MeasurementSheetController c) {
     return TextFormField(
       controller: c.searchController,
@@ -395,8 +396,6 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Sort button
   // -------------------------------------------------------------------------
   Widget _sortButton(MeasurementSheetController c) {
     return Obx(
@@ -419,8 +418,6 @@ class MeasurmentSheetView extends StatelessWidget {
   }
 
   // -------------------------------------------------------------------------
-  // Shimmer
-  // -------------------------------------------------------------------------
   Widget _shimmer() {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
@@ -442,8 +439,6 @@ class MeasurmentSheetView extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // AppBar
   // -------------------------------------------------------------------------
   AppBar _buildAppBar(MeasurementSheetController c) {
     return AppBar(
