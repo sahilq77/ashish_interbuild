@@ -344,26 +344,27 @@ class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
                                         child: SizedBox(width: double.infinity),
                                       ),
                                       Expanded(
-                                        child: OutlinedButton(
-                                          style:
-                                              AppButtonStyles.outlinedExtraSmallBlack(),
-                                          onPressed: () {
-                                            // Example navigation – adapt to your real route
+                                        child: GestureDetector(
+                                          onTap: () {
                                             Get.toNamed(
-                                              AppRoutes.measurmentSheetDeductionList,
+                                              AppRoutes
+                                                  .measurmentSheetDeductionList,
                                               // arguments: {
                                               //   'pboq_id': item.pboqId,
                                               //   'column': col,
                                               // },
                                             );
                                           },
-                                          child: Text(
-                                            "View Deduction",
-                                            style: AppStyle
-                                                .labelPrimaryPoppinsBlack
-                                                .responsive
-                                                .copyWith(fontSize: 10),
-                                          ),
+                                          child:
+                                              AppButtonStyles.outlinedExtraSmallBlackContainer(
+                                                child: Text(
+                                                  "View Deduction",
+                                                  style: AppStyle
+                                                      .labelPrimaryPoppinsBlack
+                                                      .responsive
+                                                      .copyWith(fontSize: 10),
+                                                ),
+                                              ),
                                         ),
                                       ),
                                     ],

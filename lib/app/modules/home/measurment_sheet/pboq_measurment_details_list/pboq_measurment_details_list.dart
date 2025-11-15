@@ -344,11 +344,8 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                         child: SizedBox(width: double.infinity),
                                       ),
                                       Expanded(
-                                        child: OutlinedButton(
-                                          style:
-                                              AppButtonStyles.outlinedExtraSmallBlack(),
-                                          onPressed: () {
-                                            // Example navigation – adapt to your real route
+                                        child: GestureDetector(
+                                          onTap: () {
                                             Get.toNamed(
                                               AppRoutes
                                                   .measurmentSheetDeductionList,
@@ -358,20 +355,20 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                               // },
                                             );
                                           },
-                                          child: Text(
-                                            "View Deduction",
-                                            style: AppStyle
-                                                .labelPrimaryPoppinsBlack
-                                                .responsive
-                                                .copyWith(fontSize: 10),
-                                          ),
+                                          child:
+                                              AppButtonStyles.outlinedExtraSmallBlackContainer(
+                                                child: Text(
+                                                  "View Deduction",
+                                                  style: AppStyle
+                                                      .labelPrimaryPoppinsBlack
+                                                      .responsive
+                                                      .copyWith(fontSize: 10),
+                                                ),
+                                              ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  // InkWell(
-                                  //   child: Align(child: Icon(Icons.list)),
-                                  // ),
                                 ],
                               ),
                             ),

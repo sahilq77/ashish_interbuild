@@ -236,7 +236,27 @@ class AppButtonStyles {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
     );
   }
-
+static Container outlinedExtraSmallBlackContainer({
+  required Widget child,
+  VoidCallback? onTap,
+}) {
+  return Container(
+    width: double.infinity,
+    height: _heightExtraSmall,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      border: Border.all(color: AppColors.defaultBlack, width: 1),
+      borderRadius: BorderRadius.circular(_radiusExtraSmall),
+      color: Colors.transparent,
+    ),
+    child: Center(
+      child: DefaultTextStyle(
+        style: const TextStyle(color: AppColors.defaultBlack),
+        child: child,
+      ),
+    ),
+  );
+}
   // ============ TEXT BUTTON STYLES ============
 
   // Large Text Button (Primary)
