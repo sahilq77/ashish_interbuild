@@ -50,7 +50,7 @@ class FieldSet {
     heightController = TextEditingController();
     remarkController = TextEditingController();
     deductionController = TextEditingController();
-    
+
     // Listen to observable changes and update controllers
     ever(calculatedQty, (value) => calculatedQtyController.text = value);
     ever(subLocation, (value) => subLocationController.text = value);
@@ -148,7 +148,7 @@ class EditPboqFormController extends GetxController {
     if (resetLocation) {
       _zoneLocationCtrl.zoneLocationNames.clear();
     }
-    if (resetFieldSets) {
+    if (resetFieldSets && fieldSets.isNotEmpty) {
       final fs = fieldSets[0];
       fs.selectedZone.value = '';
       fs.selectedLocation.value = '';
@@ -364,13 +364,13 @@ class EditPboqFormController extends GetxController {
           final String? pboqName = _pboqCtrl.getPboqNameById(autoPboqId);
           if (pboqName != null && pboqName.isNotEmpty) {
             selectedPboqName.value = pboqName;
-             onPboqNameChanged(pboqName);
+            onPboqNameChanged(pboqName);
           }
         }
 
         // Auto-bind selected item data if arguments exist
         if (argumentValues.isNotEmpty) {
-           _bindSelectedItemData();
+          _bindSelectedItemData();
         }
       }
     });
@@ -378,8 +378,11 @@ class EditPboqFormController extends GetxController {
 
   void _bindSelectedItemData() async {
     log('Starting _bindSelectedItemData', name: 'EditPboqFormController');
-    log('ArgumentValues: ${argumentValues.toString()}', name: 'EditPboqFormController');
-    
+    log(
+      'ArgumentValues: ${argumentValues.toString()}',
+      name: 'EditPboqFormController',
+    );
+
     // First load zones and locations
     final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
     final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
@@ -395,21 +398,34 @@ class EditPboqFormController extends GetxController {
         pboqId: int.tryParse(pboqId) ?? 0,
       );
 
-      log('Available zones: ${_zoneCtrl.zoneNames}', name: 'EditPboqFormController');
+      log(
+        'Available zones: ${_zoneCtrl.zoneNames}',
+        name: 'EditPboqFormController',
+      );
 
       // Then bind the data from arguments
+      if (fieldSets.isEmpty) {
+        log(
+          'No fieldSets available for binding',
+          name: 'EditPboqFormController',
+        );
+        return;
+      }
       final fs = fieldSets[0];
       fs.selectedZone.value = argumentValues['zone_name'] ?? '';
-      
-      log('Setting zone to: ${argumentValues['zone_name']}', name: 'EditPboqFormController');
+
+      log(
+        'Setting zone to: ${argumentValues['zone_name']}',
+        name: 'EditPboqFormController',
+      );
 
       // Load locations for the selected zone
       final String? zoneId = _zoneCtrl.getZoneIdByName(
         argumentValues['zone_name'] ?? '',
       );
-      
+
       log('Zone ID found: $zoneId', name: 'EditPboqFormController');
-      
+
       if (zoneId != null) {
         await _zoneLocationCtrl.fetchZoneLocations(
           context: Get.context!,
@@ -419,8 +435,11 @@ class EditPboqFormController extends GetxController {
           pboqId: int.tryParse(pboqId) ?? 0,
           zoneId: int.tryParse(zoneId) ?? 0,
         );
-        
-        log('Available locations: ${_zoneLocationCtrl.zoneLocationNames}', name: 'EditPboqFormController');
+
+        log(
+          'Available locations: ${_zoneLocationCtrl.zoneLocationNames}',
+          name: 'EditPboqFormController',
+        );
       }
 
       fs.selectedLocation.value = argumentValues['location_name'] ?? '';
@@ -432,15 +451,21 @@ class EditPboqFormController extends GetxController {
       fs.remark.value = argumentValues['remark'] ?? '';
       fs.deduction.value = argumentValues['deduction'] ?? '';
 
-      log('Binding complete. Zone: ${fs.selectedZone.value}, Location: ${fs.selectedLocation.value}', name: 'EditPboqFormController');
+      log(
+        'Binding complete. Zone: ${fs.selectedZone.value}, Location: ${fs.selectedLocation.value}',
+        name: 'EditPboqFormController',
+      );
 
       // Calculate quantity
       fs.calculateQuantity();
-      
+
       // Force UI refresh
       fieldSets.refresh();
     } else {
-      log('Cannot bind data - missing PBOQ ID or Package ID', name: 'EditPboqFormController');
+      log(
+        'Cannot bind data - missing PBOQ ID or Package ID',
+        name: 'EditPboqFormController',
+      );
     }
   }
 

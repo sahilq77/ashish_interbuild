@@ -6,9 +6,14 @@ import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DeductionFormView extends StatelessWidget {
+class DeductionFormView extends StatefulWidget {
   const DeductionFormView({super.key});
 
+  @override
+  State<DeductionFormView> createState() => _DeductionFormViewState();
+}
+
+class _DeductionFormViewState extends State<DeductionFormView> {
   @override
   Widget build(BuildContext context) {
     final DeductionFormController controller = Get.put(
@@ -25,25 +30,25 @@ class DeductionFormView extends StatelessWidget {
           child: Column(
             children: [
               _buildTextFormField(
-                label: 'Nos.',
+                label: 'Nos.*',
                 controller: controller.nosController,
                 hint: 'Enter Nos.',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildTextFormField(
-                label: 'Length (m)',
+                label: 'Length (m) *',
                 controller: controller.lengthController,
                 hint: 'Enter Length',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildTextFormField(
-                label: 'Breadth (m)',
+                label: 'Breadth (m) *',
                 controller: controller.breadthController,
                 hint: 'Enter Breadth',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildTextFormField(
-                label: 'Height (m)',
+                label: 'Height (m) *',
                 controller: controller.heightController,
                 hint: 'Enter Height',
               ),
