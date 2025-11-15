@@ -115,45 +115,56 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                       return Column(
                         children: [
                           // Zone *
-                          Obx(
-                            () => _buildDropdownField(
-                              label: 'Zone *',
-                              value: fs.selectedZone.value,
-                              items: controller.zoneNames,
-                              onChanged: (v) =>
-                                  controller.onFieldZoneChanged(index, v),
-                              hint: 'Select zone',
-                              enabled: true,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
+                          Obx(() {
+                            final fs = controller.fieldSets[index];
+                            final bool zoneError =
+                                fs.selectedZone.value.isEmpty;
+                            final bool locationError =
+                                fs.selectedLocation.value.isEmpty;
 
-                          // Planning Status
-                          Obx(
-                            () => _buildDropdownField(
-                              label: 'Planning Status',
-                              value: fs.planningStatus.value,
-                              items: controller.planningStatusOptions,
-                              onChanged: (v) =>
-                                  controller.onPlanningStatusChanged(index, v),
-                              hint: 'Select status',
-                              enabled: false,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Location *
-                          Obx(
-                            () => _buildDropdownField(
-                              label: 'Location *',
-                              value: fs.selectedLocation.value,
-                              items: controller.zoneLocations,
-                              onChanged: (v) =>
-                                  controller.onFieldLocationChanged(index, v),
-                              hint: 'Select location',
-                              enabled: true,
-                            ),
-                          ),
+                            return Column(
+                              children: [
+                                // Zone *
+                                _buildDropdownField(
+                                  label: 'Zone *',
+                                  value: fs.selectedZone.value,
+                                  items: controller.zoneNames,
+                                  onChanged: (v) =>
+                                      controller.onFieldZoneChanged(index, v),
+                                  hint: 'Select zone',
+                                  enabled: true,
+                                  errorText: zoneError
+                                      ? 'Zone is required'
+                                      : null,
+                                ),
+                                const SizedBox(height: 12),
+                                _buildDropdownField(
+                                  label: 'Planning Status',
+                                  value: fs.planningStatus.value,
+                                  items: controller.planningStatusOptions,
+                                  onChanged: (v) => controller
+                                      .onPlanningStatusChanged(index, v),
+                                  hint: 'Select status',
+                                  enabled: false,
+                                ),
+                                const SizedBox(height: 12),
+                                // Location *
+                                _buildDropdownField(
+                                  label: 'Location *',
+                                  value: fs.selectedLocation.value,
+                                  items: controller.zoneLocations,
+                                  onChanged: (v) => controller
+                                      .onFieldLocationChanged(index, v),
+                                  hint: 'Select location',
+                                  enabled: true,
+                                  errorText: locationError
+                                      ? 'Location is required'
+                                      : null,
+                                ),
+                                // ... rest of fields
+                              ],
+                            );
+                          }),
                           const SizedBox(height: 12),
 
                           // Sub Location
@@ -314,6 +325,7 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
     required Function(String?)? onChanged,
     required String hint,
     bool enabled = true,
+    String? errorText, // Add this
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,14 +337,6 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
           items: items,
           onChanged: onChanged,
           enabled: enabled,
-          validator: label.contains('*') && enabled
-              ? (value) {
-                  if (value == null || value.isEmpty) {
-                    return '${label.replaceAll('*', '').trim()} is required';
-                  }
-                  return null;
-                }
-              : null,
           dropdownDecoratorProps: DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
               hintText: hint,
@@ -345,6 +349,7 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
               ),
               filled: !enabled,
               fillColor: !enabled ? Colors.grey[200] : null,
+              errorText: errorText, // Show error
             ),
           ),
           popupProps: const PopupProps.menu(
