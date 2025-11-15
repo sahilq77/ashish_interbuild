@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
+import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_edit_pboq_response.dart';
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_measurmentsheet_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
@@ -507,9 +508,8 @@ class EditPboqFormController extends GetxController {
       );
 
       if (list != null && list.isNotEmpty) {
-        List<GetAddPboqMsResponse> response = getAddPboqMsResponseFromJson(
-          jsonEncode(list),
-        );
+        List<GetEditPboqMeasurmentResponse> response =
+            getEditPboqMeasurmentResponseFromJson(jsonEncode(list));
 
         if (response[0].status == true) {
           AppSnackbarStyles.showSuccess(
