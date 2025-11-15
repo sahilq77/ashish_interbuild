@@ -33,6 +33,9 @@ class Networkutility {
 
   static String addMeasurementSheet = "${baseUrl + "add-ms"}";
   static int addMeasurementSheetApi = 11;
+
+  static String getPlanningStatus = "${baseUrl + "zone-ms-status"}";
+  static int getPlanningStatusApi = 12;
 }
 
 

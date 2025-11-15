@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
+import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
@@ -20,7 +21,7 @@ import '../../../../data/network/network_utility.dart';
 class FieldSet {
   var selectedZone = ''.obs;
   var selectedLocation = ''.obs;
-  var planningStatus = 'Not Started'.obs;
+  var planningStatus = ''.obs;
   var subLocation = ''.obs;
   var uom = ''.obs;
   var nos = ''.obs;
@@ -109,14 +110,11 @@ class AddPboqFormController extends GetxController {
   late final ZoneLocationController _zoneLocationCtrl =
       Get.find<ZoneLocationController>();
   RxBool isLoading = false.obs;
+  RxBool isLoadingMore = false.obs;
+  RxString errorMessage = ''.obs;
+  RxMap<int, PlanningStatus> planningStatusData = <int, PlanningStatus>{}.obs;
 
   // Planning status options
-  final List<String> planningStatusOptions = [
-    'Not Started',
-    'In Progress',
-    'Completed',
-    'On Hold',
-  ];
 
   @override
   void onInit() {
@@ -156,7 +154,9 @@ class AddPboqFormController extends GetxController {
         // Initialize first field set with correct UOM
         if (fieldSets.isEmpty) {
           final initialFieldSet = FieldSet();
-          initialFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+          initialFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty
+              ? PBOQMSctr.uom.value
+              : 'Unit';
           fieldSets.add(initialFieldSet);
         }
 
@@ -208,8 +208,10 @@ class AddPboqFormController extends GetxController {
         fs.breadth.value = '';
         fs.height.value = '';
         fs.remark.value = '';
-        fs.planningStatus.value = 'Not Started';
-        fs.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+        fs.planningStatus.value = '';
+        fs.uom.value = PBOQMSctr.uom.value.isNotEmpty
+            ? PBOQMSctr.uom.value
+            : 'Unit';
       }
     }
   }
@@ -258,7 +260,9 @@ class AddPboqFormController extends GetxController {
 
     // Update UOM for all field sets
     for (final fs in fieldSets) {
-      fs.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+      fs.uom.value = PBOQMSctr.uom.value.isNotEmpty
+          ? PBOQMSctr.uom.value
+          : 'Unit';
     }
   }
 
@@ -266,6 +270,7 @@ class AddPboqFormController extends GetxController {
   void onFieldZoneChanged(int index, String? value) async {
     fieldSets[index].selectedZone.value = value ?? '';
     fieldSets[index].selectedLocation.value = '';
+    fieldSets[index].planningStatus.value = '';
 
     final String? zoneId = _zoneCtrl.getZoneIdByName(value ?? '');
     final String? pkgId = _pkgCtrl.getPackageIdByName(selectedPackage.value);
@@ -281,6 +286,9 @@ class AddPboqFormController extends GetxController {
       pboqId: int.tryParse(pboqId) ?? 0,
       zoneId: int.tryParse(zoneId) ?? 0,
     );
+
+    // Fetch planning status for this zone
+    await fetchPlanningStatusForZone(int.tryParse(zoneId) ?? 0, index);
 
     fieldSets.refresh();
   }
@@ -327,7 +335,9 @@ class AddPboqFormController extends GetxController {
   // Add new row
   void addFieldSet() {
     final newFieldSet = FieldSet();
-    newFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+    newFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty
+        ? PBOQMSctr.uom.value
+        : 'Unit';
     fieldSets.add(newFieldSet);
   }
 
@@ -346,7 +356,7 @@ class AddPboqFormController extends GetxController {
       fs.breadth.value = '';
       fs.height.value = '';
       fs.remark.value = '';
-      fs.planningStatus.value = 'Not Started';
+      fs.planningStatus.value = '';
       fs.uom.value = PBOQMSctr.uom.value;
       fs.calculateQuantity();
     }
@@ -474,13 +484,77 @@ class AddPboqFormController extends GetxController {
     addPboqMeasurment();
   }
 
+  Future<void> fetchPlanningStatusForZone(int zoneId, int fieldIndex) async {
+    try {
+      final String? pboqId = _pboqCtrl.getPboqIdByName(selectedPboqName.value);
+      if (pboqId == null) {
+        log('PBOQ ID is null', name: 'AddPboqFormController');
+        return;
+      }
+
+      final jsonBody = {
+        "project_id": mesurmentCtrl.projectId.value,
+        "pboq_id": pboqId,
+        "zone_qty_data": [
+          {"zone_id": zoneId, "qty": ""},
+        ],
+      };
+
+      log(
+        'Fetching planning status for zone: $zoneId',
+        name: 'AddPboqFormController',
+      );
+
+      List<Object?>? list = await Networkcall().postMethod(
+        Networkutility.getPlanningStatusApi,
+        Networkutility.getPlanningStatus,
+        jsonEncode(jsonBody),
+        Get.context!,
+      );
+
+      if (list != null && list.isNotEmpty) {
+        List<GetPlanningStatusResponse> response =
+            getPlanningStatusResponseFromJson(jsonEncode(list));
+
+        if (response[0].status == true && response[0].data.isNotEmpty) {
+          final planningData = response[0].data[0];
+          planningStatusData[zoneId] = planningData;
+
+          // Update the field set's planning status
+          final statusText =
+              'Planned: ${planningData.plannedQty} | MS Qty: ${planningData.newMsQty}';
+          fieldSets[fieldIndex].planningStatus.value = statusText;
+
+          log(
+            'Updated planning status: $statusText',
+            name: 'AddPboqFormController',
+          );
+
+          // Force UI update
+          fieldSets.refresh();
+        } else {
+          log(
+            'API response status false or no data',
+            name: 'AddPboqFormController',
+          );
+        }
+      } else {
+        log('Empty API response', name: 'AddPboqFormController');
+      }
+    } catch (e) {
+      log('Error fetching planning status: $e', name: 'AddPboqFormController');
+    }
+  }
+
   // Reset
   void resetForm() {
     selectedPackage.value = '';
     selectedPboqName.value = '';
     fieldSets.clear();
     final newFieldSet = FieldSet();
-    newFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty ? PBOQMSctr.uom.value : 'Unit';
+    newFieldSet.uom.value = PBOQMSctr.uom.value.isNotEmpty
+        ? PBOQMSctr.uom.value
+        : 'Unit';
     fieldSets.add(newFieldSet);
     _resetDependents(resetPboq: true, resetZone: true, resetLocation: true);
   }

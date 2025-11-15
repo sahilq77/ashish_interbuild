@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
+import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
@@ -52,7 +53,6 @@ class Networkcall {
     String url,
     String body,
     BuildContext context,
- 
   ) async {
     try {
       // ---- Connectivity check ----
@@ -112,7 +112,10 @@ class Networkcall {
           case 11:
             final parsed = json.decode(response.body) as Map<String, dynamic>;
             final addPboqMeasurment = [GetAddPboqMsResponse.fromJson(parsed)];
-            return addPboqMeasurment;
+          case 12:
+            final str = "[${response.body}]";
+            final getPlanningStatus = getPlanningStatusResponseFromJson(str);
+            return getPlanningStatus;
 
           default:
             log("Invalid request code: $requestCode");

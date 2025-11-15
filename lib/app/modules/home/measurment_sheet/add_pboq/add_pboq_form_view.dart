@@ -123,6 +123,7 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                                 fs.selectedLocation.value.isEmpty;
 
                             return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // Zone *
                                 _buildDropdownField(
@@ -138,15 +139,28 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                                       : null,
                                 ),
                                 const SizedBox(height: 12),
-                                _buildDropdownField(
-                                  label: 'Planning Status',
-                                  value: fs.planningStatus.value,
-                                  items: controller.planningStatusOptions,
-                                  onChanged: (v) => controller
-                                      .onPlanningStatusChanged(index, v),
-                                  hint: 'Select status',
-                                  enabled: false,
+                                Text(
+                                  "Planning Status",
+                                  style: AppStyle.reportCardRowCount.responsive,
                                 ),
+                                const SizedBox(height: 8),
+                                Obx(() {
+                                  final fs = controller.fieldSets[index];
+                                  return Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey),
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.grey[200],
+                                      // same as TextFormField
+                                    ),
+                                    child: Text(fs.planningStatus.value),
+                                  );
+                                }),
                                 const SizedBox(height: 12),
                                 // Location *
                                 _buildDropdownField(
@@ -166,8 +180,6 @@ class _AddPboqFormViewState extends State<AddPboqFormView> {
                             );
                           }),
                           const SizedBox(height: 12),
-
-                      
 
                           // Sub Location
                           _buildTextFormField(
