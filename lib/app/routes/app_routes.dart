@@ -213,22 +213,32 @@ class AppRoutes {
     GetPage(
       name: pboqList,
       page: () => const PboqMeasurmentDetailsList(),
-      bindings:[PboqMeasurmentDetailsListBinding(),ZoneBinding(),ZoneLocationBinding()] ,
+      bindings: [
+        PboqMeasurmentDetailsListBinding(),
+        ZoneBinding(),
+        ZoneLocationBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: deductionForm,
       page: () => const DeductionFormView(),
-      bindings: [ DeductionFormBinding(),MeasurmentSheetBinding(),PboqMeasurmentDetailsListBinding()],
-      
-      
-     
+      bindings: [
+        DeductionFormBinding(),
+        MeasurmentSheetBinding(),
+        PboqMeasurmentDetailsListBinding(),
+      ],
+
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: measurmentSheetDeductionList,
       page: () => const MeasurmentSheetDeductionList(),
-      binding: MeasurmentSheetDeductionListBinding(),
+      bindings: [
+        MeasurmentSheetDeductionListBinding(),
+        ZoneBinding(),
+        ZoneLocationBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
 

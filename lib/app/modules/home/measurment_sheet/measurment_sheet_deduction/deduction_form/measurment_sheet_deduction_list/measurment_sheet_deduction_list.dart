@@ -1,4 +1,6 @@
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list_response.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/add_pboq/add_pboq_form_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_deduction/deduction_form/measurment_sheet_deduction_list/measurment_sheet_deduction_list_controller.dart';
@@ -22,9 +24,19 @@ class MeasurmentSheetDeductionList extends StatefulWidget {
 
 class _MeasurmentSheetDeductionListState
     extends State<MeasurmentSheetDeductionList> {
+  final controller = Get.find<MeasurmentSheetDeductionListController>();
+  final zoneController = Get.find<ZoneController>();
+  final zoneLocationController = Get.find<ZoneLocationController>();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    zoneController.fetchZones(context: context);
+    zoneLocationController.fetchZoneLocations(context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MeasurmentSheetDeductionListController>();
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -51,7 +63,8 @@ class _MeasurmentSheetDeductionListState
               child: Row(
                 children: [
                   Expanded(child: _searchField(controller)),
-
+                  const SizedBox(width: 8),
+                  _buildFilterButton(context),
                   const SizedBox(width: 8),
                   _sortButton(controller),
                 ],
@@ -436,6 +449,197 @@ class _MeasurmentSheetDeductionListState
     );
   }
 
+  Widget _buildFilterButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  void _showFilterDialog(BuildContext context) {
+    final controller = Get.find<MeasurmentSheetDeductionListController>();
+    final zoneController = Get.find<ZoneController>();
+    final zoneLocationController = Get.find<ZoneLocationController>();
+
+    String? tempZone = controller.selectedZone.value.isEmpty
+        ? null
+        : controller.selectedZone.value;
+    String? tempZoneLocation = controller.selectedZoneLocation.value.isEmpty
+        ? null
+        : controller.selectedZoneLocation.value;
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filters',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    children: [
+                      _filterDropdownWithIcon(
+                        label: 'Zone',
+                        items: zoneController.zoneNames,
+                        selected: tempZone,
+                        onChanged: (v) => setState(() => tempZone = v),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdownWithIcon(
+                        label: 'Zone Location',
+                        items: zoneLocationController.zoneLocationNames,
+                        selected: tempZoneLocation,
+                        onChanged: (v) => setState(() => tempZoneLocation = v),
+                        icon: Icons.place,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: ResponsiveHelper.paddingSymmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveHelper.spacing(10),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          controller.selectedZone.value = tempZone ?? '';
+                          controller.selectedZoneLocation.value =
+                              tempZoneLocation ?? '';
+                          controller.fetchPboq(reset: true, context: context);
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _filterDropdownWithIcon({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    final List<String> fullList = ['', ...items];
+
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          searchFieldProps: TextFieldProps(
+            decoration: InputDecoration(
+              labelText: 'Search',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
+            ),
+          ),
+        ),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
+      ),
+    );
+  }
+
   // -------------------------------------------------------------------------
   Widget _sortButton(MeasurmentSheetDeductionListController c) {
     return Obx(
@@ -493,35 +697,7 @@ class _MeasurmentSheetDeductionListState
           fontWeight: FontWeight.w600,
         ),
       ),
-      actions: [
-        // Container(
-        //   margin: const EdgeInsets.symmetric(horizontal: 16),
-        //   decoration: BoxDecoration(
-        //     border: Border.all(color: AppColors.defaultBlack, width: 0.5),
-        //     borderRadius: BorderRadius.circular(8),
-        //   ),
-        //   child: InkWell(
-        //     borderRadius: BorderRadius.circular(8),
-        //     onTap: () => Get.toNamed(AppRoutes.addPBOQ),
-        //     child: Padding(
-        //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        //       child: Row(
-        //         mainAxisSize: MainAxisSize.min,
-        //         children: [
-        //           const SizedBox(width: 6),
-        //           Text(
-        //             'Add',
-        //             style: AppStyle.labelPrimaryPoppinsBlack.responsive
-        //                 .copyWith(
-        //                   fontSize: ResponsiveHelper.getResponsiveFontSize(14),
-        //                 ),
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
-      ],
+      actions: [],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
         child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
