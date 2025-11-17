@@ -35,6 +35,8 @@ class PboqMeasurmentDetailController extends GetxController {
   final RxBool isAscending = true.obs;
   // ── Filter (client-side) ────────────────────────────────────────
   final RxnString selectedPackageFilter = RxnString(null);
+  final RxString selectedZone = ''.obs;
+  final RxString selectedZoneLocation = ''.obs;
   // ── Debounce ─────────────────────────────────────────────────────
   Timer? _debounce;
   // ── Navigation args ─────────────────────────────────────────────
@@ -107,6 +109,19 @@ class PboqMeasurmentDetailController extends GetxController {
   // -----------------------------------------------------------------
   String _buildQueryParams({bool includePagination = true}) {
     final parts = <String>['project_id=', 'pboq_id=$pboqId'];
+    
+    if (selectedZone.value.isNotEmpty) {
+      parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
+    } else {
+      parts.add('filter_zone=');
+    }
+    
+    if (selectedZoneLocation.value.isNotEmpty) {
+      parts.add('filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}');
+    } else {
+      parts.add('filter_zone_location=');
+    }
+    
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
     }
@@ -320,9 +335,11 @@ class PboqMeasurmentDetailController extends GetxController {
 
   void clearFilters() {
     selectedPackageFilter.value = null;
+    selectedZone.value = '';
+    selectedZoneLocation.value = '';
     searchController.clear();
     _search.value = '';
-    _applyClientFilters();
+    fetchPboq(reset: true, context: Get.context!);
   }
 
   // -----------------------------------------------------------------
@@ -343,6 +360,8 @@ class PboqMeasurmentDetailController extends GetxController {
     _orderBy.value = '';
     isAscending.value = true;
     selectedPackageFilter.value = null;
+    selectedZone.value = '';
+    selectedZoneLocation.value = '';
     start.value = 0;
     hasMoreData.value = true;
     filteredPboqList.clear();

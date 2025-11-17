@@ -213,7 +213,7 @@ class AppRoutes {
     GetPage(
       name: pboqList,
       page: () => const PboqMeasurmentDetailsList(),
-      binding: PboqMeasurmentDetailsListBinding(),
+      bindings:[PboqMeasurmentDetailsListBinding(),ZoneBinding(),ZoneLocationBinding()] ,
       transition: Transition.rightToLeft,
     ),
     GetPage(

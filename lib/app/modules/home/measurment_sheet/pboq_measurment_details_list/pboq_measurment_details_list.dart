@@ -1,4 +1,6 @@
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list_response.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
@@ -21,9 +23,20 @@ class PboqMeasurmentDetailsList extends StatefulWidget {
 }
 
 class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
+  final controller = Get.find<PboqMeasurmentDetailController>();
+  final zoneController = Get.find<ZoneController>();
+  final zoneLocationController = Get.find<ZoneLocationController>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    zoneController.fetchZones(context: context);
+    zoneLocationController.fetchZoneLocations(context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PboqMeasurmentDetailController>();
     ResponsiveHelper.init(context);
 
     return Scaffold(
@@ -50,7 +63,8 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
               child: Row(
                 children: [
                   Expanded(child: _searchField(controller)),
-
+                  const SizedBox(width: 8),
+                  _buildFilterButton(context),
                   const SizedBox(width: 8),
                   _sortButton(controller),
                 ],
@@ -303,8 +317,11 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                               Get.toNamed(
                                                 AppRoutes.deductionForm,
                                                 arguments: {
-                                                  'ms_id': item.getField('ms_id'),
-                                                  'pboq_id':controller.pboqId.value
+                                                  'ms_id': item.getField(
+                                                    'ms_id',
+                                                  ),
+                                                  'pboq_id':
+                                                      controller.pboqId.value,
                                                 },
                                               );
                                             },
@@ -324,17 +341,31 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                             AppRoutes.editPBOQ,
                                             arguments: {
                                               'ms_id': item.getField('ms_id'),
-                                              'zone_id': item.getField('zone_id'),
-                                              'zone_location_id': item.getField('zone_location_id'),
-                                              'zone_name': item.getField('Zone'),
-                                              'location_name': item.getField('Location'),
-                                              'sub_location': item.getField('Sub Location'),
+                                              'zone_id': item.getField(
+                                                'zone_id',
+                                              ),
+                                              'zone_location_id': item.getField(
+                                                'zone_location_id',
+                                              ),
+                                              'zone_name': item.getField(
+                                                'Zone',
+                                              ),
+                                              'location_name': item.getField(
+                                                'Location',
+                                              ),
+                                              'sub_location': item.getField(
+                                                'Sub Location',
+                                              ),
                                               'nos': item.getField('Nos'),
                                               'length': item.getField('Length'),
-                                              'breadth': item.getField('Breadth'),
+                                              'breadth': item.getField(
+                                                'Breadth',
+                                              ),
                                               'height': item.getField('Height'),
                                               'remark': item.getField('Remark'),
-                                              'deduction': item.getField('Deduction'),
+                                              'deduction': item.getField(
+                                                'Deduction',
+                                              ),
                                               'selected_item': item,
                                             },
                                           );
@@ -408,7 +439,7 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
 
   void _showDeleteConfirmationDialog(BuildContext context, String msId) {
     final controller = Get.find<PboqMeasurmentDetailController>();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -528,6 +559,189 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
           padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
           constraints: const BoxConstraints(),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  void _showFilterDialog(BuildContext context) {
+    final controller = Get.find<PboqMeasurmentDetailController>();
+    final zoneController = Get.find<ZoneController>();
+    final zoneLocationController = Get.find<ZoneLocationController>();
+
+    String? tempZone = controller.selectedZone.value.isEmpty
+        ? null
+        : controller.selectedZone.value;
+    String? tempZoneLocation = controller.selectedZoneLocation.value.isEmpty
+        ? null
+        : controller.selectedZoneLocation.value;
+    // temporary values – applied only on “Apply”
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Header ───────────────────────────────────────
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.defaultBlack,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filters',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              // ── Scrollable filter list ───────────────────────
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    children: [
+                      _filterDropdownWithIcon(
+                        label: 'Zone',
+                        items: zoneController.zoneNames,
+                        selected: tempZone,
+                        onChanged: (v) => setState(() => tempZone = v),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdownWithIcon(
+                        label: 'Zone Location',
+                        items: zoneLocationController.zoneLocationNames,
+                        selected: tempZoneLocation,
+                        onChanged: (v) => setState(() => tempZoneLocation = v),
+                        icon: Icons.place,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Buttons ───────────────────────────────────────
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: AppButtonStyles.outlinedMediumBlack(),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: AppButtonStyles.elevatedMediumBlack(),
+
+                        onPressed: () {
+                          controller.selectedZone.value = tempZone ?? '';
+                          controller.selectedZoneLocation.value =
+                              tempZoneLocation ?? '';
+                          controller.fetchPboq(reset: true, context: context);
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _filterDropdownWithIcon({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    // prepend an empty entry so “All” can be selected
+    final List<String> fullList = ['', ...items];
+
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          showSelectedItems: true,
+          searchFieldProps: TextFieldProps(
+            decoration: InputDecoration(
+              labelText: 'Search',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
+            ),
+          ),
+        ),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        // Show “All” for the empty entry
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
       ),
     );
   }
