@@ -53,44 +53,66 @@ class DailyProgressReportViiew extends StatelessWidget {
               child: Obx(
                 () => controller.isLoading.value
                     ? _buildShimmerEffect(context)
-                    : ListView.builder(
+                    : controller.errorMessage.value.isNotEmpty
+                        ? Center(
+                            child: Text(
+                              controller.errorMessage.value,
+                              style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : controller.filteredMeasurementSheets.isEmpty
+                            ? const Center(child: Text('No data found'))
+                            : ListView.builder(
                         padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.filteredMeasurementSheets.length,
+                        itemCount: controller.filteredMeasurementSheets.length +
+                            (controller.hasMoreData.value || controller.isLoadingMore.value ? 1 : 0),
                         itemBuilder: (context, index) {
-                          final sheet =
-                              controller.filteredMeasurementSheets[index];
-                          return GestureDetector(
-                            onTap: () {
-                              controller.toggleExpanded(index);
-                            },
-                            child: Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.screenHeight * 0.02,
+                          if (index >= controller.filteredMeasurementSheets.length) {
+                            if (controller.hasMoreData.value && !controller.isLoadingMore.value) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                controller.loadMore(context);
+                              });
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: controller.hasMoreData.value
+                                    ? const CircularProgressIndicator()
+                                    : Text('No more data', style: TextStyle(color: AppColors.grey)),
                               ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  // border: Border(
-                                  //   left: BorderSide(
-                                  //     color: AppColors.primary,
-                                  //     width: 5,
-                                  //   ),
-                                  // ),
+                            );
+                          }
+                          
+                          final sheet = controller.filteredMeasurementSheets[index];
+                          return GestureDetector(
+                            onTap: () => controller.toggleExpanded(index),
+                            child: Obx(() {
+                              final isExpanded = controller.expandedIndex.value == index;
+                              return Card(
+                                margin: EdgeInsets.only(
+                                  bottom: ResponsiveHelper.screenHeight * 0.02,
                                 ),
-                                child: Obx(
-                                  () => Padding(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [Colors.white, Colors.grey.shade50],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
                                     padding: ResponsiveHelper.padding(16),
                                     child: Column(
                                       children: [
-                                        _buildDetailRow(
-                                          "PBOQ Name",
-                                          sheet.pboqName,
-                                        ),
+                                        if (controller.getFrontDisplayColumns().isNotEmpty)
+                                          ...controller.getFrontDisplayColumns().take(1).map((col) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(bottom: 6),
+                                              child: _buildDetailRow(col, controller.getFieldValue(sheet, col)),
+                                            );
+                                          }).toList(),
                                         // _buildDetailRow(
                                         //   "Package Name",
                                         //   sheet.packageName,
@@ -134,66 +156,14 @@ class DailyProgressReportViiew extends StatelessWidget {
                                         //       ResponsiveHelper.screenHeight *
                                         //       0.002,
                                         // ),
-                                        if (controller.expandedIndex.value ==
-                                            index) ...[
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "CBOQ Name",
-                                            sheet.cboqName,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "MS Qty",
-                                            sheet.msQty,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("Zones", sheet.zones),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("UOM", sheet.uom),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOQ Qty",
-                                            sheet.pboqQty,
-                                          ),
-                                          _buildDetailRow("PBOA", sheet.pboa),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Today\`s Target PBOA Qty",
-                                            sheet.todaysTargetPboaQuantity,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Today\`s Achieve Qty",
-                                            sheet.todaysAchieveQuantity,
-                                          ),
+                                        if (isExpanded && controller.appColumnDetails.value.columns.isNotEmpty) ...[
+                                          ...controller.appColumnDetails.value.columns
+                                              .where((col) => !controller.getFrontDisplayColumns().contains(col))
+                                              .map((col) => Padding(
+                                                    padding: const EdgeInsets.only(bottom: 6),
+                                                    child: _buildDetailRow(col, controller.getFieldValue(sheet, col)),
+                                                  ))
+                                              .toList(),
                                         ],
                                         SizedBox(
                                           height:
@@ -203,55 +173,34 @@ class DailyProgressReportViiew extends StatelessWidget {
                                         //  Divider(),
                                         Row(
                                           children: [
-                                            Expanded(
-                                              child: Text(
-                                                textAlign: TextAlign.start,
-                                                "Qty: ${sheet.msQty}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ResponsiveHelper.screenWidth *
-                                                  0.01,
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                textAlign: TextAlign.start,
-                                                "Amt: ${sheet.msQty}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ResponsiveHelper.screenWidth *
-                                                  0.01,
-                                            ),
-                                            Expanded(
-                                              child: OutlinedButton(
-                                                style:
-                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () {
-                                                  Get.toNamed(
-                                                    AppRoutes
-                                                        .updateDailyReportList,
-                                                  );
-                                                },
-                                                child: Text(
-                                                  "Ms Qty: ${sheet.msQty}",
-                                                  style: AppStyle
-                                                      .labelPrimaryPoppinsBlack
-                                                      .responsive
-                                                      .copyWith(fontSize: 10),
-                                                ),
-                                              ),
-                                            ),
+                                            if (controller.getFrontSecondaryDisplayColumns().isNotEmpty)
+                                              ...controller.getFrontSecondaryDisplayColumns().map((col) {
+                                                return Expanded(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(bottom: 6),
+                                                    child: Text(
+                                                      "$col: ${controller.getFieldValue(sheet, col)}",
+                                                      style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(fontSize: 13),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            const SizedBox(width: 8),
+                                            if (controller.getButtonDisplayColumns().isNotEmpty)
+                                              ...controller.getButtonDisplayColumns().map((col) {
+                                                return Expanded(
+                                                  child: OutlinedButton(
+                                                    style: AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                    onPressed: () {
+                                                      Get.toNamed(AppRoutes.updateDailyReportList);
+                                                    },
+                                                    child: Text(
+                                                      "$col: ${controller.getFieldValue(sheet, col)}",
+                                                      style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(fontSize: 10),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
                                             // Expanded(
                                             //   child: ElevatedButton(
                                             //     style:
@@ -301,8 +250,8 @@ class DailyProgressReportViiew extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           );
                         },
                       ),
@@ -451,6 +400,22 @@ class DailyProgressReportViiew extends StatelessWidget {
 
   AppBar _buildAppbar() {
     return AppBar(
+      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
+      backgroundColor: AppColors.white,
+      elevation: 0,
+      centerTitle: false,
+      title: Text(
+        'Daily Progress Report',
+        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
+          fontSize: ResponsiveHelper.getResponsiveFontSize(18),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
+      ),
+    ); AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
       backgroundColor: AppColors.white,
       elevation: 0,

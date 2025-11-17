@@ -66,6 +66,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
                               Colors.indigo,
                               true,
                               showPercent: false,
+                              controller: controller,
                             ),
                             _buildGridItem(
                               'Monthly Achieve',
@@ -78,6 +79,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
                               Colors.teal,
                               true,
                               showPercent: true,
+                              controller: controller,
                             ),
                             _buildGridItem(
                               'Weekly Target',
@@ -90,6 +92,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
                               Colors.deepOrange,
                               true,
                               showPercent: false,
+                              controller: controller,
                             ),
                             _buildGridItem(
                               'Weekly Achieve',
@@ -102,6 +105,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
                               Colors.deepPurple,
                               true,
                               showPercent: true,
+                              controller: controller,
                             ),
                             _buildGridItem(
                               'Today\'s Target',
@@ -114,6 +118,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
                               Colors.amber,
                               true,
                               showPercent: false,
+                              controller: controller,
                             ),
                             _buildGridItem(
                               'Today\'s Achieve',
@@ -126,6 +131,7 @@ class DailyProgressReportDashboard extends StatelessWidget {
                               Colors.green,
                               true,
                               showPercent: true,
+                              controller: controller,
                             ),
                           ],
                         ),
@@ -146,10 +152,17 @@ class DailyProgressReportDashboard extends StatelessWidget {
     bool isColor, {
     bool showPercent =
         true, // New parameter with default true (for backward compatibility if needed)
+    required DailyProgressReportDashboardController controller,
   }) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.dailyProgressReport);
+        Get.toNamed(
+          AppRoutes.dailyProgressReport,
+          arguments: {
+            "project_id": controller.projectId.value,
+            "package_id": controller.packageId.value,
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(

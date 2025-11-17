@@ -1,110 +1,164 @@
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/daily_progress_report_model.dart';
-import 'package:ashishinterbuild/app/data/models/measurement_sheet/measurment_sheet_model.dart';
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
+import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DailyProgressReportController extends GetxController {
-  // Reactive list of measurement sheets
-  final RxList<DailyProgressReportModel> measurementSheets =
-      <DailyProgressReportModel>[].obs;
-
-  // Reactive list for filtered measurement sheets
-  final RxList<DailyProgressReportModel> filteredMeasurementSheets =
-      <DailyProgressReportModel>[].obs;
-
-  // Reactive variable to track the index of the expanded card
-  final RxInt expandedIndex = (-1).obs; // -1 means no card is expanded
-
-  // Reactive variable to track loading state
+  final RxList<DprItem> dprList = <DprItem>[].obs;
+  final RxList<DprItem> filteredMeasurementSheets = <DprItem>[].obs;
   final RxBool isLoading = true.obs;
-
-  // TextEditingController for the search field
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasMoreData = true.obs;
+  final RxString errorMessage = ''.obs;
+  final RxInt expandedIndex = (-1).obs;
   final TextEditingController searchController = TextEditingController();
+  final RxInt start = 0.obs;
+  final int length = 10;
+  final RxString _search = ''.obs;
+  final RxString _orderBy = ''.obs;
+  final RxBool isAscending = true.obs;
+  final RxnString selectedPackageFilter = RxnString(null);
+  Timer? _debounce;
+  RxInt projectId = 0.obs;
+  RxInt packageId = 0.obs;
+  final RxList<String> frontDisplayColumns = <String>[].obs;
+  final RxList<String> buttonDisplayColumns = <String>[].obs;
+  final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
+    columns: [],
+    frontDisplayColumns: [],
+    frontSecondaryDisplayColumns: [],
+    buttonDisplayColumn: [],
+  ).obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Load dummy data when controller is initialized
-    loadDummyData();
-    // Initialize filtered list with all measurement sheets
-    filteredMeasurementSheets.assignAll(measurementSheets);
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      projectId.value = args["project_id"] ?? 0;
+      packageId.value = args["package_id"] ?? 0;
+    }
+    
+    // Set default values if still 0
+    if (projectId.value == 0) projectId.value = 26;
+    if (packageId.value == 0) packageId.value = 33;
+    
+    log("DPR → projectId=${projectId.value} packageId=${packageId.value}");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        fetchDprList(reset: true, context: Get.context!);
+      }
+    });
   }
 
   @override
   void onClose() {
-    // Dispose of the search controller
     searchController.dispose();
+    _debounce?.cancel();
     super.onClose();
   }
 
-  // Function to load dummy data
-  Future<void> loadDummyData() async {
-    isLoading.value = true;
-    // Simulate network delay
-    await Future.delayed(Duration(seconds: 2));
-    measurementSheets.assignAll([
-      DailyProgressReportModel(
-        packageName: "Prime Package",
-        cboqName: "CBOQ001",
-        msQty: "10000",
-        pboqName: "CBOQ-1",
-        zones: "Business Zone, Private Zone, Public Zone",
-        uom: "SFT",
-        pboqQty: "10000",
-        pboa: "Final painting work",
-        todaysTargetPboaQuantity: "0.00",
-        todaysAchieveQuantity: "0.00",
-        pboaQuantity: "11000"
-      ),
-      DailyProgressReportModel(
-        packageName: "Standard Package",
-        cboqName: "CBOQ002",
-        msQty: "8000",
-        pboqName: "CBOQ-2",
-        zones: "Residential Zone, Commercial Zone",
-        uom: "SFT",
-        pboqQty: "8500",
-        pboa: "Base painting work",
-        todaysTargetPboaQuantity: "0.00",
-        todaysAchieveQuantity: "0.00",
-            pboaQuantity: "11000"
-      ),
-      DailyProgressReportModel(
-        packageName: "Premium Package",
-        cboqName: "CBOQ003",
-        msQty: "12000",
-        pboqName: "CBOQ-3",
-        zones: "Industrial Zone, Public Zone",
-        uom: "SFT",
-        pboqQty: "12500",
-        pboa: "Factory Item Installation",
-        todaysTargetPboaQuantity: "0.00",
-        todaysAchieveQuantity: "0.00",
-             pboaQuantity: "11000"
-      ),
-    ]);
-    // Update filtered list after loading data
-    filteredMeasurementSheets.assignAll(measurementSheets);
-    isLoading.value = false;
+  String _buildQueryParams({bool includePagination = true}) {
+    final parts = <String>['project_id=${projectId.value}', 'filter_package=${packageId.value}'];
+    if (_search.value.isNotEmpty) {
+      parts.add('search=${Uri.encodeComponent(_search.value)}');
+    }
+    parts.add('order_by=${_orderBy.value}');
+    if (includePagination) {
+      parts.add('start=${start.value}');
+      parts.add('length=$length');
+    }
+    return parts.isNotEmpty ? '?${parts.join('&')}' : '';
   }
 
-  // Function to handle refresh
+  Future<void> fetchDprList({
+    required BuildContext context,
+    bool reset = false,
+    bool isPagination = false,
+  }) async {
+    if (reset) {
+      start.value = 0;
+      dprList.clear();
+      hasMoreData.value = true;
+    }
+    if (!hasMoreData.value && !reset) return;
+    if (isPagination) {
+      isLoadingMore.value = true;
+    } else {
+      isLoading.value = true;
+    }
+    errorMessage.value = '';
+    try {
+      final String query = _buildQueryParams(includePagination: true);
+      final String endpoint = Networkutility.getDPRList + query;
+      final responseList = await Networkcall().getMethod(
+        Networkutility.getDPRListApi,
+        endpoint,
+        context,
+      );
+      final response = responseList?.first as GetDprListResponse?;
+
+      if (response != null && response.status) {
+        final data = response.data.data;
+        if (frontDisplayColumns.isEmpty) {
+          frontDisplayColumns.assignAll(response.data.appColumnDetails.frontDisplayColumns);
+          buttonDisplayColumns.assignAll(response.data.appColumnDetails.buttonDisplayColumn);
+          appColumnDetails.value = response.data.appColumnDetails;
+        }
+        if (data.isEmpty || data.length < length) hasMoreData.value = false;
+        if (reset) {
+          dprList.assignAll(data);
+        } else {
+          dprList.addAll(data);
+        }
+        _applyClientFilters();
+        start.value += length;
+      } else {
+        _showError(response?.message ?? 'No data');
+      }
+    } on NoInternetException catch (e) {
+      _showError(e.message);
+    } on TimeoutException catch (e) {
+      _showError(e.message);
+    } on HttpException catch (e) {
+      _showError('${e.message} (Code: ${e.statusCode})');
+    } on ParseException catch (e) {
+      _showError(e.message);
+    } catch (e) {
+      _showError('Unexpected error: $e');
+    } finally {
+      isLoading.value = false;
+      isLoadingMore.value = false;
+    }
+  }
+
+  void _showError(String msg) {
+    hasMoreData.value = false;
+    errorMessage.value = msg;
+    AppSnackbarStyles.showError(title: 'Error', message: msg);
+  }
+
   Future<void> refreshData() async {
-    isLoading.value = true;
-    // Clear existing data
-    measurementSheets.clear();
-    filteredMeasurementSheets.clear();
-    // Simulate network delay and reload data
-    await Future.delayed(Duration(seconds: 2));
-    await loadDummyData();
-    // Reset search
     searchController.clear();
+    _search.value = '';
+    _orderBy.value = '';
+    isAscending.value = true;
+    selectedPackageFilter.value = null;
+    start.value = 0;
+    hasMoreData.value = true;
+    filteredMeasurementSheets.clear();
+    await fetchDprList(reset: true, context: Get.context!);
   }
 
-  // Function to handle view action
-  void viewMeasurementSheet(DailyProgressReportModel sheet) {
-    // Implement navigation or dialog to view details
-    print('Viewing: ${sheet.packageName}');
+  void loadMore(BuildContext context) {
+    if (!isLoadingMore.value && hasMoreData.value) {
+      fetchDprList(context: context, isPagination: true);
+    }
   }
 
   // Function to toggle the expanded state of a card
@@ -116,98 +170,63 @@ class DailyProgressReportController extends GetxController {
     }
   }
 
-  // Function to handle search
-  // void searchSurveys(String query) {
-  //   if (query.isEmpty) {
-  //     // If search query is empty, show all measurement sheets
-  //     filteredMeasurementSheets.assignAll(measurementSheets);
-  //   } else {
-  //     // Filter measurement sheets based on packageName or cboqName
-  //     filteredMeasurementSheets.assignAll(
-  //       measurementSheets
-  //           .where(
-  //             (sheet) =>
-  //                 sheet.packageName.toLowerCase().contains(
-  //                   query.toLowerCase(),
-  //                 ) ||
-  //                 sheet.cboqName.toLowerCase().contains(query.toLowerCase()),
-  //           )
-  //           .toList(),
-  //     );
-  //   }
-  // }
+ 
 
-  // Filter & Sort Variables
-  final RxnString selectedPackageFilter = RxnString(null);
-  final RxBool isAscending = true.obs;
 
-  // Get unique package names for filter dropdown
+
   List<String> getPackageNames() {
-    return measurementSheets.map((sheet) => sheet.packageName).toSet().toList();
+    return dprList.map((e) => e.getField('Package Name')).toSet().toList();
   }
 
-  // Apply filters (called from dialog)
+  String getFieldValue(DprItem item, String columnName) {
+    return item.getField(columnName).replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  }
+
+  List<String> getFrontDisplayColumns() {
+    return appColumnDetails.value.frontDisplayColumns.toSet().toList();
+  }
+
+  List<String> getFrontSecondaryDisplayColumns() {
+    return appColumnDetails.value.frontSecondaryDisplayColumns.toSet().toList();
+  }
+
+  List<String> getButtonDisplayColumns() {
+    return appColumnDetails.value.buttonDisplayColumn.toSet().toList();
+  }
+
   void applyFilters() {
-    var filtered = measurementSheets.toList();
-
-    if (selectedPackageFilter.value != null) {
-      filtered = filtered
-          .where((sheet) => sheet.packageName == selectedPackageFilter.value)
-          .toList();
-    }
-
-    if (searchController.text.isNotEmpty) {
-      filtered = filtered
-          .where(
-            (sheet) =>
-                sheet.packageName.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ) ||
-                sheet.cboqName.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ),
-          )
-          .toList();
-    }
-
-    filteredMeasurementSheets.assignAll(filtered);
-    applySorting();
+    _applyClientFilters();
   }
 
-  // Clear all filters
+  void _applyClientFilters() {
+    var list = dprList.toList();
+    if (selectedPackageFilter.value != null && selectedPackageFilter.value!.isNotEmpty) {
+      list = list.where((e) => e.getField('Package Name') == selectedPackageFilter.value).toList();
+    }
+    filteredMeasurementSheets.assignAll(list);
+  }
+
   void clearFilters() {
     selectedPackageFilter.value = null;
     searchController.clear();
-    filteredMeasurementSheets.assignAll(measurementSheets);
-    applySorting();
+    _search.value = '';
+    _applyClientFilters();
   }
 
-  // Toggle sort order
   void toggleSorting() {
     isAscending.value = !isAscending.value;
-    applySorting();
+    _orderBy.value = isAscending.value ? 'asc' : 'desc';
+    fetchDprList(reset: true, context: Get.context!);
   }
 
-  // Apply sorting by CBOQ Name
-  void applySorting() {
-    if (isAscending.value) {
-      filteredMeasurementSheets.sort(
-        (a, b) => a.cboqName.compareTo(b.cboqName),
-      );
-    } else {
-      filteredMeasurementSheets.sort(
-        (a, b) => b.cboqName.compareTo(a.cboqName),
-      );
-    }
-  }
-
-  // Update search to re-apply filters + sorting
   void searchSurveys(String query) {
-    if (query.isEmpty && selectedPackageFilter.value == null) {
-      filteredMeasurementSheets.assignAll(measurementSheets);
-    } else {
-      applyFilters(); // This will respect both search + filter
-    }
-    applySorting();
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      final trimmed = query.trim();
+      if (_search.value != trimmed) {
+        _search.value = trimmed;
+        fetchDprList(reset: true, context: Get.context!);
+      }
+    });
   }
 }

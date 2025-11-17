@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
@@ -291,6 +292,9 @@ class Networkcall {
           case 17:
             final getDPRdashboard = getDashboardResponseFromJson(str);
             return getDPRdashboard;
+               case 18:
+            final getDPRList = getDprListResponseFromJson(response.body);
+            return [getDPRList];
 
           default:
             log("Invalid request code: $requestCode");
