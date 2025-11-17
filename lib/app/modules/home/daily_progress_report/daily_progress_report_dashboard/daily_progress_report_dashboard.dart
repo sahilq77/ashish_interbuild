@@ -33,80 +33,90 @@ class DailyProgressReportDashboard extends StatelessWidget {
                 ),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
                 Obx(
-                  () => GridView.count(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    crossAxisCount: 2,
-                    crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                    mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                    childAspectRatio: 1.3,
-                    children: [
-                      _buildGridItem(
-                        'Monthly Target',
-                        controller.formatCurrency(
-                          controller.monthlyTarget.value,
+                  () => controller.isLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : GridView.count(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          childAspectRatio: 1.3,
+                          children: [
+                            _buildGridItem(
+                              'Monthly Target',
+                              controller.formatCurrency(
+                                controller.monthlyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.monthlyPercent.value,
+                              ),
+                              Colors.indigo,
+                              true,
+                              showPercent: false, // Hide percent
+                            ),
+                            _buildGridItem(
+                              'Monthly Achieve',
+                              controller.formatCurrency(
+                                controller.monthlyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.monthlyPercent.value,
+                              ),
+                              Colors.teal,
+                              true,
+                              showPercent: true, // Show percent
+                            ),
+                            _buildGridItem(
+                              'Weekly Target',
+                              controller.formatCurrency(
+                                controller.weeklyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.weeklyPercent.value,
+                              ),
+                              Colors.deepOrange,
+                              true,
+                              showPercent: false,
+                            ),
+                            _buildGridItem(
+                              'Weekly Achieve',
+                              controller.formatCurrency(
+                                controller.weeklyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.weeklyPercent.value,
+                              ),
+                              Colors.deepPurple,
+                              true,
+                              showPercent: true,
+                            ),
+                            _buildGridItem(
+                              'Today\'s Target',
+                              controller.formatCurrency(
+                                controller.dailyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.dailyPercent.value,
+                              ),
+                              Colors.amber,
+                              true,
+                              showPercent: false,
+                            ),
+                            _buildGridItem(
+                              'Today\'s Achieve',
+                              controller.formatCurrency(
+                                controller.dailyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.dailyPercent.value,
+                              ),
+                              Colors.green,
+                              true,
+                              showPercent: true,
+                            ),
+                          ],
                         ),
-                        controller.formatPercentage(
-                          controller.monthlyPercent.value,
-                        ),
-                        Colors.indigo,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Monthly Achieve',
-                        controller.formatCurrency(
-                          controller.monthlyAchieve.value,
-                        ),
-                        controller.formatPercentage(
-                          controller.monthlyPercent.value,
-                        ),
-                        Colors.teal,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Weekly Target',
-                        controller.formatCurrency(
-                          controller.weeklyTarget.value,
-                        ),
-                        controller.formatPercentage(
-                          controller.weeklyPercent.value,
-                        ),
-                        Colors.deepOrange,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Weekly Achieve',
-                        controller.formatCurrency(
-                          controller.weeklyAchieve.value,
-                        ),
-                        controller.formatPercentage(
-                          controller.weeklyPercent.value,
-                        ),
-                        Colors.deepPurple,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Today\'s Target',
-                        controller.formatCurrency(controller.dailyTarget.value),
-                        controller.formatPercentage(
-                          controller.dailyPercent.value,
-                        ),
-                        Colors.amber,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Today\'s Achieve',
-                        controller.formatCurrency(
-                          controller.dailyAchieve.value,
-                        ),
-                        controller.formatPercentage(
-                          controller.dailyPercent.value,
-                        ),
-                        Colors.green,
-                        true,
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -121,8 +131,10 @@ class DailyProgressReportDashboard extends StatelessWidget {
     String count,
     String percent,
     Color gradientColor,
-    bool isColor,
-  ) {
+    bool isColor, {
+    bool showPercent =
+        true, // New parameter with default true (for backward compatibility if needed)
+  }) {
     return GestureDetector(
       onTap: () {
         Get.toNamed(AppRoutes.dailyProgressReport);
@@ -172,26 +184,29 @@ class DailyProgressReportDashboard extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: ResponsiveHelper.padding(5),
-                        padding: ResponsiveHelper.padding(5),
-                        alignment: Alignment.bottomRight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: AppColors.grey.withOpacity(0.5),
+                  // Only show percent box if showPercent is true
+                  if (showPercent)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          margin: ResponsiveHelper.padding(5),
+                          padding: ResponsiveHelper.padding(5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: AppColors.grey.withOpacity(0.5),
+                            ),
+                            color: AppColors.white,
                           ),
-                          color: AppColors.white,
+                          child: Center(
+                            child: Text(percent, style: AppStyle.dashPercent),
+                          ),
                         ),
-                        child: Center(
-                          child: Text(percent, style: AppStyle.dashPercent),
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    )
+                  else
+                    const SizedBox(height: 30), // Optional: maintain spacing
                 ],
               ),
             ),

@@ -48,6 +48,11 @@ class Networkutility {
 
   static String addDeductions = "${baseUrl + "ms/add-deduction"}";
   static int addDeductionsApi = 16;
+
+//<======================= DPR MODULE ============================>
+
+  static String getDPRdashboard = "${baseUrl + "dpr/list"}";
+  static int getDPRdashboardApi = 17;
 }
 
 

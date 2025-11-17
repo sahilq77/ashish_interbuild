@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
@@ -112,11 +113,11 @@ class Networkcall {
             final str = "[${response.body}]";
             final login = getLoginResponseFromJson(str);
             return login;
-              case 11:
+          case 11:
             final str = "[${response.body}]";
             final addPboqMeasurment = getAddPboqMsResponseFromJson(str);
             return addPboqMeasurment;
-       
+
           // case 11:
           //   final parsed = json.decode(response.body) as Map<String, dynamic>;
           //   final addPboqMeasurment = [GetAddPboqMsResponse.fromJson(parsed)];
@@ -287,6 +288,9 @@ class Networkcall {
           case 15:
             final getPboqList = getPboqListResponseFromJson(str);
             return getPboqList;
+          case 17:
+            final getDPRdashboard = getDashboardResponseFromJson(str);
+            return getDPRdashboard;
 
           default:
             log("Invalid request code: $requestCode");
