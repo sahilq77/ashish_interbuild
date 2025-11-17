@@ -112,9 +112,14 @@ class Networkcall {
             final str = "[${response.body}]";
             final login = getLoginResponseFromJson(str);
             return login;
-          case 11:
-            final parsed = json.decode(response.body) as Map<String, dynamic>;
-            final addPboqMeasurment = [GetAddPboqMsResponse.fromJson(parsed)];
+              case 11:
+            final str = "[${response.body}]";
+            final addPboqMeasurment = getAddPboqMsResponseFromJson(str);
+            return addPboqMeasurment;
+       
+          // case 11:
+          //   final parsed = json.decode(response.body) as Map<String, dynamic>;
+          //   final addPboqMeasurment = [GetAddPboqMsResponse.fromJson(parsed)];
           case 12:
             final str = "[${response.body}]";
             final getPlanningStatus = getPlanningStatusResponseFromJson(str);
