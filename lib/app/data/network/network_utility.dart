@@ -25,28 +25,28 @@ class Networkutility {
   static String getZoneLocations = "${baseUrl + "zone-locations"}";
   static int getZoneLocationsApi = 8;
 
-  static String getPboqList = "${baseUrl + "pboq-list"}";
+  static String getPboqList = "${baseUrl + "ms/pboq-list"}";
   static int getPboqListApi = 9;
 
-  static String getPboqMeasurmentSheetList = "${baseUrl + "pboq-ms"}";
+  static String getPboqMeasurmentSheetList = "${baseUrl + "ms/list"}";
   static int getPboqMeasurmentSheetListApi = 10;
 
-  static String addMeasurementSheet = "${baseUrl + "add-ms"}";
+  static String addMeasurementSheet = "${baseUrl + "ms/add"}";
   static int addMeasurementSheetApi = 11;
 
-  static String getPlanningStatus = "${baseUrl + "zone-ms-status"}";
+  static String getPlanningStatus = "${baseUrl + "ms/zone-status"}";
   static int getPlanningStatusApi = 12;
 
-  static String editMeasurementSheet = "${baseUrl + "update-ms"}";
+  static String editMeasurementSheet = "${baseUrl + "ms/update"}";
   static int editMeasurementSheetApi = 13;
 
-  static String deleteMeasurementSheet = "${baseUrl + "delete-ms"}";
+  static String deleteMeasurementSheet = "${baseUrl + "ms/delete"}";
   static int deleteMeasurementSheetApi = 14;
 
-  static String pboqDeductionsList = "${baseUrl + "pboq-deductions"}";
+  static String pboqDeductionsList = "${baseUrl + "ms/pboq-deductions"}";
   static int pboqDeductionsListApi = 15;
 
-  static String addDeductions = "${baseUrl + "add-ms-deduction"}";
+  static String addDeductions = "${baseUrl + "ms/add-deduction"}";
   static int addDeductionsApi = 16;
 }
 
