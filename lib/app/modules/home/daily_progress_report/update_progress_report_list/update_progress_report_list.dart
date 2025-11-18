@@ -16,7 +16,7 @@ class UpdateProgressReportList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UpdateProgressReportController controller = Get.find();
-  ResponsiveHelper.init(context);
+    ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
@@ -140,49 +140,7 @@ class UpdateProgressReportList extends StatelessWidget {
                                                 );
                                               })
                                               .toList(),
-                                        // _buildDetailRow(
-                                        //   "Package Name",
-                                        //   sheet.packageName,
-                                        // ),
 
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "PBOQ Name",
-                                        //   sheet.pboqName,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow("PBOA", sheet.pboa),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "Today\`s Target PBOA Qty",
-                                        //   sheet.todaysTargetPboaQuantity,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "Today\`s Achieve Qty",
-                                        //   sheet.todaysAchieveQuantity,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
                                         if (isExpanded &&
                                             controller
                                                 .appColumnDetails
@@ -322,6 +280,24 @@ class UpdateProgressReportList extends StatelessWidget {
                                             // ),
                                           ],
                                         ),
+                                        Align(
+                                          alignment:
+                                              FractionalOffset.bottomRight,
+                                          child: SizedBox(
+                                            child:
+                                                controller.getFieldValue(
+                                                      sheet,
+                                                      "execution_status",
+                                                    ) ==
+                                                    "0"
+                                                ? Checkbox(
+                                                    value: true,
+
+                                                    onChanged: (val) {},
+                                                  )
+                                                : _updatedBadge(),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -334,6 +310,77 @@ class UpdateProgressReportList extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: _buildBottomButton(),
+    );
+  }
+
+  Widget _updatedBadge() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      transform: Matrix4.identity()..scale(1.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.greenColor.withOpacity(0.9),
+            AppColors.greenColor.withOpacity(0.7),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.greenColor.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.verified_rounded, color: Colors.white, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            "Updated",
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomButton() {
+    return Container(
+      padding: ResponsiveHelper.paddingSymmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {},
+        style: AppButtonStyles.elevatedLargeBlack(),
+        child: Text(
+          'Update',
+          style: AppStyle.buttonTextPoppinsWhite.responsive.copyWith(
+            fontSize: ResponsiveHelper.getResponsiveFontSize(16),
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

@@ -250,4 +250,6 @@ class UpdateProgressReportController extends GetxController {
       }
     });
   }
+
+  
 }
