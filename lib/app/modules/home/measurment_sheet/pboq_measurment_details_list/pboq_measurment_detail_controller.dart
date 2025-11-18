@@ -49,6 +49,7 @@ class PboqMeasurmentDetailController extends GetxController {
   RxInt breadthEnabled = 0.obs;
   RxInt heightEnabled = 0.obs;
   RxString uom = "".obs;
+  RxString pboqName = "".obs;
   final MeasurementSheetController mesurmentCtrl = Get.find();
   // ADD: Store full column details
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
@@ -76,6 +77,7 @@ class PboqMeasurmentDetailController extends GetxController {
       breadthEnabled.value = args["breadth"] ?? 0;
       heightEnabled.value = args["height"] ?? 0;
       uom.value = args["uom"] as String;
+      pboqName.value = args["pboq_name"] as String;
 
       // Optional: Log individual values for clarity
       log(

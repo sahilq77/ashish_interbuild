@@ -21,6 +21,7 @@ class MeasurmentSheetView extends StatefulWidget {
 class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
   @override
   Widget build(BuildContext context) {
+
     final controller = Get.find<MeasurementSheetController>();
     ResponsiveHelper.init(context);
 
@@ -320,6 +321,7 @@ class _MeasurmentSheetViewState extends State<MeasurmentSheetView> {
                                                   'height': int.parse(
                                                     controller.getHeight(item),
                                                   ),
+                                                  'pboq_name':item.getField('PBOQ Name'),
                                                 },
                                               );
                                             },

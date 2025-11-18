@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MeasurementSheetController extends GetxController {
-  
   // ── UI State ─────────────────────────────────────────────────────
   final RxList<AllData> pboqList = <AllData>[].obs;
   final RxList<AllData> filteredPboqList = <AllData>[].obs;
@@ -36,6 +35,7 @@ class MeasurementSheetController extends GetxController {
   // ── Navigation args ─────────────────────────────────────────────
   RxInt projectId = 0.obs;
   RxInt packageId = 0.obs;
+  RxString packageName = ''.obs;
   // ── Column info from API (dynamic labels) ───────────────────────
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
@@ -55,6 +55,8 @@ class MeasurementSheetController extends GetxController {
     final args = Get.arguments as Map<String, dynamic>;
     projectId.value = args["project_id"] ?? 0;
     packageId.value = args["package_id"] ?? 0;
+    packageName.value = args["package_name"] ?? "";
+
     log(
       "MeasurementSheetController → projectId=${projectId.value} packageId=${packageId.value}",
     );
@@ -273,10 +275,17 @@ class MeasurementSheetController extends GetxController {
   List<String> getAllColumns() {
     final allCols = appColumnDetails.value.columns.toSet();
     final frontCols = appColumnDetails.value.frontDisplayColumns.toSet();
-    final frontSecondaryCols = appColumnDetails.value.frontSecondaryDisplayColumns.toSet();
+    final frontSecondaryCols = appColumnDetails
+        .value
+        .frontSecondaryDisplayColumns
+        .toSet();
     final buttonCols = appColumnDetails.value.buttonDisplayColumn.toSet();
-    
-    return allCols.difference(frontCols).difference(frontSecondaryCols).difference(buttonCols).toList();
+
+    return allCols
+        .difference(frontCols)
+        .difference(frontSecondaryCols)
+        .difference(buttonCols)
+        .toList();
   }
 
   List<String> getFrontDisplayColumns() {

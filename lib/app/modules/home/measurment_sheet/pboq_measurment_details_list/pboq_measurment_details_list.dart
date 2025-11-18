@@ -57,7 +57,63 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
-
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: ResponsiveHelper.padding(16),
+                    padding: ResponsiveHelper.padding(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        Text("Package Name", style: AppStyle.reportCardTitle),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                        Obx(
+                          () => Text(
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            pboqcontroller.packageName.value,
+                            style: AppStyle.reportCardSubTitle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: ResponsiveHelper.padding(16),
+                    padding: ResponsiveHelper.padding(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        Text("PBOQ Name", style: AppStyle.reportCardTitle),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                        Obx(
+                          () => Text(
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            controller.pboqName.value,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppStyle.reportCardSubTitle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             // Search + Filter + Sort
             Padding(
               padding: ResponsiveHelper.padding(16),

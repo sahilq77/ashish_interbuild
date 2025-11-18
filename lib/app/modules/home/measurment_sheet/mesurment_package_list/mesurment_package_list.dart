@@ -103,6 +103,7 @@ class _MesurmentPackageListState extends State<MesurmentPackageList> {
                           arguments: {
                             "project_id": int.parse(package.projectId),
                             "package_id": int.parse(package.packageId),
+                            "package_name": package.packageName,
                          
                           },
                         );
