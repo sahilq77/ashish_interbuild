@@ -43,11 +43,11 @@ class DailyProgressReportController extends GetxController {
       projectId.value = args["project_id"] ?? 0;
       packageId.value = args["package_id"] ?? 0;
     }
-    
+
     // Set default values if still 0
     if (projectId.value == 0) projectId.value = 26;
     if (packageId.value == 0) packageId.value = 33;
-    
+
     log("DPR → projectId=${projectId.value} packageId=${packageId.value}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
@@ -64,7 +64,10 @@ class DailyProgressReportController extends GetxController {
   }
 
   String _buildQueryParams({bool includePagination = true}) {
-    final parts = <String>['project_id=${projectId.value}', 'filter_package=${packageId.value}'];
+    final parts = <String>[
+      'project_id=${projectId.value}',
+      'filter_package=${packageId.value}',
+    ];
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
     }
@@ -106,8 +109,12 @@ class DailyProgressReportController extends GetxController {
       if (response != null && response.status) {
         final data = response.data.data;
         if (frontDisplayColumns.isEmpty) {
-          frontDisplayColumns.assignAll(response.data.appColumnDetails.frontDisplayColumns);
-          buttonDisplayColumns.assignAll(response.data.appColumnDetails.buttonDisplayColumn);
+          frontDisplayColumns.assignAll(
+            response.data.appColumnDetails.frontDisplayColumns,
+          );
+          buttonDisplayColumns.assignAll(
+            response.data.appColumnDetails.buttonDisplayColumn,
+          );
           appColumnDetails.value = response.data.appColumnDetails;
         }
         if (data.isEmpty || data.length < length) hasMoreData.value = false;
@@ -170,10 +177,6 @@ class DailyProgressReportController extends GetxController {
     }
   }
 
- 
-
-
-
   List<String> getPackageNames() {
     return dprList.map((e) => e.getField('Package Name')).toSet().toList();
   }
@@ -200,8 +203,13 @@ class DailyProgressReportController extends GetxController {
 
   void _applyClientFilters() {
     var list = dprList.toList();
-    if (selectedPackageFilter.value != null && selectedPackageFilter.value!.isNotEmpty) {
-      list = list.where((e) => e.getField('Package Name') == selectedPackageFilter.value).toList();
+    if (selectedPackageFilter.value != null &&
+        selectedPackageFilter.value!.isNotEmpty) {
+      list = list
+          .where(
+            (e) => e.getField('Package Name') == selectedPackageFilter.value,
+          )
+          .toList();
     }
     filteredMeasurementSheets.assignAll(list);
   }
@@ -215,7 +223,7 @@ class DailyProgressReportController extends GetxController {
 
   void toggleSorting() {
     isAscending.value = !isAscending.value;
-    _orderBy.value = isAscending.value ? 'asc' : 'desc';
+    _orderBy.value = isAscending.value ? 'desc' : 'asc';
     fetchDprList(reset: true, context: Get.context!);
   }
 
