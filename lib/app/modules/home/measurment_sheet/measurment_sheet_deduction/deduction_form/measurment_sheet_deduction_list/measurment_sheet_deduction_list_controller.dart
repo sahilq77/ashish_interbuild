@@ -38,6 +38,7 @@ class MeasurmentSheetDeductionListController extends GetxController {
   RxInt projectId = 0.obs;
   RxInt packageId = 0.obs;
   RxInt pboqId = 0.obs;
+  RxString msId = ''.obs;
   // ── Column info from API (dynamic labels) ───────────────────────
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
@@ -59,6 +60,7 @@ class MeasurmentSheetDeductionListController extends GetxController {
       projectId.value = args["project_id"] ?? 0;
       packageId.value = args["package_id"] ?? 0;
       pboqId.value = args["pboq_id"] ?? 0;
+      msId.value = args["ms_id"] ?? '';
     }
     log(" → projectId=${projectId.value} packageId=${packageId.value}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,16 +85,19 @@ class MeasurmentSheetDeductionListController extends GetxController {
       'project_id=${projectId.value}',
       'package_id=${packageId.value}',
       'pboq_id=${pboqId.value}',
+      'measurement_sheet_id=${msId.value}',
     ];
-    
+
     if (selectedZone.value.isNotEmpty) {
       parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
     } else {
       parts.add('filter_zone=');
     }
-    
+
     if (selectedZoneLocation.value.isNotEmpty) {
-      parts.add('filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}');
+      parts.add(
+        'filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}',
+      );
     } else {
       parts.add('filter_zone_location=');
     }

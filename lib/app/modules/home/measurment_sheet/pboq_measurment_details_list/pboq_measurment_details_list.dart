@@ -26,6 +26,7 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
   final controller = Get.find<PboqMeasurmentDetailController>();
   final zoneController = Get.find<ZoneController>();
   final zoneLocationController = Get.find<ZoneLocationController>();
+  final pboqcontroller = Get.find<MeasurementSheetController>();
 
   @override
   void initState() {
@@ -397,13 +398,26 @@ class _PboqMeasurmentDetailsListState extends State<PboqMeasurmentDetailsList> {
                                       Expanded(
                                         child: GestureDetector(
                                           onTap: () {
+                                            print(
+                                              "project id ${controller.projectId.value}",
+                                            );
+                                            print(
+                                              "project id ${pboqcontroller.packageId.value}",
+                                            );
                                             Get.toNamed(
                                               AppRoutes
                                                   .measurmentSheetDeductionList,
-                                              // arguments: {
-                                              //   'pboq_id': item.pboqId,
-                                              //   'column': col,
-                                              // },
+                                              arguments: {
+                                                'project_id': pboqcontroller
+                                                    .projectId
+                                                    .value,
+                                                'package_id': pboqcontroller
+                                                    .packageId
+                                                    .value,
+                                                'pboq_id':
+                                                    controller.pboqId.value,
+                                                'ms_id': item.getField('ms_id'),
+                                              },
                                             );
                                           },
                                           child:
