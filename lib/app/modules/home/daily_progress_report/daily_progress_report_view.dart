@@ -1,6 +1,5 @@
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
-import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
-import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -21,6 +20,14 @@ class DailyProgressReportViiew extends StatefulWidget {
 }
 
 class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
+  final zoneController = Get.find<ZoneController>();
+
+  @override
+  void initState() {
+    super.initState();
+    zoneController.fetchZones(context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final DailyProgressReportController controller = Get.find();
@@ -37,11 +44,10 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
             Padding(
               padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
               child: Text(
-                "Skyline Towers ➔ DPR Dashboard ➔ DPR",
+                "Skyline Towers → DPR Dashboard → DPR",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
-            // Add search field
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Row(
@@ -54,7 +60,6 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                 ],
               ),
             ),
-            // Expanded to make ListView take remaining space
             Expanded(
               child: Obx(
                 () => controller.isLoading.value
@@ -64,7 +69,6 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                         child: Text(
                           controller.errorMessage.value,
                           style: AppStyle.bodyBoldPoppinsBlack.responsive,
-                          textAlign: TextAlign.center,
                         ),
                       )
                     : controller.filteredMeasurementSheets.isEmpty
@@ -148,55 +152,13 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                                 );
                                               })
                                               .toList(),
-                                        // _buildDetailRow(
-                                        //   "Package Name",
-                                        //   sheet.packageName,
-                                        // ),
 
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "PBOQ Name",
-                                        //   sheet.pboqName,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow("PBOA", sheet.pboa),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "Today\`s Target PBOA Qty",
-                                        //   sheet.todaysTargetPboaQuantity,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        // _buildDetailRow(
-                                        //   "Today\`s Achieve Qty",
-                                        //   sheet.todaysAchieveQuantity,
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
                                         if (isExpanded &&
                                             controller
                                                 .appColumnDetails
                                                 .value
                                                 .columns
-                                                .isNotEmpty) ...[
+                                                .isNotEmpty)
                                           ...controller
                                               .appColumnDetails
                                               .value
@@ -222,13 +184,12 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                                 ),
                                               )
                                               .toList(),
-                                        ],
+
                                         SizedBox(
                                           height:
                                               ResponsiveHelper.screenHeight *
                                               0.01,
                                         ),
-                                        //  Divider(),
                                         Row(
                                           children: [
                                             if (controller
@@ -299,49 +260,6 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                                   ),
                                                 );
                                               }).toList(),
-                                            // Expanded(
-                                            //   child: ElevatedButton(
-                                            //     style:
-                                            //         AppButtonStyles.elevatedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       controller.toggleExpanded(
-                                            //         index,
-                                            //       );
-                                            //     },
-                                            //     child: Text(
-                                            //       controller
-                                            //                   .expandedIndex
-                                            //                   .value ==
-                                            //               index
-                                            //           ? "Less"
-                                            //           : "Read",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsWhite,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                            // SizedBox(
-                                            //   width:
-                                            //       ResponsiveHelper.screenWidth *
-                                            //       0.05,
-                                            // ),
-                                            // Expanded(
-                                            //   child: OutlinedButton(
-                                            //     style:
-                                            //         AppButtonStyles.outlinedSmallBlack(),
-                                            //     onPressed: () {
-                                            //       Get.toNamed(
-                                            //         AppRoutes
-                                            //             .updateDailyReportList,
-                                            //       );
-                                            //     },
-                                            //     child: Text(
-                                            //       "Update",
-                                            //       style: AppStyle
-                                            //           .labelPrimaryPoppinsBlack,
-                                            //     ),
-                                            //   ),
-                                            // ),
                                           ],
                                         ),
                                       ],
@@ -359,6 +277,11 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
         ),
       ),
     );
+  }
+
+  // Helper: Format Date
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }
 
   TextFormField _buildSearchField(DailyProgressReportController controller) {
@@ -461,38 +384,20 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
           width: 130,
           child: Text(
             label,
-            style: AppStyle.reportCardTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
+            style: AppStyle.reportCardTitle.responsive.copyWith(fontSize: 13),
           ),
         ),
         SizedBox(width: 8),
-        Text(
-          ': ',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppStyle.reportCardSubTitle,
-        ),
+        Text(': ', style: AppStyle.reportCardSubTitle),
         Expanded(
           child: Text(
             value,
             style: AppStyle.reportCardSubTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+              fontSize: 13,
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Text _sectionTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.poppins(
-        color: AppColors.grey,
-        fontWeight: FontWeight.w600,
-        fontSize: 18,
-      ),
     );
   }
 
@@ -516,7 +421,6 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
     );
   }
 
-  // Filter Button
   Widget _buildFilterButton(
     BuildContext context,
     DailyProgressReportController controller,
@@ -528,24 +432,33 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
       ),
       child: IconButton(
         icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
+        onPressed: () => _showFilterDialog(context),
         padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
         constraints: const BoxConstraints(),
       ),
     );
   }
 
-  // Filter Dialog
-  void _showFilterDialog(
-    BuildContext context,
-    DailyProgressReportController controller,
-  ) {
-    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+  void _showFilterDialog(BuildContext context) {
+    final controller = Get.find<DailyProgressReportController>();
+    final zoneController = Get.find<ZoneController>();
+
+    String? tempZone = controller.selectedZone.value.isEmpty
+        ? null
+        : controller.selectedZone.value;
+
+    // Initialize temp dates
+    controller.tempStartDate = controller.selectedStartDate.value.isNotEmpty
+        ? DateTime.tryParse(controller.selectedStartDate.value)
+        : null;
+    controller.tempEndDate = controller.selectedEndDate.value.isNotEmpty
+        ? DateTime.tryParse(controller.selectedEndDate.value)
+        : null;
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
           ),
@@ -559,59 +472,157 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                   horizontal: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.defaultBlack,
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(ResponsiveHelper.spacing(20)),
                   ),
                 ),
                 child: Text(
-                  'Filter DPR',
+                  'Filters',
                   style: AppStyle.heading1PoppinsWhite.responsive,
                   textAlign: TextAlign.center,
                 ),
               ),
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Package',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    children: [
+                      _filterDropdownWithIcon(
+                        label: 'Zone',
+                        items: zoneController.zoneNames,
+                        selected: tempZone,
+                        onChanged: (v) => setState(() => tempZone = v),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 16),
+                      // DATE RANGE PICKER
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.grey.withOpacity(0.5),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Date Range",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            InkWell(
+                              onTap: () async {
+                                final picked = await showDateRangePicker(
+                                  barrierColor: AppColors.buttonColor,
+                                  context: ctx,
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365),
+                                  ),
+                                  initialDateRange:
+                                      controller.tempStartDate != null &&
+                                          controller.tempEndDate != null
+                                      ? DateTimeRange(
+                                          start: controller.tempStartDate!,
+                                          end: controller.tempEndDate!,
+                                        )
+                                      : null,
+                                  builder: (context, child) => Theme(
+                                    data: ThemeData.light().copyWith(
+                                      colorScheme: const ColorScheme.light(
+                                        primary: AppColors.primary,
+                                      ),
+                                    ),
+                                    child: child!,
+                                  ),
+                                );
+                                if (picked != null) {
+                                  final daysDifference = picked.end
+                                      .difference(picked.start)
+                                      .inDays;
+                                  if (daysDifference > 7) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Date range cannot exceed 7 days',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else {
+                                    controller.tempStartDate = picked.start;
+                                    controller.tempEndDate = picked.end;
+                                    setState(() {});
+                                  }
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.date_range,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        controller.tempStartDate == null
+                                            ? "Select Date Range"
+                                            : "${_formatDate(controller.tempStartDate!)} → ${_formatDate(controller.tempEndDate!)}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color:
+                                              controller.tempStartDate == null
+                                              ? Colors.grey[600]
+                                              : Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    if (controller.tempStartDate != null)
+                                      InkWell(
+                                        onTap: () {
+                                          controller.tempStartDate = null;
+                                          controller.tempEndDate = null;
+                                          setState(() {});
+                                        },
+                                        child: const Icon(
+                                          Icons.clear,
+                                          size: 20,
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
-                  items: controller.getPackageNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Package',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      tempSelectedPackage = value;
-                    });
-                  },
-                  selectedItem: tempSelectedPackage,
                 ),
               ),
               Padding(
@@ -623,14 +634,7 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.outlinedMediumBlack(),
                         onPressed: () {
                           controller.clearFilters();
                           Navigator.pop(context);
@@ -644,19 +648,23 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                     SizedBox(width: ResponsiveHelper.spacing(16)),
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.elevatedMediumBlack(),
                         onPressed: () {
-                          controller.selectedPackageFilter.value =
-                              tempSelectedPackage;
-                          controller.applyFilters();
+                          controller.selectedZone.value = tempZone ?? '';
+                          if (controller.tempStartDate != null &&
+                              controller.tempEndDate != null) {
+                            controller.selectedStartDate.value =
+                                "${controller.tempStartDate!.year}-${controller.tempStartDate!.month.toString().padLeft(2, '0')}-${controller.tempStartDate!.day.toString().padLeft(2, '0')}";
+                            controller.selectedEndDate.value =
+                                "${controller.tempEndDate!.year}-${controller.tempEndDate!.month.toString().padLeft(2, '0')}-${controller.tempEndDate!.day.toString().padLeft(2, '0')}";
+                          } else {
+                            controller.selectedStartDate.value = '';
+                            controller.selectedEndDate.value = '';
+                          }
+                          controller.fetchDprList(
+                            context: context,
+                            reset: true,
+                          );
                           Navigator.pop(context);
                         },
                         child: Text(
@@ -675,7 +683,40 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
     );
   }
 
-  // Sort Button
+  Widget _filterDropdownWithIcon({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    final List<String> fullList = ['', ...items];
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          showSelectedItems: true,
+        ),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
+      ),
+    );
+  }
+
   Widget _buildSortButton(DailyProgressReportController controller) {
     return Obx(
       () => Container(

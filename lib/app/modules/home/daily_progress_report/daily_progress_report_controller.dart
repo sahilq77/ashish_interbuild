@@ -28,6 +28,16 @@ class DailyProgressReportController extends GetxController {
   RxInt packageId = 0.obs;
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
+
+  // FILTERS
+  final RxString selectedZone = ''.obs;
+  final RxString selectedStartDate = ''.obs;  // YYYY-MM-DD
+  final RxString selectedEndDate = ''.obs;    // YYYY-MM-DD
+
+  // Temporary for dialog (not applied until "Apply")
+  DateTime? tempStartDate;
+  DateTime? tempEndDate;
+
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
     columns: [],
     frontDisplayColumns: [],
@@ -43,10 +53,6 @@ class DailyProgressReportController extends GetxController {
       projectId.value = args["project_id"] ?? 0;
       packageId.value = args["package_id"] ?? 0;
     }
-
-    // Set default values if still 0
-    // if (projectId.value == 0) projectId.value = 26;
-    // if (packageId.value == 0) packageId.value = 33;
 
     log("DPR → projectId=${projectId.value} packageId=${packageId.value}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -67,15 +73,26 @@ class DailyProgressReportController extends GetxController {
     final parts = <String>[
       'project_id=${projectId.value}',
       'filter_package=${packageId.value}',
+      'filter_revised_start_date=${selectedStartDate.value}',
+      'filter_revised_finish_date=${selectedEndDate.value}',
     ];
+
+    if (selectedZone.value.isNotEmpty) {
+      parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
+    }
+
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
     }
+
     parts.add('order_by=${_orderBy.value}');
+    parts.add('order_dir=${isAscending.value ? "asc" : "desc"}');
+
     if (includePagination) {
       parts.add('start=${start.value}');
       parts.add('length=$length');
     }
+
     return parts.isNotEmpty ? '?${parts.join('&')}' : '';
   }
 
@@ -156,6 +173,11 @@ class DailyProgressReportController extends GetxController {
     _orderBy.value = '';
     isAscending.value = true;
     selectedPackageFilter.value = null;
+    selectedZone.value = '';
+    selectedStartDate.value = '';
+    selectedEndDate.value = '';
+    tempStartDate = null;
+    tempEndDate = null;
     start.value = 0;
     hasMoreData.value = true;
     filteredMeasurementSheets.clear();
@@ -168,12 +190,11 @@ class DailyProgressReportController extends GetxController {
     }
   }
 
-  // Function to toggle the expanded state of a card
   void toggleExpanded(int index) {
     if (expandedIndex.value == index) {
-      expandedIndex.value = -1; // Collapse if the same card is clicked
+      expandedIndex.value = -1;
     } else {
-      expandedIndex.value = index; // Expand the clicked card
+      expandedIndex.value = index;
     }
   }
 
@@ -203,22 +224,22 @@ class DailyProgressReportController extends GetxController {
 
   void _applyClientFilters() {
     var list = dprList.toList();
-    if (selectedPackageFilter.value != null &&
-        selectedPackageFilter.value!.isNotEmpty) {
-      list = list
-          .where(
-            (e) => e.getField('Package Name') == selectedPackageFilter.value,
-          )
-          .toList();
+    if (selectedPackageFilter.value != null && selectedPackageFilter.value!.isNotEmpty) {
+      list = list.where((e) => e.getField('Package Name') == selectedPackageFilter.value).toList();
     }
     filteredMeasurementSheets.assignAll(list);
   }
 
   void clearFilters() {
     selectedPackageFilter.value = null;
+    selectedZone.value = '';
+    selectedStartDate.value = '';
+    selectedEndDate.value = '';
+    tempStartDate = null;
+    tempEndDate = null;
     searchController.clear();
     _search.value = '';
-    _applyClientFilters();
+    fetchDprList(context: Get.context!, reset: true);
   }
 
   void toggleSorting() {
