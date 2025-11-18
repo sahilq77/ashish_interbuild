@@ -45,8 +45,8 @@ class DailyProgressReportController extends GetxController {
     }
 
     // Set default values if still 0
-    if (projectId.value == 0) projectId.value = 26;
-    if (packageId.value == 0) packageId.value = 33;
+    // if (projectId.value == 0) projectId.value = 26;
+    // if (packageId.value == 0) packageId.value = 33;
 
     log("DPR → projectId=${projectId.value} packageId=${packageId.value}");
     WidgetsBinding.instance.addPostFrameCallback((_) {

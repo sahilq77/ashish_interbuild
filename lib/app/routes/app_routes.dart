@@ -252,7 +252,7 @@ class AppRoutes {
     GetPage(
       name: updateDailyReportList,
       page: () => const UpdateProgressReportList(),
-      binding: UpdateProgressReportBinding(),
+      bindings: [UpdateProgressReportBinding(), DailyProgressReportBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(

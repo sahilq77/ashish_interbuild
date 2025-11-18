@@ -12,9 +12,15 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class DailyProgressReportViiew extends StatelessWidget {
+class DailyProgressReportViiew extends StatefulWidget {
   const DailyProgressReportViiew({super.key});
 
+  @override
+  State<DailyProgressReportViiew> createState() =>
+      _DailyProgressReportViiewState();
+}
+
+class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
   @override
   Widget build(BuildContext context) {
     final DailyProgressReportController controller = Get.find();
@@ -54,22 +60,28 @@ class DailyProgressReportViiew extends StatelessWidget {
                 () => controller.isLoading.value
                     ? _buildShimmerEffect(context)
                     : controller.errorMessage.value.isNotEmpty
-                        ? Center(
-                            child: Text(
-                              controller.errorMessage.value,
-                              style: AppStyle.bodyBoldPoppinsBlack.responsive,
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        : controller.filteredMeasurementSheets.isEmpty
-                            ? const Center(child: Text('No data found'))
-                            : ListView.builder(
+                    ? Center(
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : controller.filteredMeasurementSheets.isEmpty
+                    ? const Center(child: Text('No data found'))
+                    : ListView.builder(
                         padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.filteredMeasurementSheets.length +
-                            (controller.hasMoreData.value || controller.isLoadingMore.value ? 1 : 0),
+                        itemCount:
+                            controller.filteredMeasurementSheets.length +
+                            (controller.hasMoreData.value ||
+                                    controller.isLoadingMore.value
+                                ? 1
+                                : 0),
                         itemBuilder: (context, index) {
-                          if (index >= controller.filteredMeasurementSheets.length) {
-                            if (controller.hasMoreData.value && !controller.isLoadingMore.value) {
+                          if (index >=
+                              controller.filteredMeasurementSheets.length) {
+                            if (controller.hasMoreData.value &&
+                                !controller.isLoadingMore.value) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 controller.loadMore(context);
                               });
@@ -79,16 +91,21 @@ class DailyProgressReportViiew extends StatelessWidget {
                               child: Center(
                                 child: controller.hasMoreData.value
                                     ? const CircularProgressIndicator()
-                                    : Text('No more data', style: TextStyle(color: AppColors.grey)),
+                                    : Text(
+                                        'No more data',
+                                        style: TextStyle(color: AppColors.grey),
+                                      ),
                               ),
                             );
                           }
-                          
-                          final sheet = controller.filteredMeasurementSheets[index];
+
+                          final sheet =
+                              controller.filteredMeasurementSheets[index];
                           return GestureDetector(
                             onTap: () => controller.toggleExpanded(index),
                             child: Obx(() {
-                              final isExpanded = controller.expandedIndex.value == index;
+                              final isExpanded =
+                                  controller.expandedIndex.value == index;
                               return Card(
                                 margin: EdgeInsets.only(
                                   bottom: ResponsiveHelper.screenHeight * 0.02,
@@ -96,7 +113,10 @@ class DailyProgressReportViiew extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [Colors.white, Colors.grey.shade50],
+                                      colors: [
+                                        Colors.white,
+                                        Colors.grey.shade50,
+                                      ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -106,13 +126,28 @@ class DailyProgressReportViiew extends StatelessWidget {
                                     padding: ResponsiveHelper.padding(16),
                                     child: Column(
                                       children: [
-                                        if (controller.getFrontDisplayColumns().isNotEmpty)
-                                          ...controller.getFrontDisplayColumns().take(1).map((col) {
-                                            return Padding(
-                                              padding: const EdgeInsets.only(bottom: 6),
-                                              child: _buildDetailRow(col, controller.getFieldValue(sheet, col)),
-                                            );
-                                          }).toList(),
+                                        if (controller
+                                            .getFrontDisplayColumns()
+                                            .isNotEmpty)
+                                          ...controller
+                                              .getFrontDisplayColumns()
+                                              .take(1)
+                                              .map((col) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                              .toList(),
                                         // _buildDetailRow(
                                         //   "Package Name",
                                         //   sheet.packageName,
@@ -156,13 +191,36 @@ class DailyProgressReportViiew extends StatelessWidget {
                                         //       ResponsiveHelper.screenHeight *
                                         //       0.002,
                                         // ),
-                                        if (isExpanded && controller.appColumnDetails.value.columns.isNotEmpty) ...[
-                                          ...controller.appColumnDetails.value.columns
-                                              .where((col) => !controller.getFrontDisplayColumns().contains(col))
-                                              .map((col) => Padding(
-                                                    padding: const EdgeInsets.only(bottom: 6),
-                                                    child: _buildDetailRow(col, controller.getFieldValue(sheet, col)),
-                                                  ))
+                                        if (isExpanded &&
+                                            controller
+                                                .appColumnDetails
+                                                .value
+                                                .columns
+                                                .isNotEmpty) ...[
+                                          ...controller
+                                              .appColumnDetails
+                                              .value
+                                              .columns
+                                              .where(
+                                                (col) => !controller
+                                                    .getFrontDisplayColumns()
+                                                    .contains(col),
+                                              )
+                                              .map(
+                                                (col) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
                                               .toList(),
                                         ],
                                         SizedBox(
@@ -173,30 +231,70 @@ class DailyProgressReportViiew extends StatelessWidget {
                                         //  Divider(),
                                         Row(
                                           children: [
-                                            if (controller.getFrontSecondaryDisplayColumns().isNotEmpty)
-                                              ...controller.getFrontSecondaryDisplayColumns().map((col) {
-                                                return Expanded(
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.only(bottom: 6),
-                                                    child: Text(
-                                                      "$col: ${controller.getFieldValue(sheet, col)}",
-                                                      style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(fontSize: 13),
-                                                    ),
-                                                  ),
-                                                );
-                                              }).toList(),
+                                            if (controller
+                                                .getFrontSecondaryDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller
+                                                  .getFrontSecondaryDisplayColumns()
+                                                  .map((col) {
+                                                    return Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              bottom: 6,
+                                                            ),
+                                                        child: Text(
+                                                          "$col: ${controller.getFieldValue(sheet, col)}",
+                                                          style: AppStyle
+                                                              .labelPrimaryPoppinsBlack
+                                                              .responsive
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  })
+                                                  .toList(),
                                             const SizedBox(width: 8),
-                                            if (controller.getButtonDisplayColumns().isNotEmpty)
-                                              ...controller.getButtonDisplayColumns().map((col) {
+                                            if (controller
+                                                .getButtonDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller.getButtonDisplayColumns().map((
+                                                col,
+                                              ) {
                                                 return Expanded(
                                                   child: OutlinedButton(
-                                                    style: AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                    style:
+                                                        AppButtonStyles.outlinedExtraSmallPrimary(),
                                                     onPressed: () {
-                                                      Get.toNamed(AppRoutes.updateDailyReportList);
+                                                      Get.toNamed(
+                                                        AppRoutes
+                                                            .updateDailyReportList,
+                                                        arguments: {
+                                                          "selected_source":
+                                                              controller
+                                                                  .getFieldValue(
+                                                                    sheet,
+                                                                    "Source",
+                                                                  ),
+                                                          "selected_system_id":
+                                                              controller
+                                                                  .getFieldValue(
+                                                                    sheet,
+                                                                    "System ID",
+                                                                  ),
+                                                        },
+                                                      );
                                                     },
                                                     child: Text(
                                                       "$col: ${controller.getFieldValue(sheet, col)}",
-                                                      style: AppStyle.labelPrimaryPoppinsBlack.responsive.copyWith(fontSize: 10),
+                                                      style: AppStyle
+                                                          .labelPrimaryPoppinsBlack
+                                                          .responsive
+                                                          .copyWith(
+                                                            fontSize: 10,
+                                                          ),
                                                     ),
                                                   ),
                                                 );
@@ -415,22 +513,6 @@ class DailyProgressReportViiew extends StatelessWidget {
         preferredSize: const Size.fromHeight(0),
         child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
       ),
-    ); AppBar(
-      iconTheme: const IconThemeData(color: AppColors.defaultBlack),
-      backgroundColor: AppColors.white,
-      elevation: 0,
-      centerTitle: false,
-      title: Text(
-        'Daily Progress Report',
-        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
-          fontSize: ResponsiveHelper.getResponsiveFontSize(18),
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(0),
-        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
-      ),
     );
   }
 
@@ -483,7 +565,7 @@ class DailyProgressReportViiew extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Filter Measurement Sheets',
+                  'Filter DPR',
                   style: AppStyle.heading1PoppinsWhite.responsive,
                   textAlign: TextAlign.center,
                 ),

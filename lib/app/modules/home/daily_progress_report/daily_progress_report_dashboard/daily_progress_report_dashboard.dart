@@ -183,7 +183,13 @@ class DailyProgressReportDashboard extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () {
-              Get.toNamed(AppRoutes.dailyProgressReport);
+              Get.toNamed(
+                AppRoutes.dailyProgressReport,
+                arguments: {
+                  "project_id": controller.projectId.value,
+                  "package_id": controller.packageId.value,
+                },
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),

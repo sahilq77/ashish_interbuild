@@ -16,7 +16,7 @@ class UpdateProgressReportList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UpdateProgressReportController controller = Get.find();
-    ResponsiveHelper.init(context);
+  ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
@@ -29,54 +29,11 @@ class UpdateProgressReportList extends StatelessWidget {
             Padding(
               padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
               child: Text(
-                "Skyline Towers ➔ DPR Dashboard ➔ DPR ➔ DPR Detail",
+                "Skyline Towers ➔ DPR Dashboard ➔ DPR",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    margin: ResponsiveHelper.padding(16),
-                    padding: ResponsiveHelper.padding(5),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightGrey),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      children: [
-                        Text("Package Name", style: AppStyle.reportCardTitle),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
-                        Text(
-                          "Prime Package",
-                          style: AppStyle.reportCardSubTitle,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    margin: ResponsiveHelper.padding(16),
-                    padding: ResponsiveHelper.padding(5),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightGrey),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      children: [
-                        Text("PBOQ Name", style: AppStyle.reportCardTitle),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
-                        Text("PBOQ ", style: AppStyle.reportCardSubTitle),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // Add search field
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Row(
@@ -89,274 +46,288 @@ class UpdateProgressReportList extends StatelessWidget {
                 ],
               ),
             ),
+            // Expanded to make ListView take remaining space
             Expanded(
               child: Obx(
                 () => controller.isLoading.value
                     ? _buildShimmerEffect(context)
+                    : controller.errorMessage.value.isNotEmpty
+                    ? Center(
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : controller.filteredMeasurementSheets.isEmpty
+                    ? const Center(child: Text('No data found'))
                     : ListView.builder(
                         padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.filteredMeasurementSheets.length,
+                        itemCount:
+                            controller.filteredMeasurementSheets.length +
+                            (controller.hasMoreData.value ||
+                                    controller.isLoadingMore.value
+                                ? 1
+                                : 0),
                         itemBuilder: (context, index) {
+                          if (index >=
+                              controller.filteredMeasurementSheets.length) {
+                            if (controller.hasMoreData.value &&
+                                !controller.isLoadingMore.value) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                controller.loadMore(context);
+                              });
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: controller.hasMoreData.value
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                        'No more data',
+                                        style: TextStyle(color: AppColors.grey),
+                                      ),
+                              ),
+                            );
+                          }
+
                           final sheet =
                               controller.filteredMeasurementSheets[index];
                           return GestureDetector(
-                            onTap: () {
-                              controller.toggleExpanded(index);
-                            },
-                            child: Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.screenHeight * 0.02,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
+                            onTap: () => controller.toggleExpanded(index),
+                            child: Obx(() {
+                              final isExpanded =
+                                  controller.expandedIndex.value == index;
+                              return Card(
+                                margin: EdgeInsets.only(
+                                  bottom: ResponsiveHelper.screenHeight * 0.02,
                                 ),
-                                child: Obx(
-                                  () => Padding(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.white,
+                                        Colors.grey.shade50,
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
                                     padding: ResponsiveHelper.padding(16),
                                     child: Column(
                                       children: [
-                                        _buildDetailRow("PBOA", sheet.pboa),
-                                        if (controller.expandedIndex.value ==
-                                            index) ...[
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("Zone", sheet.zone),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Location",
-                                            sheet.location,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "MS Qty",
-                                            sheet.msQty,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "System ID",
-                                            sheet.systemId,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Source",
-                                            sheet.source,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Sub Location",
-                                            sheet.subLocation,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "CBOQ Code",
-                                            sheet.cboqCode,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("PBOQ", sheet.pboq),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOA Qty",
-                                            sheet.pboaQty,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOA Amount",
-                                            sheet.pboaAmount,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Revised Start Date",
-                                            sheet.revisedStartDate,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Revised End Date",
-                                            sheet.revisedEndDate,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Length",
-                                            sheet.length,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Breadth",
-                                            sheet.breadth,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Height",
-                                            sheet.height,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Uploaded File",
-                                            sheet.uploadedFile,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Progress",
-                                            sheet.progress,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Execution",
-                                            sheet.execution,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Updated On",
-                                            sheet.updatedOn,
-                                          ),
+                                        if (controller
+                                            .getFrontDisplayColumns()
+                                            .isNotEmpty)
+                                          ...controller
+                                              .getFrontDisplayColumns()
+                                              .take(1)
+                                              .map((col) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                              .toList(),
+                                        // _buildDetailRow(
+                                        //   "Package Name",
+                                        //   sheet.packageName,
+                                        // ),
+
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "PBOQ Name",
+                                        //   sheet.pboqName,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow("PBOA", sheet.pboa),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "Today\`s Target PBOA Qty",
+                                        //   sheet.todaysTargetPboaQuantity,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        // _buildDetailRow(
+                                        //   "Today\`s Achieve Qty",
+                                        //   sheet.todaysAchieveQuantity,
+                                        // ),
+                                        // SizedBox(
+                                        //   height:
+                                        //       ResponsiveHelper.screenHeight *
+                                        //       0.002,
+                                        // ),
+                                        if (isExpanded &&
+                                            controller
+                                                .appColumnDetails
+                                                .value
+                                                .columns
+                                                .isNotEmpty) ...[
+                                          ...controller
+                                              .appColumnDetails
+                                              .value
+                                              .columns
+                                              .where(
+                                                (col) => !controller
+                                                    .getFrontDisplayColumns()
+                                                    .contains(col),
+                                              )
+                                              .map(
+                                                (col) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
                                         ],
                                         SizedBox(
                                           height:
                                               ResponsiveHelper.screenHeight *
                                               0.01,
                                         ),
+                                        //  Divider(),
                                         Row(
                                           children: [
-                                            Expanded(
-                                              child: Text(
-                                                textAlign: TextAlign.start,
-                                                "Qty: ${sheet.msQty}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ResponsiveHelper.screenWidth *
-                                                  0.01,
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                textAlign: TextAlign.start,
-                                                "Amt: ${sheet.msQty}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ResponsiveHelper.screenWidth *
-                                                  0.01,
-                                            ),
-                                            Expanded(
-                                              child: OutlinedButton(
-                                                style:
-                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () async {
-                                                  await controller
-                                                      .pickImageForSheet(sheet);
-                                                  _showConfirmationDialog(
-                                                    context,
-                                                    sheet,
-                                                    controller,
-                                                  );
-                                                },
-                                                child: Text(
-                                                  "Update",
-                                                  style: AppStyle
-                                                      .labelPrimaryPoppinsBlack
-                                                      .responsive
-                                                      .copyWith(fontSize: 10),
-                                                ),
-                                              ),
-                                            ),
+                                            if (controller
+                                                .getFrontSecondaryDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller
+                                                  .getFrontSecondaryDisplayColumns()
+                                                  .map((col) {
+                                                    return Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              bottom: 6,
+                                                            ),
+                                                        child: Text(
+                                                          "$col: ${controller.getFieldValue(sheet, col)}",
+                                                          style: AppStyle
+                                                              .labelPrimaryPoppinsBlack
+                                                              .responsive
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  })
+                                                  .toList(),
+                                            const SizedBox(width: 8),
+                                            if (controller
+                                                .getButtonDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller.getButtonDisplayColumns().map((
+                                                col,
+                                              ) {
+                                                return Expanded(
+                                                  child: OutlinedButton(
+                                                    style:
+                                                        AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                    onPressed: () {
+                                                      // Get.toNamed(
+                                                      //   AppRoutes
+                                                      //       .updateDailyReportList,
+                                                      // );
+                                                    },
+                                                    child: Text(
+                                                      "$col: ${controller.getFieldValue(sheet, col)}",
+                                                      style: AppStyle
+                                                          .labelPrimaryPoppinsBlack
+                                                          .responsive
+                                                          .copyWith(
+                                                            fontSize: 10,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            // Expanded(
+                                            //   child: ElevatedButton(
+                                            //     style:
+                                            //         AppButtonStyles.elevatedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       controller.toggleExpanded(
+                                            //         index,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       controller
+                                            //                   .expandedIndex
+                                            //                   .value ==
+                                            //               index
+                                            //           ? "Less"
+                                            //           : "Read",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsWhite,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            // SizedBox(
+                                            //   width:
+                                            //       ResponsiveHelper.screenWidth *
+                                            //       0.05,
+                                            // ),
+                                            // Expanded(
+                                            //   child: OutlinedButton(
+                                            //     style:
+                                            //         AppButtonStyles.outlinedSmallBlack(),
+                                            //     onPressed: () {
+                                            //       Get.toNamed(
+                                            //         AppRoutes
+                                            //             .updateDailyReportList,
+                                            //       );
+                                            //     },
+                                            //     child: Text(
+                                            //       "Update",
+                                            //       style: AppStyle
+                                            //           .labelPrimaryPoppinsBlack,
+                                            //     ),
+                                            //   ),
+                                            // ),
                                           ],
                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           );
                         },
                       ),
@@ -367,163 +338,6 @@ class UpdateProgressReportList extends StatelessWidget {
       ),
     );
   }
-
-  // ... [ALL OTHER WIDGETS UNCHANGED: _buildFilterButton, _buildSortButton, etc.] ...
-
-  void _showConfirmationDialog(
-    BuildContext context,
-    dynamic sheet,
-    UpdateProgressReportController controller,
-  ) {
-    // Reset any previous temporary image
-    controller.clearTempImage();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        // ---- LOCAL STATE FOR THE DIALOG ----
-        String? tempSelectedPackage = controller.selectedPackageFilter.value;
-
-        return StatefulBuilder(
-          builder: (BuildContext ctx, StateSetter setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              title: Text(
-                'Confirm Update',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  fontSize: ResponsiveHelper.getResponsiveFontSize(18),
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Are you sure you want to update the progress report for ${sheet.pboa}?',
-                    style: GoogleFonts.poppins(
-                      fontSize: ResponsiveHelper.getResponsiveFontSize(14),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ---- REACTIVE IMAGE PREVIEW (Obx inside StatefulBuilder) ----
-                  Obx(() {
-                    final path = controller.tempImagePath;
-                    if (path.isEmpty) {
-                      return Container(
-                        height: 120,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.lightGrey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Center(child: Text('No image selected')),
-                      );
-                    }
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(path),
-                        height: 180,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (c, e, s) => Container(
-                          height: 180,
-                          color: Colors.grey[200],
-                          child: const Center(
-                            child: Text('Failed to load image'),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 16),
-
-                  // ---- OPTIONAL: Dropdown to change package inside dialog ----
-                  // (Uncomment if you want the user to change package here)
-                  /*
-                  DropdownSearch<String>(
-                    popupProps: const PopupProps.menu(showSearchBox: true),
-                    items: controller.getPackageNames(),
-                    dropdownDecoratorProps: DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText: 'Select Package',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                    selectedItem: tempSelectedPackage,
-                    onChanged: (val) => setDialogState(() => tempSelectedPackage = val),
-                  ),
-                  */
-                ],
-              ),
-              actions: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: AppButtonStyles.outlinedSmallBlack(),
-                        onPressed: () {
-                          controller.clearTempImage();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          'Cancel',
-                          style: AppStyle.labelPrimaryPoppinsBlack,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: AppButtonStyles.elevatedSmallBlack(),
-                        onPressed: () async {
-                          // ---- Confirm logic (same as before) ----
-                          if (controller.tempImagePath.isNotEmpty) {
-                            Get.snackbar(
-                              "Success",
-                              "Updated with photo!",
-                              backgroundColor: AppColors.primary,
-                              colorText: Colors.white,
-                            );
-                          } else {
-                            Get.snackbar(
-                              "Warning",
-                              "No image attached!",
-                              backgroundColor: Colors.orange,
-                              colorText: Colors.white,
-                            );
-                          }
-
-                          // OPTIONAL: apply package change if you added the dropdown
-                          // if (tempSelectedPackage != null) {
-                          //   controller.selectedPackageFilter.value = tempSelectedPackage!;
-                          //   controller.applyFilters();
-                          // }
-
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          'Confirm',
-                          style: AppStyle.labelPrimaryPoppinsWhite,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // ... [ALL OTHER METHODS UNCHANGED: _buildSearchField, _buildShimmerEffect, etc.] ...
-  // Keep everything else exactly as in your original file
 
   TextFormField _buildSearchField(UpdateProgressReportController controller) {
     return TextFormField(
@@ -544,7 +358,7 @@ class UpdateProgressReportList extends StatelessWidget {
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5,
+      itemCount: 5, // Show 5 shimmer cards
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -577,14 +391,20 @@ class UpdateProgressReportList extends StatelessWidget {
                         Expanded(
                           child: Container(
                             height: 40,
-                            color: Colors.grey.shade300,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
                         SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
                         Expanded(
                           child: Container(
                             height: 40,
-                            color: Colors.grey.shade300,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
                       ],
@@ -616,7 +436,7 @@ class UpdateProgressReportList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 100,
+          width: 130,
           child: Text(
             label,
             style: AppStyle.reportCardTitle.responsive.copyWith(
@@ -643,6 +463,17 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
+  Text _sectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        color: AppColors.grey,
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+      ),
+    );
+  }
+
   AppBar _buildAppbar() {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
@@ -650,7 +481,7 @@ class UpdateProgressReportList extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Daily Progress Report Details',
+        'Daily Progress Report',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
@@ -663,6 +494,7 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
+  // Filter Button
   Widget _buildFilterButton(
     BuildContext context,
     UpdateProgressReportController controller,
@@ -681,6 +513,7 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
+  // Filter Dialog
   void _showFilterDialog(
     BuildContext context,
     UpdateProgressReportController controller,
@@ -751,8 +584,11 @@ class UpdateProgressReportList extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onChanged: (value) =>
-                      setState(() => tempSelectedPackage = value),
+                  onChanged: (value) {
+                    setState(() {
+                      tempSelectedPackage = value;
+                    });
+                  },
                   selectedItem: tempSelectedPackage,
                 ),
               ),
@@ -817,6 +653,7 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
+  // Sort Button
   Widget _buildSortButton(UpdateProgressReportController controller) {
     return Obx(
       () => Container(

@@ -292,9 +292,14 @@ class Networkcall {
           case 17:
             final getDPRdashboard = getDashboardResponseFromJson(str);
             return getDPRdashboard;
-               case 18:
+          case 18:
             final getDPRList = getDprListResponseFromJson(response.body);
             return [getDPRList];
+          case 19:
+            final getDprReportDetailList = getDprListResponseFromJson(
+              response.body,
+            );
+            return [getDprReportDetailList];
 
           default:
             log("Invalid request code: $requestCode");

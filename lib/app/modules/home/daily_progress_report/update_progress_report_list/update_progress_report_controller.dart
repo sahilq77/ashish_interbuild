@@ -1,290 +1,253 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/daily_progress_report_model.dart';
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/update_daily_progress_report_model.dart';
+import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class UpdateProgressReportController extends GetxController {
-
-  final RxList<UpdateDailyProgressReportModel> measurementSheets =
-      <UpdateDailyProgressReportModel>[].obs;
-  final RxList<UpdateDailyProgressReportModel> filteredMeasurementSheets =
-      <UpdateDailyProgressReportModel>[].obs;
-  final RxInt expandedIndex = (-1).obs;
+  final DailyProgressReportController dprController = Get.find();
+  final RxList<DprItem> dprList = <DprItem>[].obs;
+  final RxList<DprItem> filteredMeasurementSheets = <DprItem>[].obs;
   final RxBool isLoading = true.obs;
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasMoreData = true.obs;
+  final RxString errorMessage = ''.obs;
+  final RxInt expandedIndex = (-1).obs;
   final TextEditingController searchController = TextEditingController();
-final RxString _tempImagePath = ''.obs;
-
-  // ADD THIS PUBLIC GETTER
-  String get tempImagePath => _tempImagePath.value;
-  // NEW: Image Picker
-  final ImagePicker _picker = ImagePicker();
-
+  final RxInt start = 0.obs;
+  final int length = 10;
+  final RxString _search = ''.obs;
+  final RxString _orderBy = ''.obs;
+  final RxBool isAscending = true.obs;
+  final RxnString selectedPackageFilter = RxnString(null);
+  Timer? _debounce;
+  RxString sourceName = "".obs;
+  RxString systemId = "".obs;
+  final RxList<String> frontDisplayColumns = <String>[].obs;
+  final RxList<String> buttonDisplayColumns = <String>[].obs;
+  final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
+    columns: [],
+    frontDisplayColumns: [],
+    frontSecondaryDisplayColumns: [],
+    buttonDisplayColumn: [],
+  ).obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadDummyData();
-    filteredMeasurementSheets.assignAll(measurementSheets);
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      sourceName.value = args["selected_source"] ?? "";
+      systemId.value = args["selected_system_id"] ?? "";
+    }
+
+    // Set default values if still 0
+
+    log("DPR Detail → Source=${sourceName.value} System Id=${systemId.value}");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        fetchDprList(reset: true, context: Get.context!);
+      }
+    });
   }
 
   @override
   void onClose() {
     searchController.dispose();
+    _debounce?.cancel();
     super.onClose();
   }
 
-  Future<void> loadDummyData() async {
-    isLoading.value = true;
-    await Future.delayed(Duration(seconds: 2));
-    measurementSheets.assignAll([
-      UpdateDailyProgressReportModel(
-        srNo: "1",
-        systemId: "SYS001",
-        source: "Source A",
-        zone: "Zone A",
-        location: "Location 1",
-        subLocation: "Sub Loc 1",
-        cboqCode: "CBOQ001",
-        pboq: "PBOQ001",
-        pboa: "PBOA001",
-        pboaQty: "50",
-        pboaAmount: "5000",
-        revisedStartDate: "2025-10-01",
-        revisedEndDate: "2025-10-15",
-        length: "10",
-        breadth: "5",
-        height: "3",
-        msQty: "50",
-        uploadedFile: "file1.pdf",
-        progress: "75%",
-        execution: "Completed",
-        updatedOn: "2025-10-10",
-      ),
-      // ... other dummy items (unchanged)
-      UpdateDailyProgressReportModel(
-        srNo: "2",
-        systemId: "SYS002",
-        source: "Source B",
-        zone: "Zone B",
-        location: "Location 2",
-        subLocation: "Sub Loc 2",
-        cboqCode: "CBOQ002",
-        pboq: "PBOQ002",
-        pboa: "PBOA002",
-        pboaQty: "75",
-        pboaAmount: "7500",
-        revisedStartDate: "2025-10-02",
-        revisedEndDate: "2025-10-16",
-        length: "12",
-        breadth: "6",
-        height: "4",
-        msQty: "75",
-        uploadedFile: "file2.pdf",
-        progress: "50%",
-        execution: "In Progress",
-        updatedOn: "2025-10-11",
-      ),
-      UpdateDailyProgressReportModel(
-        srNo: "3",
-        systemId: "SYS003",
-        source: "Source C",
-        zone: "Zone C",
-        location: "Location 3",
-        subLocation: "Sub Loc 3",
-        cboqCode: "CBOQ003",
-        pboq: "PBOQ003",
-        pboa: "PBOA003",
-        pboaQty: "30",
-        pboaAmount: "3000",
-        revisedStartDate: "2025-10-03",
-        revisedEndDate: "2025-10-17",
-        length: "8",
-        breadth: "4",
-        height: "2",
-        msQty: "30",
-        uploadedFile: "file3.pdf",
-        progress: "90%",
-        execution: "Completed",
-        updatedOn: "2025-10-12",
-      ),
-      UpdateDailyProgressReportModel(
-        srNo: "4",
-        systemId: "SYS004",
-        source: "Source D",
-        zone: "Zone D",
-        location: "Location 4",
-        subLocation: "Sub Loc 4",
-        cboqCode: "CBOQ004",
-        pboq: "PBOQ004",
-        pboa: "PBOA004",
-        pboaQty: "90",
-        pboaAmount: "9000",
-        revisedStartDate: "2025-10-04",
-        revisedEndDate: "2025-10-18",
-        length: "15",
-        breadth: "7",
-        height: "5",
-        msQty: "90",
-        uploadedFile: "file4.pdf",
-        progress: "60%",
-        execution: "In Progress",
-        updatedOn: "2025-10-13",
-      ),
-    ]);
-    filteredMeasurementSheets.assignAll(measurementSheets);
-    isLoading.value = false;
+  String _buildQueryParams({bool includePagination = true}) {
+    final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final parts = <String>[
+      'project_id=${dprController.projectId}',
+      'filter_package=${dprController.packageId}',
+      'selected_source=${sourceName.value}',
+      'selected_system_id=${systemId.value}',
+      'filter_revised_start_date=${today}',
+      'filter_revised_finish_date =${today}',
+    ];
+    if (_search.value.isNotEmpty) {
+      parts.add('search=${Uri.encodeComponent(_search.value)}');
+    }
+    parts.add('order_by=${_orderBy.value}');
+    if (includePagination) {
+      parts.add('start=${start.value}');
+      parts.add('length=$length');
+    }
+    return parts.isNotEmpty ? '?${parts.join('&')}' : '';
+  }
+
+  Future<void> fetchDprList({
+    required BuildContext context,
+    bool reset = false,
+    bool isPagination = false,
+  }) async {
+    if (reset) {
+      start.value = 0;
+      dprList.clear();
+      hasMoreData.value = true;
+    }
+    if (!hasMoreData.value && !reset) return;
+    if (isPagination) {
+      isLoadingMore.value = true;
+    } else {
+      isLoading.value = true;
+    }
+    errorMessage.value = '';
+    try {
+      final String query = _buildQueryParams(includePagination: true);
+      final String endpoint = Networkutility.getDprReportDetailList + query;
+      final responseList = await Networkcall().getMethod(
+        Networkutility.getDprReportDetailListApi,
+        endpoint,
+        context,
+      );
+      final response = responseList?.first as GetDprListResponse?;
+
+      if (response != null && response.status) {
+        final data = response.data.data;
+        if (frontDisplayColumns.isEmpty) {
+          frontDisplayColumns.assignAll(
+            response.data.appColumnDetails.frontDisplayColumns,
+          );
+          buttonDisplayColumns.assignAll(
+            response.data.appColumnDetails.buttonDisplayColumn,
+          );
+          appColumnDetails.value = response.data.appColumnDetails;
+        }
+        if (data.isEmpty || data.length < length) hasMoreData.value = false;
+        if (reset) {
+          dprList.assignAll(data);
+        } else {
+          dprList.addAll(data);
+        }
+        _applyClientFilters();
+        start.value += length;
+      } else {
+        _showError(response?.message ?? 'No data');
+      }
+    } on NoInternetException catch (e) {
+      _showError(e.message);
+    } on TimeoutException catch (e) {
+      _showError(e.message);
+    } on HttpException catch (e) {
+      _showError('${e.message} (Code: ${e.statusCode})');
+    } on ParseException catch (e) {
+      _showError(e.message);
+    } catch (e) {
+      _showError('Unexpected error: $e');
+    } finally {
+      isLoading.value = false;
+      isLoadingMore.value = false;
+    }
+  }
+
+  void _showError(String msg) {
+    hasMoreData.value = false;
+    errorMessage.value = msg;
+    AppSnackbarStyles.showError(title: 'Error', message: msg);
   }
 
   Future<void> refreshData() async {
-    isLoading.value = true;
-    measurementSheets.clear();
-    filteredMeasurementSheets.clear();
-    await Future.delayed(Duration(seconds: 2));
-    await loadDummyData();
     searchController.clear();
+    _search.value = '';
+    _orderBy.value = '';
+    isAscending.value = true;
+    selectedPackageFilter.value = null;
+    start.value = 0;
+    hasMoreData.value = true;
+    filteredMeasurementSheets.clear();
+    await fetchDprList(reset: true, context: Get.context!);
   }
 
-  void viewMeasurementSheet(UpdateDailyProgressReportModel sheet) {
-    print('Viewing: ${sheet.pboa}');
+  void loadMore(BuildContext context) {
+    if (!isLoadingMore.value && hasMoreData.value) {
+      fetchDprList(context: context, isPagination: true);
+    }
   }
 
+  // Function to toggle the expanded state of a card
   void toggleExpanded(int index) {
     if (expandedIndex.value == index) {
-      expandedIndex.value = -1;
+      expandedIndex.value = -1; // Collapse if the same card is clicked
     } else {
-      expandedIndex.value = index;
+      expandedIndex.value = index; // Expand the clicked card
     }
   }
 
-  // Filter & Sort Variables
-  final RxnString selectedPackageFilter = RxnString(null);
-  final RxBool isAscending = true.obs;
-
-  // Get unique package names for filter dropdown
   List<String> getPackageNames() {
-    return measurementSheets.map((sheet) => sheet.location).toSet().toList();
+    return dprList.map((e) => e.getField('Package Name')).toSet().toList();
   }
 
-  // Apply filters
+  String getFieldValue(DprItem item, String columnName) {
+    return item.getField(columnName).replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  }
+
+  List<String> getFrontDisplayColumns() {
+    return appColumnDetails.value.frontDisplayColumns.toSet().toList();
+  }
+
+  List<String> getFrontSecondaryDisplayColumns() {
+    return appColumnDetails.value.frontSecondaryDisplayColumns.toSet().toList();
+  }
+
+  List<String> getButtonDisplayColumns() {
+    return appColumnDetails.value.buttonDisplayColumn.toSet().toList();
+  }
+
   void applyFilters() {
-    var filtered = measurementSheets.toList();
+    _applyClientFilters();
+  }
 
-    if (selectedPackageFilter.value != null) {
-      filtered = filtered
-          .where((sheet) => sheet.location == selectedPackageFilter.value)
-          .toList();
-    }
-
-    if (searchController.text.isNotEmpty) {
-      filtered = filtered
+  void _applyClientFilters() {
+    var list = dprList.toList();
+    if (selectedPackageFilter.value != null &&
+        selectedPackageFilter.value!.isNotEmpty) {
+      list = list
           .where(
-            (sheet) =>
-                sheet.location.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ) ||
-                sheet.pboa.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ),
+            (e) => e.getField('Package Name') == selectedPackageFilter.value,
           )
           .toList();
     }
-
-    filteredMeasurementSheets.assignAll(filtered);
-    applySorting();
+    filteredMeasurementSheets.assignAll(list);
   }
 
-  // Clear all filters
   void clearFilters() {
     selectedPackageFilter.value = null;
     searchController.clear();
-    filteredMeasurementSheets.assignAll(measurementSheets);
-    applySorting();
+    _search.value = '';
+    _applyClientFilters();
   }
 
-  // Toggle sort order
   void toggleSorting() {
     isAscending.value = !isAscending.value;
-    applySorting();
+    _orderBy.value = isAscending.value ? 'desc' : 'asc';
+    fetchDprList(reset: true, context: Get.context!);
   }
 
-  // Apply sorting by CBOQ Name
-  void applySorting() {
-    if (isAscending.value) {
-      filteredMeasurementSheets.sort(
-        (a, b) => a.pboa.compareTo(b.pboa),
-      );
-    } else {
-      filteredMeasurementSheets.sort(
-        (a, b) => b.pboa.compareTo(a.pboa),
-      );
-    }
-  }
-
-  // Update search to re-apply filters + sorting
   void searchSurveys(String query) {
-    if (query.isEmpty && selectedPackageFilter.value == null) {
-      filteredMeasurementSheets.assignAll(measurementSheets);
-    } else {
-      applyFilters();
-    }
-    applySorting();
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      final trimmed = query.trim();
+      if (_search.value != trimmed) {
+        _search.value = trimmed;
+        fetchDprList(reset: true, context: Get.context!);
+      }
+    });
   }
-
-  // ──────────────────────────────────────────────────────────────────────
-//  NEW: Pick image for a sheet – **NO size/quality limits**
-// ──────────────────────────────────────────────────────────────────────
-Future<void> pickImageForSheet(UpdateDailyProgressReportModel sheet) async {
-  final source = await _showImageSourceDialog();
-  if (source == null) return;
-
-  // NOTE: we deliberately omit maxWidth, maxHeight and imageQuality
-  final XFile? pickedFile = await _picker.pickImage(source: source);
-
-  if (pickedFile != null) {
-    final String savedPath = await _saveImageToAppDir(pickedFile);
-    sheet.capturedImagePath = savedPath;
-    _tempImagePath.value = savedPath;
-  }
-}
-
-  Future<ImageSource?> _showImageSourceDialog() async {
-    return Get.dialog<ImageSource>(
-      AlertDialog(
-        title: Text('Select Image Source'),
-        actions: [
-          TextButton.icon(
-            icon: Icon(Icons.photo_library),
-            label: Text('Gallery'),
-            onPressed: () => Get.back(result: ImageSource.gallery),
-          ),
-          TextButton.icon(
-            icon: Icon(Icons.camera_alt),
-            label: Text('Camera'),
-            onPressed: () => Get.back(result: ImageSource.camera),
-          ),
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Get.back(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<String> _saveImageToAppDir(XFile file) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final String path = '${directory.path}/dpr_images/$fileName';
-
-    final File dest = File(path);
-    await dest.parent.create(recursive: true);
-    await File(file.path).copy(dest.path);
-    return dest.path;
-  }
-
-  void clearTempImage() => _tempImagePath.value = '';
 }
