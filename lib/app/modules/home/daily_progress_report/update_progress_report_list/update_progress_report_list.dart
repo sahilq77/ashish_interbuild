@@ -1,3 +1,5 @@
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -9,9 +11,27 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:io';
+import 'package:intl/intl.dart';
 
-class UpdateProgressReportList extends StatelessWidget {
+class UpdateProgressReportList extends StatefulWidget {
   const UpdateProgressReportList({super.key});
+
+  @override
+  State<UpdateProgressReportList> createState() =>
+      _UpdateProgressReportListState();
+}
+
+class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
+  final zoneController = Get.find<ZoneController>();
+  final zoneLocationController = Get.find<ZoneLocationController>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    zoneController.fetchZones(context: context);
+    zoneLocationController.fetchZoneLocations(context: context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +39,7 @@ class UpdateProgressReportList extends StatelessWidget {
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: _buildAppbar(),
+      appBar: _buildAppbar(controller),
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
         color: AppColors.primary,
@@ -40,7 +60,7 @@ class UpdateProgressReportList extends StatelessWidget {
                 children: [
                   Expanded(child: _buildSearchField(controller)),
                   SizedBox(width: ResponsiveHelper.spacing(8)),
-                  _buildFilterButton(context, controller),
+                  _buildFilterButton(context),
                   SizedBox(width: ResponsiveHelper.spacing(8)),
                   _buildSortButton(controller),
                 ],
@@ -94,7 +114,27 @@ class UpdateProgressReportList extends StatelessWidget {
                           final sheet =
                               controller.filteredMeasurementSheets[index];
                           return GestureDetector(
-                            onTap: () => controller.toggleExpanded(index),
+                            onTap: () {
+                              if (controller.isMultiSelectMode.value &&
+                                  controller.getFieldValue(
+                                        sheet,
+                                        "execution_status",
+                                      ) ==
+                                      "0") {
+                                controller.toggleItemSelection(index);
+                              } else if (!controller.isMultiSelectMode.value) {
+                                controller.toggleExpanded(index);
+                              }
+                            },
+                            onLongPress: () {
+                              if (controller.getFieldValue(
+                                    sheet,
+                                    "execution_status",
+                                  ) ==
+                                  "0") {
+                                controller.startMultiSelect(index);
+                              }
+                            },
                             child: Obx(() {
                               final isExpanded =
                                   controller.expandedIndex.value == index;
@@ -280,22 +320,129 @@ class UpdateProgressReportList extends StatelessWidget {
                                             // ),
                                           ],
                                         ),
-                                        Align(
-                                          alignment:
-                                              FractionalOffset.bottomRight,
-                                          child: SizedBox(
-                                            child:
-                                                controller.getFieldValue(
-                                                      sheet,
-                                                      "execution_status",
-                                                    ) ==
-                                                    "0"
-                                                ? Checkbox(
-                                                    value: true,
-
-                                                    onChanged: (val) {},
-                                                  )
-                                                : _updatedBadge(),
+                                        Obx(
+                                          () => Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  if (controller
+                                                          .isMultiSelectMode
+                                                          .value &&
+                                                      controller.getFieldValue(
+                                                            sheet,
+                                                            "execution_status",
+                                                          ) ==
+                                                          "0")
+                                                    Checkbox(
+                                                      value: controller
+                                                          .selectedIndices
+                                                          .contains(index),
+                                                      onChanged: (val) {
+                                                        controller
+                                                            .toggleItemSelection(
+                                                              index,
+                                                            );
+                                                      },
+                                                    ),
+                                                  const Spacer(),
+                                                  if (controller.getFieldValue(
+                                                        sheet,
+                                                        "execution_status",
+                                                      ) ==
+                                                      "0")
+                                                    IconButton(
+                                                      onPressed: () =>
+                                                          controller
+                                                              .pickImagesForRow(
+                                                                index,
+                                                              ),
+                                                      icon: Icon(
+                                                        Icons.camera_alt,
+                                                        color:
+                                                            AppColors.primary,
+                                                      ),
+                                                    )
+                                                  else
+                                                    _updatedBadge(),
+                                                ],
+                                              ),
+                                              if (controller.rowImages
+                                                      .containsKey(index) &&
+                                                  controller
+                                                      .rowImages[index]!
+                                                      .isNotEmpty)
+                                                Container(
+                                                  height: 60,
+                                                  child: ListView.builder(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    itemCount: controller
+                                                        .rowImages[index]!
+                                                        .length,
+                                                    itemBuilder: (context, imgIndex) {
+                                                      return Container(
+                                                        margin:
+                                                            const EdgeInsets.only(
+                                                              right: 8,
+                                                            ),
+                                                        child: Stack(
+                                                          children: [
+                                                            ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    8,
+                                                                  ),
+                                                              child: Image.file(
+                                                                File(
+                                                                  controller
+                                                                      .rowImages[index]![imgIndex]
+                                                                      .path,
+                                                                ),
+                                                                width: 60,
+                                                                height: 60,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              ),
+                                                            ),
+                                                            Positioned(
+                                                              top: 2,
+                                                              right: 2,
+                                                              child: GestureDetector(
+                                                                onTap: () => controller
+                                                                    .removeImageFromRow(
+                                                                      index,
+                                                                      imgIndex,
+                                                                    ),
+                                                                child: Container(
+                                                                  padding:
+                                                                      const EdgeInsets.all(
+                                                                        2,
+                                                                      ),
+                                                                  decoration: const BoxDecoration(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                  ),
+                                                                  child: const Icon(
+                                                                    Icons.close,
+                                                                    color: Colors
+                                                                        .white,
+                                                                    size: 12,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -312,7 +459,7 @@ class UpdateProgressReportList extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomButton(),
+      bottomNavigationBar: _buildBottomButton(controller),
     );
   }
 
@@ -359,28 +506,79 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomButton() {
-    return Container(
-      padding: ResponsiveHelper.paddingSymmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () {},
-        style: AppButtonStyles.elevatedLargeBlack(),
-        child: Text(
-          'Update',
-          style: AppStyle.buttonTextPoppinsWhite.responsive.copyWith(
-            fontSize: ResponsiveHelper.getResponsiveFontSize(16),
-            fontWeight: FontWeight.w600,
-          ),
+  Widget _buildBottomButton(UpdateProgressReportController controller) {
+    return Obx(
+      () => Container(
+        padding: ResponsiveHelper.paddingSymmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                if (!controller.isMultiSelectMode.value) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: controller.toggleMultiSelectMode,
+                      style: AppButtonStyles.outlinedLargeBlack(),
+                      child: Text(
+                        'Select Items',
+                        style: AppStyle.buttonTextPoppinsBlack.responsive,
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: controller.toggleMultiSelectMode,
+                      style: AppButtonStyles.outlinedMediumBlack(),
+                      child: Text(
+                        'Cancel',
+                        style: AppStyle.buttonTextPoppinsBlack.responsive,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: controller.selectedIndices.length == 0
+                          ? null
+                          : () => controller.batchUpdateSelectedDPRs(),
+                      style: AppButtonStyles.elevatedMediumBlack(),
+                      child: controller.isLoadingu.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              'Update (${controller.selectedIndices.length})',
+                              style: AppStyle.buttonTextPoppinsWhite.responsive,
+                            ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -521,17 +719,21 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppbar() {
+  AppBar _buildAppbar(UpdateProgressReportController controller) {
     return AppBar(
       iconTheme: const IconThemeData(color: AppColors.defaultBlack),
       backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: false,
-      title: Text(
-        'Daily Progress Report',
-        style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
-          fontSize: ResponsiveHelper.getResponsiveFontSize(18),
-          fontWeight: FontWeight.w600,
+      title: Obx(
+        () => Text(
+          controller.isMultiSelectMode.value
+              ? 'Select Items (${controller.selectedIndices.length})'
+              : 'Daily Progress Report',
+          style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
+            fontSize: ResponsiveHelper.getResponsiveFontSize(18),
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       bottom: PreferredSize(
@@ -541,11 +743,7 @@ class UpdateProgressReportList extends StatelessWidget {
     );
   }
 
-  // Filter Button
-  Widget _buildFilterButton(
-    BuildContext context,
-    UpdateProgressReportController controller,
-  ) {
+  Widget _buildFilterButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.grey),
@@ -553,30 +751,38 @@ class UpdateProgressReportList extends StatelessWidget {
       ),
       child: IconButton(
         icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
+        onPressed: () => _showFilterDialog(context),
         padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
         constraints: const BoxConstraints(),
       ),
     );
   }
 
-  // Filter Dialog
-  void _showFilterDialog(
-    BuildContext context,
-    UpdateProgressReportController controller,
-  ) {
-    String? tempSelectedPackage = controller.selectedPackageFilter.value;
+  void _showFilterDialog(BuildContext context) {
+    final controller = Get.find<UpdateProgressReportController>();
+    final zoneController = Get.find<ZoneController>();
+    final zoneLocationController = Get.find<ZoneLocationController>();
+
+    String? tempZone = controller.selectedZone.value.isEmpty
+        ? null
+        : controller.selectedZone.value;
+    String? tempZoneLocation = controller.selectedZoneLocation.value.isEmpty
+        ? null
+        : controller.selectedZoneLocation.value;
+    DateTime? tempDate = controller.selectedDate.value;
+    // temporary values – applied only on “Apply”
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // ── Header ───────────────────────────────────────
               Container(
                 width: double.infinity,
                 padding: ResponsiveHelper.paddingSymmetric(
@@ -584,61 +790,123 @@ class UpdateProgressReportList extends StatelessWidget {
                   horizontal: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.defaultBlack,
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(ResponsiveHelper.spacing(20)),
                   ),
                 ),
                 child: Text(
-                  'Filter Measurement Sheets',
+                  'Filters',
                   style: AppStyle.heading1PoppinsWhite.responsive,
                   textAlign: TextAlign.center,
                 ),
               ),
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSearchBox: true,
-                    searchFieldProps: TextFieldProps(
-                      decoration: InputDecoration(
-                        labelText: 'Search Package',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: AppColors.primary,
+
+              // ── Scrollable filter list ───────────────────────
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    children: [
+                      _filterDropdownWithIcon(
+                        label: 'Zone',
+                        items: zoneController.zoneNames,
+                        selected: tempZone,
+                        onChanged: (v) => setState(() => tempZone = v),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 12),
+                      _filterDropdownWithIcon(
+                        label: 'Zone Location',
+                        items: zoneLocationController.zoneLocationNames,
+                        selected: tempZoneLocation,
+                        onChanged: (v) => setState(() => tempZoneLocation = v),
+                        icon: Icons.place,
+                      ),
+
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.grey.withOpacity(0.5),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Date",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            GestureDetector(
+                              onTap: () async {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate: tempDate ?? DateTime.now(),
+                                  firstDate: DateTime(2015),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (date != null) {
+                                  setState(() => tempDate = date);
+                                }
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      color: AppColors.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      tempDate != null
+                                          ? DateFormat(
+                                              'dd/MM/yyyy',
+                                            ).format(tempDate!)
+                                          : 'Select Date',
+                                      style: TextStyle(
+                                        color: tempDate != null
+                                            ? AppColors.defaultBlack
+                                            : AppColors.grey,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  items: controller.getPackageNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Package',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      tempSelectedPackage = value;
-                    });
-                  },
-                  selectedItem: tempSelectedPackage,
                 ),
               ),
+
+              // ── Buttons ───────────────────────────────────────
               Padding(
                 padding: ResponsiveHelper.paddingSymmetric(
                   horizontal: 20,
@@ -648,14 +916,7 @@ class UpdateProgressReportList extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.outlinedMediumBlack(),
                         onPressed: () {
                           controller.clearFilters();
                           Navigator.pop(context);
@@ -669,19 +930,17 @@ class UpdateProgressReportList extends StatelessWidget {
                     SizedBox(width: ResponsiveHelper.spacing(16)),
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.elevatedMediumBlack(),
+
                         onPressed: () {
-                          controller.selectedPackageFilter.value =
-                              tempSelectedPackage;
-                          controller.applyFilters();
+                          controller.selectedZone.value = tempZone ?? '';
+                          controller.selectedZoneLocation.value =
+                              tempZoneLocation ?? '';
+                          controller.selectedDate.value = tempDate;
+                          controller.fetchDprList(
+                            reset: true,
+                            context: context,
+                          );
                           Navigator.pop(context);
                         },
                         child: Text(
@@ -696,6 +955,52 @@ class UpdateProgressReportList extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _filterDropdownWithIcon({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    // prepend an empty entry so “All” can be selected
+    final List<String> fullList = ['', ...items];
+
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          showSelectedItems: true,
+          searchFieldProps: TextFieldProps(
+            decoration: InputDecoration(
+              labelText: 'Search',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
+            ),
+          ),
+        ),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        // Show “All” for the empty entry
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
       ),
     );
   }

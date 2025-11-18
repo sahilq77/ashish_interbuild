@@ -523,7 +523,6 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                             InkWell(
                               onTap: () async {
                                 final picked = await showDateRangePicker(
-                                  barrierColor: AppColors.buttonColor,
                                   context: ctx,
                                   firstDate: DateTime(2020),
                                   lastDate: DateTime.now().add(
@@ -533,11 +532,13 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                       controller.tempStartDate != null &&
                                           controller.tempEndDate != null
                                       ? DateTimeRange(
+                                        
                                           start: controller.tempStartDate!,
                                           end: controller.tempEndDate!,
                                         )
                                       : null,
                                   builder: (context, child) => Theme(
+
                                     data: ThemeData.light().copyWith(
                                       colorScheme: const ColorScheme.light(
                                         primary: AppColors.primary,

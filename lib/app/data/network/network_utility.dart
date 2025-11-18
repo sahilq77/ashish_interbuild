@@ -59,6 +59,9 @@ class Networkutility {
 
   static String getDprReportDetailList = "${baseUrl + "dpr/details"}";
   static int getDprReportDetailListApi = 19;
+
+  static String updateDailyProgressReport = "${baseUrl + "dpr/update"}";
+  static int updateDailyProgressReportApi = 21;
 }
 
 

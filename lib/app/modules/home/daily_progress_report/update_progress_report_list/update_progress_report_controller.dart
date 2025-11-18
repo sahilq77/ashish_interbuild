@@ -1,21 +1,24 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/daily_progress_report_model.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/update_daily_progress_report_model.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
+
+import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http; // ← THIS IS THE CORRECT ONE
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+import 'dart:developer' as developer; // Make sure this is imported
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 
 class UpdateProgressReportController extends GetxController {
   final DailyProgressReportController dprController = Get.find();
@@ -44,6 +47,13 @@ class UpdateProgressReportController extends GetxController {
     frontSecondaryDisplayColumns: [],
     buttonDisplayColumn: [],
   ).obs;
+  final errorMessageu = ''.obs;
+  final successMessage = ''.obs;
+  final RxBool isLoadingu = false.obs;
+
+  final RxString selectedZone = ''.obs;
+  final RxString selectedZoneLocation = ''.obs;
+  final Rxn<DateTime> selectedDate = Rxn<DateTime>();
 
   @override
   void onInit() {
@@ -72,15 +82,30 @@ class UpdateProgressReportController extends GetxController {
   }
 
   String _buildQueryParams({bool includePagination = true}) {
-    final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final String dateFilter = selectedDate.value != null 
+        ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
+        : DateFormat('yyyy-MM-dd').format(DateTime.now());
     final parts = <String>[
       'project_id=${dprController.projectId}',
       'filter_package=${dprController.packageId}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
-      'filter_revised_start_date=${today}',
-      'filter_revised_finish_date =${today}',
+      'filter_revised_start_date=${dateFilter}',
+      'filter_revised_finish_date =${dateFilter}',
     ];
+    if (selectedZone.value.isNotEmpty) {
+      parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
+    } else {
+      parts.add('filter_zone=');
+    }
+
+    if (selectedZoneLocation.value.isNotEmpty) {
+      parts.add(
+        'filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}',
+      );
+    } else {
+      parts.add('filter_zone_location=');
+    }
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
     }
@@ -229,9 +254,12 @@ class UpdateProgressReportController extends GetxController {
 
   void clearFilters() {
     selectedPackageFilter.value = null;
+    selectedZone.value = "";
+    selectedZoneLocation.value = "";
+    selectedDate.value = null;
     searchController.clear();
     _search.value = '';
-    _applyClientFilters();
+    fetchDprList(context: Get.context!, reset: true);
   }
 
   void toggleSorting() {
@@ -251,5 +279,402 @@ class UpdateProgressReportController extends GetxController {
     });
   }
 
-  
+  // Multi-select & Image Picker
+  final RxBool isMultiSelectMode = false.obs;
+  final RxSet<int> selectedIndices = <int>{}.obs;
+  final RxMap<int, List<XFile>> rowImages = <int, List<XFile>>{}.obs;
+  final ImagePicker _picker = ImagePicker();
+
+  void toggleMultiSelectMode() {
+    isMultiSelectMode.value = !isMultiSelectMode.value;
+    if (!isMultiSelectMode.value) {
+      selectedIndices.clear();
+    }
+  }
+
+  void toggleItemSelection(int index) {
+    if (selectedIndices.contains(index)) {
+      selectedIndices.remove(index);
+    } else {
+      selectedIndices.add(index);
+    }
+  }
+
+  Future<void> pickImagesForRow(int rowIndex) async {
+    try {
+      final List<XFile> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        rowImages[rowIndex] = images;
+      }
+    } catch (e) {
+      AppSnackbarStyles.showError(
+        title: 'Error',
+        message: 'Failed to pick images: $e',
+      );
+    }
+  }
+
+  void removeImageFromRow(int rowIndex, int imageIndex) {
+    if (rowImages.containsKey(rowIndex) &&
+        imageIndex < rowImages[rowIndex]!.length) {
+      rowImages[rowIndex]!.removeAt(imageIndex);
+      if (rowImages[rowIndex]!.isEmpty) {
+        rowImages.remove(rowIndex);
+      }
+    }
+  }
+
+  Future<void> updateSelectedDPR(BuildContext context) async {
+    if (selectedIndices.isEmpty) {
+      AppSnackbarStyles.showError(
+        title: 'Error',
+        message: 'Please select at least one item to update',
+      );
+      return;
+    }
+
+    isLoadingu.value = true;
+    errorMessageu.value = '';
+    successMessage.value = '';
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(Networkutility.updateDailyProgressReport),
+      );
+
+      // Add form fields
+      request.fields['project_id'] = dprController.projectId.toString();
+      request.fields['system_id'] = systemId.value
+          .replaceAll(RegExp(r'<[^>]*>'), '')
+          .trim();
+      request.fields['source_table'] = sourceName.value;
+
+      // Add each selected row
+      int i = 0;
+      for (int idx in selectedIndices) {
+        final item = filteredMeasurementSheets[idx];
+        final msId = item.getField('measurement_sheet_id') ?? '0';
+
+        request.fields['ms_rows[$i][project_id]'] = dprController.projectId
+            .toString();
+        request.fields['ms_rows[$i][system_id]'] = systemId.value
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .trim();
+        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
+        request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
+        request.fields['ms_rows[$i][progress_status]'] = '1';
+        request.fields['ms_rows[$i][dpr_date]'] = DateFormat(
+          'yyyy-MM-dd',
+        ).format(DateTime.now());
+        request.fields['ms_rows[$i][executed_qty]'] =
+            item.getField('executed_qty') ?? '0';
+
+        // Add images for this row
+        if (rowImages.containsKey(idx)) {
+          for (
+            int imgIndex = 0;
+            imgIndex < rowImages[idx]!.length;
+            imgIndex++
+          ) {
+            final image = rowImages[idx]![imgIndex];
+            final multipartFile = await http.MultipartFile.fromPath(
+              'ms_rows[$i][attachment][$imgIndex]',
+              image.path,
+            );
+            request.files.add(multipartFile);
+          }
+        }
+        i++;
+      }
+
+      // ==================== DETAILED REQUEST LOGGING ====================
+      final logBuffer = StringBuffer();
+      logBuffer.writeln('=== DPR UPDATE REQUEST ===');
+      logBuffer.writeln('URL: ${request.url}');
+      logBuffer.writeln('Method: ${request.method}');
+      logBuffer.writeln('\n--- Form Fields ---');
+      request.fields.forEach((key, value) {
+        logBuffer.writeln('$key: $value');
+      });
+
+      logBuffer.writeln('\n--- Attached Files ---');
+      if (request.files.isEmpty) {
+        logBuffer.writeln('No files attached');
+      } else {
+        for (var file in request.files) {
+          logBuffer.writeln(
+            '${file.field}: ${file.filename} (${file.length} bytes)',
+          );
+        }
+      }
+      logBuffer.writeln('Total files: ${request.files.length}');
+      logBuffer.writeln('==========================');
+
+      // Use developer.log (supports long strings, won't truncate like print())
+      developer.log(
+        logBuffer.toString(),
+        name: 'DPR_UPDATE_REQUEST',
+        level: 800, // INFO level
+      );
+      // ==================================================================
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      // Response logging
+      developer.log(
+        'DPR Update Response: ${response.statusCode}\n$responseBody',
+        name: 'DPR_UPDATE_RESPONSE',
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(responseBody);
+        successMessage.value = 'DPR updated successfully';
+        AppSnackbarStyles.showSuccess(
+          title: 'Success',
+          message: 'DPR updated successfully',
+        );
+
+        selectedIndices.clear();
+        rowImages.clear();
+        isMultiSelectMode.value = false;
+        await refreshData();
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e, stackTrace) {
+      developer.log(
+        'Error updating DPR',
+        name: 'DPR_UPDATE_ERROR',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      errorMessageu.value = 'Failed to update DPR: $e';
+      AppSnackbarStyles.showError(
+        title: 'Error',
+        message: 'Failed to update DPR. Please try again.',
+      );
+    } finally {
+      isLoadingu.value = false;
+    }
+  }
+
+  // Toggle item selection
+  void toggleSelection(int index) {
+    if (selectedIndices.contains(index)) {
+      selectedIndices.remove(index);
+    } else {
+      selectedIndices.add(index);
+    }
+    if (selectedIndices.isEmpty) {
+      isMultiSelectMode.value = false;
+    }
+  }
+
+  // Start multi-select on long press
+  void startMultiSelect(int index) {
+    if (!isMultiSelectMode.value) {
+      isMultiSelectMode.value = true;
+    }
+    toggleSelection(index);
+  }
+
+  // Clear all selections
+  void clearSelection() {
+    selectedIndices.clear();
+    isMultiSelectMode.value = false;
+    rowImages.clear();
+  }
+
+  // Get total selected images count
+  int getTotalImagesCount() {
+    return rowImages.values.fold(0, (sum, images) => sum + images.length);
+  }
+
+  // Remove image
+  // void removeImage(int index) {
+  //   selectedImages.removeAt(index);
+  // }
+
+  /// ADD THIS HELPER METHOD IN YOUR CLASS (GetX Controller or wherever you have this function)
+  void _logMultipartRequest(http.MultipartRequest request) {
+    developer.log(
+      '╔════════════════════════════════════════════════════════════',
+      name: 'DPR_Update',
+    );
+    developer.log(
+      '║              BATCH DPR UPDATE REQUEST LOG                 ',
+      name: 'DPR_Update',
+    );
+    developer.log(
+      '╠════════════════════════════════════════════════════════════',
+      name: 'DPR_Update',
+    );
+    developer.log(
+      '║ URL: ${request.method} ${request.url}',
+      name: 'DPR_Update',
+    );
+    developer.log('║ Headers:', name: 'DPR_Update');
+    request.headers.forEach((key, value) {
+      final display = key.toLowerCase().contains('authorization')
+          ? 'Bearer ***'
+          : value;
+      developer.log('║   $key: $display', name: 'DPR_Update');
+    });
+
+    developer.log('║', name: 'DPR_Update');
+    developer.log('║ FIELDS (${request.fields.length}):', name: 'DPR_Update');
+    request.fields.forEach((key, value) {
+      final displayValue = value.length > 300
+          ? '${value.substring(0, 300)}...'
+          : value;
+      developer.log('║   $key: $displayValue', name: 'DPR_Update');
+    });
+
+    developer.log('║', name: 'DPR_Update');
+    developer.log('║ FILES (${request.files.length}):', name: 'DPR_Update');
+    for (int i = 0; i < request.files.length; i++) {
+      final file = request.files[i];
+      final filename = file.filename ?? 'unknown';
+      final size = file.length > 0 ? _formatBytes(file.length) : 'unknown size';
+      developer.log(
+        '║   [${file.field}] $filename → $size',
+        name: 'DPR_Update',
+      );
+    }
+
+    developer.log(
+      '╚════════════════════════════════════════════════════════════',
+      name: 'DPR_Update',
+    );
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  /// YOUR MAIN FUNCTION — FULLY UPDATED WITH LOGGING
+  Future<void> batchUpdateSelectedDPRs() async {
+    if (selectedIndices.isEmpty) {
+      AppSnackbarStyles.showError(
+        title: "Error",
+        message: "Please select at least one item",
+      );
+      return;
+    }
+
+    isLoadingu.value = true;
+
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(Networkutility.updateDailyProgressReport),
+      );
+
+      // Common fields
+
+      // Add each selected row
+      int i = 0;
+      for (int idx in selectedIndices) {
+        final item = filteredMeasurementSheets[idx];
+
+        final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
+        final msQty = item.getField('MS QTY')?.toString() ?? '0';
+
+        request.fields['ms_rows[$i][project_id]'] = dprController.projectId
+            .toString();
+        request.fields['ms_rows[$i][system_id]'] = systemId.value
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .trim();
+        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
+        request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
+        request.fields['ms_rows[$i][progress_status]'] = '1';
+        request.fields['ms_rows[$i][dpr_date]'] = DateFormat(
+          'yyyy-MM-dd',
+        ).format(DateTime.now());
+        request.fields['ms_rows[$i][executed_qty]'] =
+            item.getField('MS QTY')?.toString() ?? '0';
+
+        // Attach images for this specific row (if any)
+        if (rowImages.containsKey(idx) && rowImages[idx]!.isNotEmpty) {
+          for (
+            int imgIndex = 0;
+            imgIndex < rowImages[idx]!.length;
+            imgIndex++
+          ) {
+            final image = rowImages[idx]![imgIndex];
+            final file = File(image.path);
+            if (await file.exists()) {
+              request.files.add(
+                await http.MultipartFile.fromPath(
+                  'ms_rows[$i][attachment]',
+                  image.path,
+                  filename: path.basename(image.path),
+                ),
+              );
+            }
+          }
+        }
+        i++;
+      }
+
+      if (i == 0) {
+        throw Exception("No valid measurement sheets selected");
+      }
+
+      // Authorization header
+      if (AppUtility.authToken != null && AppUtility.authToken!.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
+      }
+
+      // LOG THE ENTIRE REQUEST (THIS IS WHAT YOU WANTED)
+      _logMultipartRequest(request);
+
+      developer.log(
+        "Sending batch update with $i rows and ${request.files.length} attachments...",
+        name: 'DPR_Update',
+      );
+
+      // Send request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      developer.log(
+        "Response: ${response.statusCode} ${response.body}",
+        name: 'DPR_Update',
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        AppSnackbarStyles.showSuccess(
+          title: "Success",
+          message: "DPR Updated Successfully!",
+        );
+        clearSelection();
+        rowImages.clear();
+        await refreshData();
+      } else {
+        throw Exception(
+          "Server error: ${response.statusCode} - ${response.body}",
+        );
+      }
+    } catch (e, stackTrace) {
+      developer.log(
+        "Error in batchUpdateSelectedDPRs: $e",
+        name: 'DPR_Update',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      AppSnackbarStyles.showError(
+        title: "Update Failed",
+        message: e.toString().length > 100
+            ? "Failed to update DPR. Check logs."
+            : e.toString(),
+      );
+    } finally {
+      isLoadingu.value = false;
+    }
+  }
 }
