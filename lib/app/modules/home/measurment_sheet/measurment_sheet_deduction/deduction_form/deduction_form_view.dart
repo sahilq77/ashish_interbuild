@@ -36,6 +36,7 @@ class _DeductionFormViewState extends State<DeductionFormView> {
           child: Form(
             // Wrap with Form widget
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUnfocus,
             child: Column(
               children: [
                 _buildTextFormField(
