@@ -620,6 +620,66 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
     );
   }
 
+  void _showConfirmationDialog(
+    BuildContext context,
+    UpdateProgressReportController controller,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // Reduced border radius
+          ),
+          title: Text(
+            'Confirm Update',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(18),
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to update?',
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+            ),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: AppButtonStyles.outlinedSmallBlack(),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: AppStyle.labelPrimaryPoppinsBlack,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: AppButtonStyles.elevatedSmallBlack(),
+                    onPressed: () {
+                      controller.batchUpdateSelectedDPRs();
+                    },
+                    child: Text(
+                      'Confirm',
+                      style: AppStyle.labelPrimaryPoppinsWhite,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _updatedBadge() {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -715,7 +775,7 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                     child: ElevatedButton(
                       onPressed: controller.selectedIndices.length == 0
                           ? null
-                          : () => controller.batchUpdateSelectedDPRs(),
+                          : () => _showConfirmationDialog(context, controller),
                       style: AppButtonStyles.elevatedMediumBlack(),
                       child: controller.isLoadingu.value
                           ? const SizedBox(
