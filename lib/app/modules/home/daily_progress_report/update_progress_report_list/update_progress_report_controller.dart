@@ -48,6 +48,7 @@ class UpdateProgressReportController extends GetxController {
   RxString systemId = "".obs;
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
+  
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
     columns: [],
     frontDisplayColumns: [],

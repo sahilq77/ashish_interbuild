@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -956,6 +957,94 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
           ),
         ),
       ),
+      actions: [
+        // Obx(() {
+        //   if (controller.dprCounts.value.isEmpty) {
+        //     return const Center(child: Text(""));
+        //   }
+
+        //   final count = controller.dprCounts.value.first;
+
+        //   return Container(
+        //     margin: const EdgeInsets.symmetric(horizontal: 16),
+        //     decoration: BoxDecoration(
+        //       border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //     child: InkWell(
+        //       borderRadius: BorderRadius.circular(8),
+        //       onTap: () => Get.toNamed(
+        //         AppRoutes.addPBOQ,
+        //         arguments: {
+        //           "project_id": int.parse(count.projectId),
+        //           "package_id":int.parse(count.packageId),
+        //           "pboq_id": int.parse(count.pboqId),
+        //         },
+        //       ),
+        //       child: Padding(
+        //         padding: const EdgeInsets.symmetric(
+        //           horizontal: 16,
+        //           vertical: 10,
+        //         ),
+        //         child: Row(
+        //           mainAxisSize: MainAxisSize.min,
+        //           children: [
+        //             const SizedBox(width: 6),
+        //             Text(
+        //               'Add',
+        //               style: AppStyle.labelPrimaryPoppinsBlack.responsive
+        //                   .copyWith(
+        //                     fontSize: ResponsiveHelper.getResponsiveFontSize(
+        //                       14,
+        //                     ),
+        //                   ),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   );
+
+        //   // count.totalMs == 1 && count.totalMs > 1
+        //   //     ? Container(
+        //   //         margin: const EdgeInsets.symmetric(horizontal: 16),
+        //   //         decoration: BoxDecoration(
+        //   //           border: Border.all(
+        //   //             color: AppColors.defaultBlack,
+        //   //             width: 0.5,
+        //   //           ),
+        //   //           borderRadius: BorderRadius.circular(8),
+        //   //         ),
+        //   //         child: InkWell(
+        //   //           borderRadius: BorderRadius.circular(8),
+        //   //           onTap: () => Get.toNamed(AppRoutes.addPBOQ),
+        //   //           child: Padding(
+        //   //             padding: const EdgeInsets.symmetric(
+        //   //               horizontal: 16,
+        //   //               vertical: 10,
+        //   //             ),
+        //   //             child: Row(
+        //   //               mainAxisSize: MainAxisSize.min,
+        //   //               children: [
+        //   //                 const SizedBox(width: 6),
+        //   //                 Text(
+        //   //                   'Add',
+        //   //                   style: AppStyle.labelPrimaryPoppinsBlack.responsive
+        //   //                       .copyWith(
+        //   //                         fontSize:
+        //   //                             ResponsiveHelper.getResponsiveFontSize(
+        //   //                               14,
+        //   //                             ),
+        //   //                       ),
+        //   //                 ),
+        //   //               ],
+        //   //             ),
+        //   //           ),
+        //   //         ),
+        //   //       )
+        //   //     : SizedBox.shrink();
+        // }),
+      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
         child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),

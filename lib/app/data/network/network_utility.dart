@@ -62,6 +62,11 @@ class Networkutility {
 
   static String updateDailyProgressReport = "${baseUrl + "dpr/update"}";
   static int updateDailyProgressReportApi = 21;
+
+//<======================= WEEKLY INSPECTION MODULE ============================>
+static String getWIRdashboard  = "${baseUrl + "wir/list"}";
+  static int getWIRdashboardApi = 22;
+  
 }
 
 

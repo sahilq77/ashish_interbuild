@@ -6,6 +6,7 @@ import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 
 class WeeklyInspectionDashboard extends StatelessWidget {
   const WeeklyInspectionDashboard({super.key});
@@ -17,75 +18,126 @@ class WeeklyInspectionDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
-      body: Padding(
-        padding: ResponsiveHelper.padding(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Skyline Towers ➔ Weekly Inspection Dashboard",
-              style: AppStyle.bodySmallPoppinsPrimary,
+      body: RefreshIndicator(
+        onRefresh: controller.refreshData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: ResponsiveHelper.padding(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Skyline Towers ➔ WIR Dashboard",
+                  style: AppStyle.bodySmallPoppinsPrimary,
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
+                Obx(
+                  () => controller.isLoading.value
+                      ? GridView.count(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          childAspectRatio: 1.3,
+                          children: List.generate(
+                            6,
+                            (index) => _buildShimmerItem(),
+                          ),
+                        )
+                      : GridView.count(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          childAspectRatio: 1.3,
+                          children: [
+                            _buildGridItem(
+                              'Monthly Target',
+                              controller.formatCurrency(
+                                controller.monthlyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.monthlyPercent.value,
+                              ),
+                              Colors.indigo,
+                              true,
+                              showPercent: false,
+                              controller: controller,
+                            ),
+                            _buildGridItem(
+                              'Monthly Achieve',
+                              controller.formatCurrency(
+                                controller.monthlyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.monthlyPercent.value,
+                              ),
+                              Colors.teal,
+                              true,
+                              showPercent: true,
+                              controller: controller,
+                            ),
+                            _buildGridItem(
+                              'Weekly Target',
+                              controller.formatCurrency(
+                                controller.weeklyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.weeklyPercent.value,
+                              ),
+                              Colors.deepOrange,
+                              true,
+                              showPercent: false,
+                              controller: controller,
+                            ),
+                            _buildGridItem(
+                              'Weekly Achieve',
+                              controller.formatCurrency(
+                                controller.weeklyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.weeklyPercent.value,
+                              ),
+                              Colors.deepPurple,
+                              true,
+                              showPercent: true,
+                              controller: controller,
+                            ),
+                            _buildGridItem(
+                              'Today\'s Target',
+                              controller.formatCurrency(
+                                controller.dailyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.dailyPercent.value,
+                              ),
+                              Colors.amber,
+                              true,
+                              showPercent: false,
+                              controller: controller,
+                            ),
+                            _buildGridItem(
+                              'Today\'s Achieve',
+                              controller.formatCurrency(
+                                controller.dailyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.dailyPercent.value,
+                              ),
+                              Colors.green,
+                              true,
+                              showPercent: true,
+                              controller: controller,
+                            ),
+                          ],
+                        ),
+                ),
+              ],
             ),
-            SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
-            Obx(
-              () => GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                childAspectRatio: 1.3,
-                children: [
-                  _buildGridItem(
-                    'Monthly Target',
-                    controller.formatCurrency(controller.monthlyTarget.value),
-                    controller.formatPercentage(
-                      controller.monthlyPercent.value,
-                    ),
-                    Colors.indigo,
-                    true,
-                  ),
-                  _buildGridItem(
-                    'Monthly Achieve',
-                    controller.formatCurrency(controller.monthlyAchieve.value),
-                    controller.formatPercentage(
-                      controller.monthlyPercent.value,
-                    ),
-                    Colors.teal,
-                    true,
-                  ),
-                  _buildGridItem(
-                    'Weekly Target',
-                    controller.formatCurrency(controller.weeklyTarget.value),
-                    controller.formatPercentage(controller.weeklyPercent.value),
-                    Colors.deepOrange,
-                    true,
-                  ),
-                  _buildGridItem(
-                    'Weekly Achieve',
-                    controller.formatCurrency(controller.weeklyAchieve.value),
-                    controller.formatPercentage(controller.weeklyPercent.value),
-                    Colors.deepPurple,
-                    true,
-                  ),
-                  _buildGridItem(
-                    'Today\'s Target',
-                    controller.formatCurrency(controller.dailyTarget.value),
-                    controller.formatPercentage(controller.dailyPercent.value),
-                    Colors.amber,
-                    true,
-                  ),
-                  _buildGridItem(
-                    'Today\'s Achieve',
-                    controller.formatCurrency(controller.dailyAchieve.value),
-                    controller.formatPercentage(controller.dailyPercent.value),
-                    Colors.green,
-                    true,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -96,11 +148,20 @@ class WeeklyInspectionDashboard extends StatelessWidget {
     String count,
     String percent,
     Color gradientColor,
-    bool isColor,
-  ) {
+    bool isColor, {
+    bool showPercent =
+        true, // New parameter with default true (for backward compatibility if needed)
+    required WeeklyInspectionDashboardController controller,
+  }) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.weeklyInspection);
+        Get.toNamed(
+          AppRoutes.dailyProgressReport,
+          arguments: {
+            "project_id": controller.projectId.value,
+            "package_id": controller.packageId.value,
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -121,7 +182,13 @@ class WeeklyInspectionDashboard extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () {
-              Get.toNamed(AppRoutes.weeklyInspection);
+              Get.toNamed(
+                AppRoutes.dailyProgressReport,
+                arguments: {
+                  "project_id": controller.projectId.value,
+                  "package_id": controller.packageId.value,
+                },
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -147,29 +214,88 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: ResponsiveHelper.padding(5),
-                        padding: ResponsiveHelper.padding(5),
-                        alignment: Alignment.bottomRight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: AppColors.grey.withOpacity(0.5),
+                  // Only show percent box if showPercent is true
+                  if (showPercent)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          margin: ResponsiveHelper.padding(5),
+                          padding: ResponsiveHelper.padding(5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: AppColors.grey.withOpacity(0.5),
+                            ),
+                            color: AppColors.white,
                           ),
-                          color: AppColors.white,
+                          child: Center(
+                            child: Text(percent, style: AppStyle.dashPercent),
+                          ),
                         ),
-                        child: Center(
-                          child: Text(percent, style: AppStyle.dashPercent),
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    )
+                  else
+                    const SizedBox(height: 30), // Optional: maintain spacing
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerItem() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.grey.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title placeholder
+              Container(
+                height: 16,
+                width: double.infinity,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 12),
+              // Count placeholder
+              Container(height: 24, width: 80, color: Colors.white),
+              const Spacer(),
+              // Percent box placeholder (only for achieve cards)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Container(width: 40, height: 16, color: Colors.white),
+                ),
+              ),
+            ],
           ),
         ),
       ),
