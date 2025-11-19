@@ -958,92 +958,92 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
         ),
       ),
       actions: [
-        // Obx(() {
-        //   if (controller.dprCounts.value.isEmpty) {
-        //     return const Center(child: Text(""));
-        //   }
+        Obx(() {
+          if (controller.dprCount.value.isEmpty) {
+            return const Center(child: Text(""));
+          }
 
-        //   final count = controller.dprCounts.value.first;
+          final count = controller.dprCount.value.first;
 
-        //   return Container(
-        //     margin: const EdgeInsets.symmetric(horizontal: 16),
-        //     decoration: BoxDecoration(
-        //       border: Border.all(color: AppColors.defaultBlack, width: 0.5),
-        //       borderRadius: BorderRadius.circular(8),
-        //     ),
-        //     child: InkWell(
-        //       borderRadius: BorderRadius.circular(8),
-        //       onTap: () => Get.toNamed(
-        //         AppRoutes.addPBOQ,
-        //         arguments: {
-        //           "project_id": int.parse(count.projectId),
-        //           "package_id":int.parse(count.packageId),
-        //           "pboq_id": int.parse(count.pboqId),
-        //         },
-        //       ),
-        //       child: Padding(
-        //         padding: const EdgeInsets.symmetric(
-        //           horizontal: 16,
-        //           vertical: 10,
-        //         ),
-        //         child: Row(
-        //           mainAxisSize: MainAxisSize.min,
-        //           children: [
-        //             const SizedBox(width: 6),
-        //             Text(
-        //               'Add',
-        //               style: AppStyle.labelPrimaryPoppinsBlack.responsive
-        //                   .copyWith(
-        //                     fontSize: ResponsiveHelper.getResponsiveFontSize(
-        //                       14,
-        //                     ),
-        //                   ),
-        //             ),
-        //           ],
-        //         ),
-        //       ),
-        //     ),
-        //   );
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => Get.toNamed(
+                AppRoutes.addPBOQ,
+                arguments: {
+                  "project_id": int.parse(count.projectId),
+                  "package_id": int.parse(count.packageId),
+                  "pboq_id": int.parse(count.pboqId),
+                },
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 6),
+                    Text(
+                      'Add',
+                      style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                          .copyWith(
+                            fontSize: ResponsiveHelper.getResponsiveFontSize(
+                              14,
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
 
-        //   // count.totalMs == 1 && count.totalMs > 1
-        //   //     ? Container(
-        //   //         margin: const EdgeInsets.symmetric(horizontal: 16),
-        //   //         decoration: BoxDecoration(
-        //   //           border: Border.all(
-        //   //             color: AppColors.defaultBlack,
-        //   //             width: 0.5,
-        //   //           ),
-        //   //           borderRadius: BorderRadius.circular(8),
-        //   //         ),
-        //   //         child: InkWell(
-        //   //           borderRadius: BorderRadius.circular(8),
-        //   //           onTap: () => Get.toNamed(AppRoutes.addPBOQ),
-        //   //           child: Padding(
-        //   //             padding: const EdgeInsets.symmetric(
-        //   //               horizontal: 16,
-        //   //               vertical: 10,
-        //   //             ),
-        //   //             child: Row(
-        //   //               mainAxisSize: MainAxisSize.min,
-        //   //               children: [
-        //   //                 const SizedBox(width: 6),
-        //   //                 Text(
-        //   //                   'Add',
-        //   //                   style: AppStyle.labelPrimaryPoppinsBlack.responsive
-        //   //                       .copyWith(
-        //   //                         fontSize:
-        //   //                             ResponsiveHelper.getResponsiveFontSize(
-        //   //                               14,
-        //   //                             ),
-        //   //                       ),
-        //   //                 ),
-        //   //               ],
-        //   //             ),
-        //   //           ),
-        //   //         ),
-        //   //       )
-        //   //     : SizedBox.shrink();
-        // }),
+          // count.totalMs == 1 && count.totalMs > 1
+          //     ? Container(
+          //         margin: const EdgeInsets.symmetric(horizontal: 16),
+          //         decoration: BoxDecoration(
+          //           border: Border.all(
+          //             color: AppColors.defaultBlack,
+          //             width: 0.5,
+          //           ),
+          //           borderRadius: BorderRadius.circular(8),
+          //         ),
+          //         child: InkWell(
+          //           borderRadius: BorderRadius.circular(8),
+          //           onTap: () => Get.toNamed(AppRoutes.addPBOQ),
+          //           child: Padding(
+          //             padding: const EdgeInsets.symmetric(
+          //               horizontal: 16,
+          //               vertical: 10,
+          //             ),
+          //             child: Row(
+          //               mainAxisSize: MainAxisSize.min,
+          //               children: [
+          //                 const SizedBox(width: 6),
+          //                 Text(
+          //                   'Add',
+          //                   style: AppStyle.labelPrimaryPoppinsBlack.responsive
+          //                       .copyWith(
+          //                         fontSize:
+          //                             ResponsiveHelper.getResponsiveFontSize(
+          //                               14,
+          //                             ),
+          //                       ),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     : SizedBox.shrink();
+        }),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),

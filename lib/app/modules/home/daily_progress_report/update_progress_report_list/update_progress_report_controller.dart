@@ -48,7 +48,8 @@ class UpdateProgressReportController extends GetxController {
   RxString systemId = "".obs;
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
-  
+  final RxList<DprCounts> dprCount = <DprCounts>[].obs;
+
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
     columns: [],
     frontDisplayColumns: [],
@@ -165,6 +166,15 @@ class UpdateProgressReportController extends GetxController {
 
       if (response != null && response.status) {
         final data = response.data.data;
+        dprCount.add(
+          DprCounts(
+            projectId: response.data.dprCounts!.packageId,
+            packageId: response.data.dprCounts!.packageId,
+            pboqId: response.data.dprCounts!.pboqId,
+            totalMs: response.data.dprCounts!.totalMs,
+            dprStatus: response.data.dprCounts!.dprStatus,
+          ),
+        );
         if (frontDisplayColumns.isEmpty) {
           frontDisplayColumns.assignAll(
             response.data.appColumnDetails.frontDisplayColumns,

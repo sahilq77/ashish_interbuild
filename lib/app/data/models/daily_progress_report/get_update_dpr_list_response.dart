@@ -39,6 +39,7 @@ class DprData {
   int recordsFiltered;
   AppColumnDetails appColumnDetails;
   List<DprItem> data;
+  DprCounts? dprCounts;
 
   DprData({
     required this.draw,
@@ -46,6 +47,7 @@ class DprData {
     required this.recordsFiltered,
     required this.appColumnDetails,
     required this.data,
+    this.dprCounts,
   });
 
   factory DprData.fromJson(Map<String, dynamic> json) => DprData(
@@ -54,6 +56,7 @@ class DprData {
     recordsFiltered: json["recordsFiltered"] ?? 0,
     appColumnDetails: AppColumnDetails.fromJson(json["app_column_details"]),
     data: List<DprItem>.from(json["data"].map((x) => DprItem.fromJson(x))),
+    dprCounts: json["dpr_counts"] != null ? DprCounts.fromJson(json["dpr_counts"]) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +65,7 @@ class DprData {
     "recordsFiltered": recordsFiltered,
     "app_column_details": appColumnDetails.toJson(),
     "data": List<dynamic>.from(data.map((x) => x.toJson())),
+    if (dprCounts != null) "dpr_counts": dprCounts!.toJson(),
   };
 }
 
@@ -90,6 +94,66 @@ class AppColumnDetails {
     "front_display_columns": List<dynamic>.from(frontDisplayColumns.map((x) => x)),
     "front_secondary_display_columns": List<dynamic>.from(frontSecondaryDisplayColumns.map((x) => x)),
     "button_display_column": List<dynamic>.from(buttonDisplayColumn.map((x) => x)),
+  };
+}
+
+class DprCounts {
+  String projectId;
+  String packageId;
+  String pboqId;
+  int totalMs;
+  DprStatus dprStatus;
+
+  DprCounts({
+    required this.projectId,
+    required this.packageId,
+    required this.pboqId,
+    required this.totalMs,
+    required this.dprStatus,
+  });
+
+  factory DprCounts.fromJson(Map<String, dynamic> json) => DprCounts(
+    projectId: json["project_id"] ?? "",
+    packageId: json["package_id"] ?? "",
+    pboqId: json["pboq_id"] ?? "",
+    totalMs: json["TotalMs"] ?? 0,
+    dprStatus: DprStatus.fromJson(json["dpr_status"]),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "project_id": projectId,
+    "package_id": packageId,
+    "pboq_id": pboqId,
+    "TotalMs": totalMs,
+    "dpr_status": dprStatus.toJson(),
+  };
+}
+
+class DprStatus {
+  int target;
+  int achievedTarget;
+  String targetAmount;
+  String achievedTargetAmount;
+
+  DprStatus({
+    required this.target,
+    required this.achievedTarget,
+    required this.targetAmount,
+    required this.achievedTargetAmount,
+  });
+
+  factory DprStatus.fromJson(Map<String, dynamic> json) => DprStatus(
+    target: json["target"] ?? 0,
+    achievedTarget: json["achieved_target"] ?? 0,
+    targetAmount: json["target_amount"] ?? "0.00",
+    achievedTargetAmount: json["achieved_target_amount"] ?? "0.00",
+  );
+
+  Map<String, dynamic> toJson() => {
+    "target": target,
+    "achieved_target": achievedTarget,
+    "target_amount": targetAmount,
+    "achieved_target_amount": achievedTargetAmount,
   };
 }
 

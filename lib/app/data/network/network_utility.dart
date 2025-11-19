@@ -4,10 +4,10 @@ class Networkutility {
   static String login = "${baseUrl + "login"}";
   static int loginApi = 1;
 
-  static String getProfile = "${baseUrl + "user-details"}";
+  static String getProfile = "${baseUrl + "profile/details"}";
   static int getProfileApi = 2;
 
-  static String updateUserDetail = "${baseUrl + "update-user-details"}";
+  static String updateUserDetail = "${baseUrl + "profile/update"}";
   static int updateUserDetailApi = 3;
 
   static String getProjectNameList = "${baseUrl + "projects"}";
@@ -63,10 +63,9 @@ class Networkutility {
   static String updateDailyProgressReport = "${baseUrl + "dpr/update"}";
   static int updateDailyProgressReportApi = 21;
 
-//<======================= WEEKLY INSPECTION MODULE ============================>
-static String getWIRdashboard  = "${baseUrl + "wir/list"}";
+  //<======================= WEEKLY INSPECTION MODULE ============================>
+  static String getWIRdashboard = "${baseUrl + "wir/list"}";
   static int getWIRdashboardApi = 22;
-  
 }
 
 
