@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart'
+    hide DprItem, AppColumnDetails;
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_update_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
@@ -158,7 +160,7 @@ class UpdateProgressReportController extends GetxController {
         endpoint,
         context,
       );
-      final response = responseList?.first as GetDprListResponse?;
+      final response = responseList?.first as GetUpdateDPRListResponse?;
 
       if (response != null && response.status) {
         final data = response.data.data;

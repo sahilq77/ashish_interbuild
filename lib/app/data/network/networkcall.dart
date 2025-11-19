@@ -6,6 +6,7 @@ import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pbo
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
+import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_update_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
@@ -296,7 +297,7 @@ class Networkcall {
             final getDPRList = getDprListResponseFromJson(response.body);
             return [getDPRList];
           case 19:
-            final getDprReportDetailList = getDprListResponseFromJson(
+            final getDprReportDetailList = getUpdateDprListResponseFromJson(
               response.body,
             );
             return [getDprReportDetailList];

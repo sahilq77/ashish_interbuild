@@ -1,24 +1,24 @@
 import 'dart:convert';
 
 
-GetDprListResponse getDprListResponseFromJson(String str) => GetDprListResponse.fromJson(json.decode(str));
+GetUpdateDPRListResponse getUpdateDprListResponseFromJson(String str) => GetUpdateDPRListResponse.fromJson(json.decode(str));
 
-String getDprListResponseToJson(GetDprListResponse data) => json.encode(data.toJson());
+String getUpdateDprListResponseToJson(GetUpdateDPRListResponse data) => json.encode(data.toJson());
 
-class GetDprListResponse {
+class GetUpdateDPRListResponse {
   bool status;
   dynamic error;
   String message;
   DprData data;
 
-  GetDprListResponse({
+  GetUpdateDPRListResponse({
     required this.status,
     required this.error,
     required this.message,
     required this.data,
   });
 
-  factory GetDprListResponse.fromJson(Map<String, dynamic> json) => GetDprListResponse(
+  factory GetUpdateDPRListResponse.fromJson(Map<String, dynamic> json) => GetUpdateDPRListResponse(
     status: json["status"],
     error: json["error"],
     message: json["message"],
