@@ -21,7 +21,9 @@ class DailyProgressReportViiew extends StatefulWidget {
 
 class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
   final zoneController = Get.find<ZoneController>();
-
+  final DailyProgressReportController controller = Get.put(
+    DailyProgressReportController(),
+  );
   @override
   void initState() {
     super.initState();
@@ -30,7 +32,6 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
 
   @override
   Widget build(BuildContext context) {
-    final DailyProgressReportController controller = Get.find();
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -440,7 +441,9 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
   }
 
   void _showFilterDialog(BuildContext context) {
-    final controller = Get.find<DailyProgressReportController>();
+    final DailyProgressReportController controller = Get.put(
+      DailyProgressReportController(),
+    );
     final zoneController = Get.find<ZoneController>();
 
     String? tempZone = controller.selectedZone.value.isEmpty
@@ -532,13 +535,11 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                       controller.tempStartDate != null &&
                                           controller.tempEndDate != null
                                       ? DateTimeRange(
-                                        
                                           start: controller.tempStartDate!,
                                           end: controller.tempEndDate!,
                                         )
                                       : null,
                                   builder: (context, child) => Theme(
-
                                     data: ThemeData.light().copyWith(
                                       colorScheme: const ColorScheme.light(
                                         primary: AppColors.primary,

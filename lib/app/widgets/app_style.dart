@@ -303,7 +303,7 @@ class AppStyle {
   );
 
   static TextStyle get buttonTextSmallPoppinsWhite => GoogleFonts.poppins(
-    fontSize: _fontSize16,
+    fontSize: _fontSize13,
     fontWeight: FontWeight.w600,
     color: AppColors.white,
   );

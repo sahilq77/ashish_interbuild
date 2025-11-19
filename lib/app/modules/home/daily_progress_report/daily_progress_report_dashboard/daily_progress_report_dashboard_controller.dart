@@ -5,6 +5,7 @@ import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart'
     show Networkcall;
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,6 +32,7 @@ class DailyProgressReportDashboardController extends GetxController {
   late RxDouble dailyTarget;
   late RxDouble dailyAchieve;
   late RxDouble dailyPercent;
+  final UpdateProgressReportController dprUpdateController = Get.find();
 
   @override
   void onInit() {
@@ -85,7 +87,9 @@ class DailyProgressReportDashboardController extends GetxController {
               )
               as List<GetDashboardResponse>?;
 
-      if (response != null && response.isNotEmpty && response[0].status == true) {
+      if (response != null &&
+          response.isNotEmpty &&
+          response[0].status == true) {
         final count = response[0].dprCounts;
 
         dprCount.add(count);
@@ -109,11 +113,10 @@ class DailyProgressReportDashboardController extends GetxController {
         dailyPercent.value =
             double.tryParse(count.todayAchievedTargetPer ?? '0') ?? 0.0;
       } else {
-        final message = response?.isNotEmpty == true ? response![0].message : 'Failed to load data';
-        AppSnackbarStyles.showError(
-          title: 'Error',
-          message: message,
-        );
+        final message = response?.isNotEmpty == true
+            ? response![0].message
+            : 'Failed to load data';
+        AppSnackbarStyles.showError(title: 'Error', message: message);
         errorMessage.value = message;
       }
     } on NoInternetException catch (e) {

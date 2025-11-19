@@ -267,7 +267,10 @@ class AppRoutes {
     GetPage(
       name: dailyProgressDashboard,
       page: () => const DailyProgressReportDashboard(),
-      binding: DailyProgressReportDashboardBinding(),
+      bindings: [
+        DailyProgressReportDashboardBinding(),
+        UpdateProgressReportBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
@@ -22,20 +24,32 @@ class UpdateProgressReportList extends StatefulWidget {
 }
 
 class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
-  final zoneController = Get.find<ZoneController>();
-  final zoneLocationController = Get.find<ZoneLocationController>();
-
-  @override
+  final UpdateProgressReportController controller = Get.find();
+   final zoneController = Get.put(ZoneController());
+  final zoneLocationController = Get.put(ZoneLocationController());
+ @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    zoneController.fetchZones(context: context);
-    zoneLocationController.fetchZoneLocations(context: context);
-  }
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      controller.sourceName.value = args["selected_source"] ?? "";
+      controller.systemId.value = args["selected_system_id"] ?? "";
+    }
 
+    // Set default values if still 0
+
+    log("DPR Detail → Source=${controller.sourceName.value} System Id=${controller.systemId.value}");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        controller.fetchDprList(reset: true, context: Get.context!);
+        zoneController.fetchZones(context: Get.context!);
+        zoneLocationController.fetchZoneLocations(context: Get.context!);
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    final UpdateProgressReportController controller = Get.find();
+    
     ResponsiveHelper.init(context);
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -52,6 +66,63 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                 "Skyline Towers ➔ DPR Dashboard ➔ DPR",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
+            ),
+               Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: ResponsiveHelper.padding(16),
+                    padding: ResponsiveHelper.padding(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        Text("Package Name", style: AppStyle.reportCardTitle),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                        Obx(
+                          () => Text(
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            controller.packageName.value,
+                            style: AppStyle.reportCardSubTitle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: ResponsiveHelper.padding(16),
+                    padding: ResponsiveHelper.padding(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        Text("PBOQ Name", style: AppStyle.reportCardTitle),
+                        SizedBox(height: ResponsiveHelper.screenHeight * 0.003),
+                        Obx(
+                          () => Text(
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            controller.pboqName.value,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppStyle.reportCardSubTitle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             // Add search field
             Padding(
@@ -336,16 +407,20 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                                                             "execution_status",
                                                           ) ==
                                                           "0")
-                                                    Checkbox(
-                                                      value: controller
-                                                          .selectedIndices
-                                                          .contains(index),
-                                                      onChanged: (val) {
-                                                        controller
-                                                            .toggleItemSelection(
-                                                              index,
-                                                            );
-                                                      },
+                                                    Transform.scale(
+                                                      scale: 1.2,
+                                                      child: Checkbox(
+                                                        value: controller
+                                                            .selectedIndices
+                                                            .contains(index),
+                                                        onChanged: (val) {
+                                                          controller
+                                                              .toggleItemSelection(
+                                                                index,
+                                                              );
+                                                        },
+                                                        activeColor: AppColors.primary,
+                                                      ),
                                                     ),
                                                   const Spacer(),
                                                   if (controller.getFieldValue(
@@ -353,17 +428,39 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                                                         "execution_status",
                                                       ) ==
                                                       "0")
-                                                    IconButton(
-                                                      onPressed: () =>
-                                                          controller
-                                                              .pickImagesForRow(
-                                                                index,
+                                                    Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        if (controller.rowImages.containsKey(index) &&
+                                                            controller.rowImages[index] != null &&
+                                                            controller.rowImages[index]!.isNotEmpty)
+                                                          Container(
+                                                            padding: const EdgeInsets.symmetric(
+                                                              horizontal: 8,
+                                                              vertical: 4,
+                                                            ),
+                                                            decoration: BoxDecoration(
+                                                              color: AppColors.primary.withOpacity(0.1),
+                                                              borderRadius: BorderRadius.circular(12),
+                                                            ),
+                                                            child: Text(
+                                                              '${controller.rowImages[index]!.length} images',
+                                                              style: TextStyle(
+                                                                color: AppColors.primary,
+                                                                fontSize: 12,
+                                                                fontWeight: FontWeight.w500,
                                                               ),
-                                                      icon: Icon(
-                                                        Icons.camera_alt,
-                                                        color:
-                                                            AppColors.primary,
-                                                      ),
+                                                            ),
+                                                          ),
+                                                        const SizedBox(width: 8),
+                                                        IconButton(
+                                                          onPressed: () => controller.pickImageForRow(index),
+                                                          icon: Icon(
+                                                            Icons.add_a_photo,
+                                                            color: AppColors.primary,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     )
                                                   else
                                                     _updatedBadge(),
@@ -371,40 +468,27 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                                               ),
                                               if (controller.rowImages
                                                       .containsKey(index) &&
-                                                  controller
-                                                      .rowImages[index]!
-                                                      .isNotEmpty)
+                                                  controller.rowImages[index] != null &&
+                                                  controller.rowImages[index]!.isNotEmpty)
                                                 Container(
-                                                  height: 60,
+                                                  height: 80,
+                                                  margin: const EdgeInsets.only(top: 8),
                                                   child: ListView.builder(
-                                                    scrollDirection:
-                                                        Axis.horizontal,
-                                                    itemCount: controller
-                                                        .rowImages[index]!
-                                                        .length,
-                                                    itemBuilder: (context, imgIndex) {
+                                                    scrollDirection: Axis.horizontal,
+                                                    itemCount: controller.rowImages[index]!.length,
+                                                    itemBuilder: (context, imageIndex) {
+                                                      final image = controller.rowImages[index]![imageIndex];
                                                       return Container(
-                                                        margin:
-                                                            const EdgeInsets.only(
-                                                              right: 8,
-                                                            ),
+                                                        margin: const EdgeInsets.only(right: 8),
                                                         child: Stack(
                                                           children: [
                                                             ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    8,
-                                                                  ),
+                                                              borderRadius: BorderRadius.circular(8),
                                                               child: Image.file(
-                                                                File(
-                                                                  controller
-                                                                      .rowImages[index]![imgIndex]
-                                                                      .path,
-                                                                ),
+                                                                File(image.path),
                                                                 width: 60,
                                                                 height: 60,
-                                                                fit: BoxFit
-                                                                    .cover,
+                                                                fit: BoxFit.cover,
                                                               ),
                                                             ),
                                                             Positioned(
@@ -412,25 +496,16 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                                                               right: 2,
                                                               child: GestureDetector(
                                                                 onTap: () => controller
-                                                                    .removeImageFromRow(
-                                                                      index,
-                                                                      imgIndex,
-                                                                    ),
+                                                                    .removeImageFromRow(index, imageIndex),
                                                                 child: Container(
-                                                                  padding:
-                                                                      const EdgeInsets.all(
-                                                                        2,
-                                                                      ),
+                                                                  padding: const EdgeInsets.all(2),
                                                                   decoration: const BoxDecoration(
-                                                                    color: Colors
-                                                                        .red,
-                                                                    shape: BoxShape
-                                                                        .circle,
+                                                                    color: Colors.red,
+                                                                    shape: BoxShape.circle,
                                                                   ),
                                                                   child: const Icon(
                                                                     Icons.close,
-                                                                    color: Colors
-                                                                        .white,
+                                                                    color: Colors.white,
                                                                     size: 12,
                                                                   ),
                                                                 ),
@@ -535,7 +610,8 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                       style: AppButtonStyles.outlinedLargeBlack(),
                       child: Text(
                         'Select Items',
-                        style: AppStyle.buttonTextPoppinsBlack.responsive,
+                        style: AppStyle.buttonTextPoppinsBlack.responsive
+                            .copyWith(fontSize: 15),
                       ),
                     ),
                   ),
@@ -546,7 +622,8 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                       style: AppButtonStyles.outlinedMediumBlack(),
                       child: Text(
                         'Cancel',
-                        style: AppStyle.buttonTextPoppinsBlack.responsive,
+                        style: AppStyle.buttonTextPoppinsBlack.responsive
+                            .copyWith(fontSize: 15),
                       ),
                     ),
                   ),
@@ -571,7 +648,8 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                             )
                           : Text(
                               'Update (${controller.selectedIndices.length})',
-                              style: AppStyle.buttonTextPoppinsWhite.responsive,
+                              style: AppStyle.buttonTextPoppinsWhite.responsive
+                                  .copyWith(fontSize: 15),
                             ),
                     ),
                   ),
