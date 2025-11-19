@@ -26,7 +26,7 @@ class UpdateProgressReportController extends GetxController {
   final DailyProgressReportController dprController = Get.put(
     DailyProgressReportController(),
   );
- 
+
   final RxList<DprItem> dprList = <DprItem>[].obs;
   final RxList<DprItem> filteredMeasurementSheets = <DprItem>[].obs;
   final RxBool isLoading = true.obs;
@@ -213,6 +213,7 @@ class UpdateProgressReportController extends GetxController {
     start.value = 0;
     hasMoreData.value = true;
     filteredMeasurementSheets.clear();
+    toggleMultiSelectMode();
     await fetchDprList(reset: true, context: Get.context!);
   }
 
