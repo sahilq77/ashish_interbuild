@@ -66,6 +66,9 @@ class Networkutility {
   //<======================= WEEKLY INSPECTION MODULE ============================>
   static String getWIRdashboard = "${baseUrl + "wir/list"}";
   static int getWIRdashboardApi = 22;
+
+  static String getWIRList = "${baseUrl + "wir/list"}";
+  static int getWIRListApi = 23;
 }
 
 

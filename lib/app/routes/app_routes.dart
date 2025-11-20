@@ -34,7 +34,7 @@ import 'package:ashishinterbuild/app/modules/home/measurment_sheet/edit_pboq/edi
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_deduction/deduction_form/measurment_sheet_deduction_list/measurment_sheet_deduction_list.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_deduction/deduction_form/measurment_sheet_deduction_list/measurment_sheet_deduction_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
-import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_card_view.dart/weekly_inspection_card_view.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_card_view/weekly_inspection_card_view.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_package_list/weekly_inspection_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
@@ -105,10 +105,7 @@ class AppRoutes {
       '/update-daily-progress-report-list';
   static const String dailyProgressDashboard = '/daily-progress-dashboard';
 
-
-  
-  static const String weeklyInspectionCardView =
-      '/weekly-inspection-card-view';
+  static const String weeklyInspectionCardView = '/weekly-inspection-card-view';
   static const String weeklyInspectionDashboard =
       '/weekly-inspection-dashboard';
   static const String weeklyInspection = '/weekly-inspection';
@@ -296,8 +293,7 @@ class AppRoutes {
     ),
 
     // ─── WEEKLY INSPECTION ─────────────────────────────────
-    
-     GetPage(
+    GetPage(
       name: weeklyInspectionCardView,
       page: () => const WeeklyInspectionCardView(),
       binding: WeeklyInspectionDashboardBinding(),
@@ -312,7 +308,7 @@ class AppRoutes {
     GetPage(
       name: weeklyInspection,
       page: () => const WeeklyInspectionView(),
-      binding: WeeklyInspectionBinding(),
+      bindings: [WeeklyInspectionBinding(), ZoneBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(

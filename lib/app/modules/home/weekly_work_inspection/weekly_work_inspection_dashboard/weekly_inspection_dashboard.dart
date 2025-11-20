@@ -55,7 +55,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                           childAspectRatio: 1.3,
                           children: [
                             _buildGridItem(
-                              'Monthly Target',
+                              'Total Target',
                               controller.formatCurrency(
                                 controller.monthlyTarget.value,
                               ),
@@ -68,7 +68,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                               controller: controller,
                             ),
                             _buildGridItem(
-                              'Monthly Achieve',
+                              'Total Achieve',
                               controller.formatCurrency(
                                 controller.monthlyAchieve.value,
                               ),
@@ -81,7 +81,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                               controller: controller,
                             ),
                             _buildGridItem(
-                              'Weekly Target',
+                              'Monthly Target',
                               controller.formatCurrency(
                                 controller.weeklyTarget.value,
                               ),
@@ -94,7 +94,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                               controller: controller,
                             ),
                             _buildGridItem(
-                              'Weekly Achieve',
+                              'Monthly Achieve',
                               controller.formatCurrency(
                                 controller.weeklyAchieve.value,
                               ),
@@ -107,7 +107,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                               controller: controller,
                             ),
                             _buildGridItem(
-                              'Today\'s Target',
+                              'Weekly Target',
                               controller.formatCurrency(
                                 controller.dailyTarget.value,
                               ),
@@ -120,7 +120,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                               controller: controller,
                             ),
                             _buildGridItem(
-                              'Today\'s Achieve',
+                              'Weekly Achieve',
                               controller.formatCurrency(
                                 controller.dailyAchieve.value,
                               ),
@@ -156,7 +156,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Get.toNamed(
-          AppRoutes.dailyProgressReport,
+          AppRoutes.weeklyInspection,
           arguments: {
             "project_id": controller.projectId.value,
             "package_id": controller.packageId.value,
@@ -183,7 +183,7 @@ class WeeklyInspectionDashboard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             onTap: () {
               Get.toNamed(
-                AppRoutes.dailyProgressReport,
+                AppRoutes.weeklyInspection,
                 arguments: {
                   "project_id": controller.projectId.value,
                   "package_id": controller.packageId.value,

@@ -101,28 +101,31 @@ class WeeklyInspectionProjectList extends StatelessWidget {
 
                       return GestureDetector(
                         onTap: () => Get.toNamed(
-                          AppRoutes.weeklyInspectionPackageList,
-                          arguments: project.projectId,
+                          AppRoutes.weeklyInspectionCardView,
+                          arguments: {
+                            "project_id": int.parse(project.projectId),
+                            "package_id": 0,
+                          },
                         ),
-                        child:  Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.screenHeight * 0.02,
+                        child: Card(
+                          margin: EdgeInsets.only(
+                            bottom: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.white, Colors.grey.shade50],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  // border: Border(
-                                  //   left: BorderSide(
-                                  //     color: AppColors.primary,
-                                  //     width: 5,
-                                  //   ),
-                                  // ),
-                                ),
+                              borderRadius: BorderRadius.circular(10),
+                              // border: Border(
+                              //   left: BorderSide(
+                              //     color: AppColors.primary,
+                              //     width: 5,
+                              //   ),
+                              // ),
+                            ),
                             child: Padding(
                               padding: ResponsiveHelper.padding(16),
                               child: _buildDetailRow(

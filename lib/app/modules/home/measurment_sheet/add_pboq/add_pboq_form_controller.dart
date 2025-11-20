@@ -369,16 +369,14 @@ class AddPboqFormController extends GetxController {
 
     if (zoneId == null || pkgId == null || pboqId == null) return;
 
-    if (zoneId.isNotEmpty && zoneId.isNotEmpty && pboqId.isEmpty) {
-      await _zoneLocationCtrl.fetchZoneLocations(
-        context: Get.context!,
-        forceFetch: true,
-        projectId: mesurmentCtrl.projectId.value,
-        packageId: int.tryParse(pkgId) ?? 0,
-        pboqId: int.tryParse(pboqId) ?? 0,
-        zoneId: int.tryParse(zoneId) ?? 0,
-      );
-    }
+    await _zoneLocationCtrl.fetchZoneLocations(
+      context: Get.context!,
+      forceFetch: true,
+      projectId: mesurmentCtrl.projectId.value,
+      packageId: int.tryParse(pkgId) ?? 0,
+      pboqId: int.tryParse(pboqId) ?? 0,
+      zoneId: int.tryParse(zoneId) ?? 0,
+    );
 
     // Fetch planning status for this zone
     await fetchPlanningStatusForZone(int.tryParse(zoneId) ?? 0, index);
