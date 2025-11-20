@@ -52,17 +52,17 @@ class MeasurementSheetController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments!=null) {
-       final args = Get.arguments as Map<String, dynamic>;
-    projectId.value = args["project_id"] ?? 0;
-    packageId.value = args["package_id"] ?? 0;
-    packageName.value = args["package_name"] ?? "";
+    if (Get.arguments != null) {
+      final args = Get.arguments as Map<String, dynamic>;
+      projectId.value = args["project_id"] ?? 0;
+      packageId.value = args["package_id"] ?? 0;
+      packageName.value = args["package_name"] ?? "";
 
-    log(
-      "MeasurementSheetController → projectId=${projectId.value} packageId=${packageId.value}",
-    );
+      log(
+        "MeasurementSheetController → projectId=${projectId.value} packageId=${packageId.value}",
+      );
     }
-   
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         fetchPboq(reset: true, context: Get.context!);
@@ -140,32 +140,69 @@ class MeasurementSheetController extends GetxController {
             appColumnDetails.value = api.data.appColumnDetails;
           }
           // ---- pagination guard ----
-          if (data.isEmpty || data.length < length) hasMoreData.value = false;
-          // ---- map to UI list ----
-          final newItems = data;
-          if (reset) {
-            pboqList.assignAll(newItems);
+          if (data.isEmpty) {
+            hasMoreData.value = false;
+            // If this is the first page and no data, show error
+            if (reset || start.value == 0) {
+              _showError('No data available');
+            }
           } else {
-            pboqList.addAll(newItems);
+            // ---- map to UI list ----
+            final newItems = data;
+            if (reset) {
+              pboqList.assignAll(newItems);
+            } else {
+              pboqList.addAll(newItems);
+            }
+            _applyClientFilters(); // search + package filter
+            start.value += length;
+
+            // Check if we have less data than requested (last page)
+            if (data.length < length) {
+              hasMoreData.value = false;
+            }
           }
-          _applyClientFilters(); // search + package filter
-          start.value += length;
         } else {
-          _showError(api.message ?? 'No data');
+          // Only show error and clear data if this is the first page
+          if (reset || start.value == 0) {
+            _showError(api.message ?? 'No data');
+          } else {
+            hasMoreData.value = false;
+          }
         }
       } else {
-        _showError('Empty response');
+        // Only show error and clear data if this is the first page
+        if (reset || start.value == 0) {
+          _showError('Empty response');
+        } else {
+          hasMoreData.value = false;
+        }
       }
     } on NoInternetException catch (e) {
-      _showError(e.message);
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } on TimeoutException catch (e) {
-      _showError(e.message);
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } on HttpException catch (e) {
-      _showError('${e.message} (Code: ${e.statusCode})');
+      if (reset || start.value == 0) {
+        _showError('${e.message} (Code: ${e.statusCode})');
+      }
+      hasMoreData.value = false;
     } on ParseException catch (e) {
-      _showError(e.message);
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } catch (e) {
-      _showError('Unexpected error: $e');
+      if (reset || start.value == 0) {
+        _showError('Unexpected error: $e');
+      }
+      hasMoreData.value = false;
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -173,7 +210,6 @@ class MeasurementSheetController extends GetxController {
   }
 
   void _showError(String msg) {
-    hasMoreData.value = false;
     errorMessage.value = msg;
     AppSnackbarStyles.showError(title: 'Error', message: msg);
   }
