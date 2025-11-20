@@ -31,8 +31,8 @@ class DailyProgressReportController extends GetxController {
 
   // FILTERS
   final RxString selectedZone = ''.obs;
-  final RxString selectedStartDate = ''.obs;  // YYYY-MM-DD
-  final RxString selectedEndDate = ''.obs;    // YYYY-MM-DD
+  final RxString selectedStartDate = ''.obs; // YYYY-MM-DD
+  final RxString selectedEndDate = ''.obs; // YYYY-MM-DD
 
   // Temporary for dialog (not applied until "Apply")
   DateTime? tempStartDate;
@@ -72,7 +72,7 @@ class DailyProgressReportController extends GetxController {
   String _buildQueryParams({bool includePagination = true}) {
     final parts = <String>[
       'project_id=${projectId.value}',
-      'filter_package=${packageId.value}',
+      'filter_package=${packageId.value == 0 ? "" : packageId.value}',
       'filter_revised_start_date=${selectedStartDate.value}',
       'filter_revised_finish_date=${selectedEndDate.value}',
     ];
@@ -224,8 +224,13 @@ class DailyProgressReportController extends GetxController {
 
   void _applyClientFilters() {
     var list = dprList.toList();
-    if (selectedPackageFilter.value != null && selectedPackageFilter.value!.isNotEmpty) {
-      list = list.where((e) => e.getField('Package Name') == selectedPackageFilter.value).toList();
+    if (selectedPackageFilter.value != null &&
+        selectedPackageFilter.value!.isNotEmpty) {
+      list = list
+          .where(
+            (e) => e.getField('Package Name') == selectedPackageFilter.value,
+          )
+          .toList();
     }
     filteredMeasurementSheets.assignAll(list);
   }

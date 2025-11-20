@@ -5,6 +5,7 @@ import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
@@ -60,16 +61,21 @@ class _DprCardViewScreenState extends State<DprCardViewScreen> {
                   GestureDetector(
                     onTap: () {
                       Get.toNamed(
-                        AppRoutes.dailyProgressReport,
-                        arguments: {
-                          "project_id": projectId,
-                          "package_id": packageId,
-                        },
+                        AppRoutes.dprPackageList,
+                        arguments: projectId.toString(),
                       );
                     },
                     child: _buildGlassCard("DPR"),
                   ),
-                  _buildGlassCard("DPR Detail"),
+                  GestureDetector(
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.dailyProgressReport,
+                        arguments: {"project_id": projectId, "package_id": 0},
+                      );
+                    },
+                    child: _buildGlassCard("DPR Detail"),
+                  ),
                 ],
               ),
             ],
@@ -112,12 +118,12 @@ class _DprCardViewScreenState extends State<DprCardViewScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.star),
+                    Icon(FontAwesomeIcons.star),
                     const SizedBox(height: 20),
                     Text(
                       title,
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+                        fontSize: ResponsiveHelper.getResponsiveFontSize(14),
                         fontWeight: FontWeight.w500,
                         color: Colors.black.withOpacity(
                           0.95,

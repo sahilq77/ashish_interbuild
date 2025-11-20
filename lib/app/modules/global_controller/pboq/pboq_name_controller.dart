@@ -48,7 +48,7 @@ class PboqNameController extends GetxController {
       final response =
           await Networkcall().getMethod(
                 Networkutility.getPboqApi,
-                projectId == 0 && packageId == 0
+                projectId == 0 || packageId == 0
                     ? Networkutility.getPboq
                     : Networkutility.getPboq +
                           "?project_id=$projectId&package_id=$packageId",

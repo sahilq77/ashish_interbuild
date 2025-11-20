@@ -43,24 +43,22 @@ class DprPackageList extends StatelessWidget {
             ),
 
             // ── Error Message (if any) ───────────────────────────────
-            Obx(
-              () => controller.errorMessage.value.isNotEmpty
-                  ? Container(
-                      width: double.infinity,
-                      padding: ResponsiveHelper.padding(12),
-                      margin: ResponsiveHelper.padding(16),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        border: Border.all(color: Colors.red.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        controller.errorMessage.value,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            Obx(() => controller.errorMessage.value.isNotEmpty
+                ? Container(
+                    width: double.infinity,
+                    padding: ResponsiveHelper.padding(12),
+                    margin: ResponsiveHelper.padding(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      controller.errorMessage.value,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )
+                : const SizedBox.shrink()),
 
             // ── List ─────────────────────────────────────────────────
             Expanded(
@@ -77,8 +75,7 @@ class DprPackageList extends StatelessWidget {
 
                 return ListView.builder(
                   padding: ResponsiveHelper.padding(16),
-                  itemCount:
-                      controller.filteredPackages.length +
+                  itemCount: controller.filteredPackages.length +
                       (controller.hasMoreData.value ? 1 : 0),
                   itemBuilder: (context, index) {
                     // ── Load More Trigger ─────────────────────────────
@@ -93,9 +90,8 @@ class DprPackageList extends StatelessWidget {
 
                     return GestureDetector(
                       onTap: () {
-                        // dprCardView
                         Get.toNamed(
-                          AppRoutes.dprCardView,
+                          AppRoutes.dailyProgressDashboard,
                           arguments: {
                             "project_id": int.parse(package.projectId),
                             "package_id": int.parse(package.packageId),
@@ -177,6 +173,9 @@ class DprPackageList extends StatelessWidget {
     );
   }
 
+ 
+ 
+
   Widget _buildLoadMoreIndicator() {
     return const Padding(
       padding: EdgeInsets.all(16.0),
@@ -189,11 +188,7 @@ class DprPackageList extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
             'No packages found',

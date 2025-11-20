@@ -50,7 +50,9 @@ class PboqMeasurmentDetailController extends GetxController {
   RxInt heightEnabled = 0.obs;
   RxString uom = "".obs;
   RxString pboqName = "".obs;
-  final MeasurementSheetController mesurmentCtrl = Get.find();
+  final MeasurementSheetController mesurmentCtrl = Get.put(
+    MeasurementSheetController(),
+  );
   // ADD: Store full column details
   final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
     columns: [],
@@ -76,8 +78,8 @@ class PboqMeasurmentDetailController extends GetxController {
       lengthEnabled.value = args["length"] ?? 0;
       breadthEnabled.value = args["breadth"] ?? 0;
       heightEnabled.value = args["height"] ?? 0;
-      uom.value = args["uom"] as String;
-      pboqName.value = args["pboq_name"] as String;
+      uom.value = args["uom"] ?? "";
+      pboqName.value = args["pboq_name"] ?? "";
 
       // Optional: Log individual values for clarity
       log(
@@ -111,19 +113,21 @@ class PboqMeasurmentDetailController extends GetxController {
   // -----------------------------------------------------------------
   String _buildQueryParams({bool includePagination = true}) {
     final parts = <String>['project_id=', 'pboq_id=$pboqId'];
-    
+
     if (selectedZone.value.isNotEmpty) {
       parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
     } else {
       parts.add('filter_zone=');
     }
-    
+
     if (selectedZoneLocation.value.isNotEmpty) {
-      parts.add('filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}');
+      parts.add(
+        'filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}',
+      );
     } else {
       parts.add('filter_zone_location=');
     }
-    
+
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
     }

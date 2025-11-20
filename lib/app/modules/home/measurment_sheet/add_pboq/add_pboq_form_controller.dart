@@ -119,37 +119,64 @@ class AddPboqFormController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    
+    // Get arguments from navigation
+    final args = Get.arguments as Map<String, dynamic>?;
+    log('AddPboqFormController → Arguments received: $args', name: 'AddPboqForm');
+    
+    if (args != null) {
+      mesurmentCtrl.projectId.value = args["project_id"] ?? 0;
+      mesurmentCtrl.packageId.value = args["package_id"] ?? 0;
+      PBOQMSctr.pboqId.value = args["pboq_id"] ?? 0;
+      
+      log('AddPboqFormController → Set values: projectId=${mesurmentCtrl.projectId.value}, packageId=${mesurmentCtrl.packageId.value}, pboqId=${PBOQMSctr.pboqId.value}', name: 'AddPboqForm');
+    } else {
+      log('AddPboqFormController → No arguments received!', name: 'AddPboqForm');
+    }
+    
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (Get.context != null) {
         // Auto-bind Package
+        log('AddPboqFormController → Fetching packages for projectId: ${mesurmentCtrl.projectId.value}', name: 'AddPboqForm');
         await _pkgCtrl
             .fetchPackages(
               context: Get.context!,
               projectId: mesurmentCtrl.projectId.value,
             )
             .then((_) {
+              log('AddPboqFormController → Packages fetched: ${_pkgCtrl.packageNames}', name: 'AddPboqForm');
               final String? autoPackageId = mesurmentCtrl.packageId.value
                   .toString();
+              log('AddPboqFormController → Looking for packageId: $autoPackageId', name: 'AddPboqForm');
               if (autoPackageId != null &&
                   autoPackageId != 'null' &&
-                  autoPackageId.isNotEmpty) {
+                  autoPackageId.isNotEmpty &&
+                  autoPackageId != '0') {
                 final String? packageName = _pkgCtrl.getPackageNameById(
                   autoPackageId,
                 );
+                log('AddPboqFormController → Found packageName: $packageName', name: 'AddPboqForm');
                 if (packageName != null && packageName.isNotEmpty) {
                   selectedPackage.value = packageName;
+                  log('AddPboqFormController → Auto-bound package: $packageName', name: 'AddPboqForm');
                   onPackageChanged(packageName);
+                } else {
+                  log('AddPboqFormController → Package name not found for ID: $autoPackageId', name: 'AddPboqForm');
                 }
+              } else {
+                log('AddPboqFormController → Invalid packageId: $autoPackageId', name: 'AddPboqForm');
               }
             });
 
         // Fetch PBOQs
+        log('AddPboqFormController → Fetching PBOQs for projectId: ${mesurmentCtrl.projectId.value}, packageId: ${mesurmentCtrl.packageId.value}', name: 'AddPboqForm');
         await _pboqCtrl.fetchPboqs(
           forceFetch: true,
           context: Get.context!,
           projectId: mesurmentCtrl.projectId.value,
           packageId: mesurmentCtrl.packageId.value,
         );
+        log('AddPboqFormController → PBOQs fetched: ${_pboqCtrl.pboqNames}', name: 'AddPboqForm');
 
         // Initialize first field set with correct UOM
         if (fieldSets.isEmpty) {
@@ -158,18 +185,27 @@ class AddPboqFormController extends GetxController {
               ? PBOQMSctr.uom.value
               : 'Unit';
           fieldSets.add(initialFieldSet);
+          log('AddPboqFormController → Initialized first fieldSet with UOM: ${initialFieldSet.uom.value}', name: 'AddPboqForm');
         }
 
         // Auto-bind PBOQ
         final String? autoPboqId = PBOQMSctr.pboqId.value.toString();
+        log('AddPboqFormController → Looking for pboqId: $autoPboqId', name: 'AddPboqForm');
         if (autoPboqId != null &&
             autoPboqId != 'null' &&
-            autoPboqId.isNotEmpty) {
+            autoPboqId.isNotEmpty &&
+            autoPboqId != '0') {
           final String? pboqName = _pboqCtrl.getPboqNameById(autoPboqId);
+          log('AddPboqFormController → Found pboqName: $pboqName', name: 'AddPboqForm');
           if (pboqName != null && pboqName.isNotEmpty) {
             selectedPboqName.value = pboqName;
+            log('AddPboqFormController → Auto-bound PBOQ: $pboqName', name: 'AddPboqForm');
             onPboqNameChanged(pboqName);
+          } else {
+            log('AddPboqFormController → PBOQ name not found for ID: $autoPboqId', name: 'AddPboqForm');
           }
+        } else {
+          log('AddPboqFormController → Invalid pboqId: $autoPboqId', name: 'AddPboqForm');
         }
       }
     });

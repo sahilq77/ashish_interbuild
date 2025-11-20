@@ -11,6 +11,7 @@ import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
 
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
@@ -62,6 +63,7 @@ class UpdateProgressReportController extends GetxController {
 
   final RxString selectedZone = ''.obs;
   final RxString selectedZoneLocation = ''.obs;
+  final RxString selectedPboq = ''.obs;
   final Rxn<DateTime> selectedDate = Rxn<DateTime>();
 
   RxString packageName = "".obs;
@@ -106,8 +108,8 @@ class UpdateProgressReportController extends GetxController {
         ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
         : DateFormat('yyyy-MM-dd').format(DateTime.now());
     final parts = <String>[
-      'project_id=${dprController.projectId}',
-      'filter_package=${dprController.packageId}',
+      'project_id=${dprController.projectId.value}',
+      'filter_package=${dprController.packageId.value == 0 ? "" : dprController.packageId.value}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
       'filter_revised_start_date=${dateFilter}',
@@ -125,6 +127,11 @@ class UpdateProgressReportController extends GetxController {
       );
     } else {
       parts.add('filter_zone_location=');
+    }
+    if (selectedPboq.value.isNotEmpty) {
+      parts.add('filter_pboq=${Uri.encodeComponent(selectedPboq.value)}');
+    } else {
+      parts.add('filter_pboq=');
     }
     if (_search.value.isNotEmpty) {
       parts.add('search=${Uri.encodeComponent(_search.value)}');
@@ -286,6 +293,7 @@ class UpdateProgressReportController extends GetxController {
     selectedPackageFilter.value = null;
     selectedZone.value = "";
     selectedZoneLocation.value = "";
+    selectedPboq.value = "";
     selectedDate.value = null;
     searchController.clear();
     _search.value = '';
