@@ -131,6 +131,7 @@ class AddPboqFormController extends GetxController {
       mesurmentCtrl.projectId.value = args["project_id"] ?? 0;
       mesurmentCtrl.packageId.value = args["package_id"] ?? 0;
       PBOQMSctr.pboqId.value = args["pboq_id"] ?? 0;
+      uom.value = args["uom"] ?? "";
 
       log(
         'AddPboqFormController → Set values: projectId=${mesurmentCtrl.projectId.value}, packageId=${mesurmentCtrl.packageId.value}, pboqId=${PBOQMSctr.pboqId.value}',
@@ -301,7 +302,7 @@ class AddPboqFormController extends GetxController {
         fs.planningStatus.value = '';
         fs.uom.value = PBOQMSctr.uom.value.isNotEmpty
             ? PBOQMSctr.uom.value
-            : 'Unit';
+            : uom.value;
       }
     }
   }

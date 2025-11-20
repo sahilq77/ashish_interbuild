@@ -1,5 +1,7 @@
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/pboq_measurment_details_list/pboq_measurment_detail_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -21,14 +23,16 @@ class DailyProgressReportViiew extends StatefulWidget {
 
 class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
   final zoneController = Get.find<ZoneController>();
-  final DailyProgressReportController controller = Get.put(
-    DailyProgressReportController(),
-  );
-  @override
-  void initState() {
-    super.initState();
-    zoneController.fetchZones(context: context);
-  }
+
+  final DailyProgressReportController controller =
+      Get.find<DailyProgressReportController>();
+  // PboqMeasurmentDetailController uomController =
+  //     Get.find<PboqMeasurmentDetailController>();
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   zoneController.fetchZones(context: context);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -259,6 +263,11 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                                                       sheet,
                                                                       "System ID",
                                                                     ),
+                                                            "uom": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "UOM",
+                                                                ),
                                                           },
                                                         );
                                                       },

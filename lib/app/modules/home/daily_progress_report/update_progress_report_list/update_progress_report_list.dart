@@ -4,6 +4,7 @@ import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_control
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sheet_controller.dart';
 import 'dart:developer';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
@@ -28,6 +29,7 @@ class UpdateProgressReportList extends StatefulWidget {
 
 class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
   final UpdateProgressReportController controller = Get.find();
+
   final zoneController = Get.put(ZoneController());
   final zoneLocationController = Get.put(ZoneLocationController());
   final pboqController = Get.put(PboqNameController());
@@ -38,6 +40,7 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
     if (args != null) {
       controller.sourceName.value = args["selected_source"] ?? "";
       controller.systemId.value = args["selected_system_id"] ?? "";
+      controller.uom.value = args["uom"] ?? "";
     }
 
     // Set default values if still 0
@@ -986,6 +989,7 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                   "project_id": int.parse(count.projectId),
                   "package_id": int.parse(count.packageId),
                   "pboq_id": int.parse(count.pboqId),
+                  "uom": controller.uom.value,
                 };
                 log(
                   'UpdateProgressReportList → Navigating to AddPBOQ with args: $args',

@@ -263,6 +263,7 @@ class AppRoutes {
         DailyProgressReportBinding(),
         ZoneBinding(),
         ZoneLocationBinding(),
+        PboqMeasurmentDetailsListBinding()
       ],
       transition: Transition.rightToLeft,
     ),

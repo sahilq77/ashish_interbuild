@@ -4,11 +4,13 @@ import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_l
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DailyProgressReportController extends GetxController {
+  final zoneController = Get.find<ZoneController>();
   final RxList<DprItem> dprList = <DprItem>[].obs;
   final RxList<DprItem> filteredMeasurementSheets = <DprItem>[].obs;
   final RxBool isLoading = true.obs;
@@ -57,6 +59,7 @@ class DailyProgressReportController extends GetxController {
     log("DPR → projectId=${projectId.value} packageId=${packageId.value}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
+        zoneController.fetchZones(context: Get.context!);
         fetchDprList(reset: true, context: Get.context!);
       }
     });

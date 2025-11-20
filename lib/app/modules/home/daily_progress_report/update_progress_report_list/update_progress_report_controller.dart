@@ -47,6 +47,7 @@ class UpdateProgressReportController extends GetxController {
   Timer? _debounce;
   RxString sourceName = "".obs;
   RxString systemId = "".obs;
+   RxString uom = "".obs;
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
   final RxList<DprCounts> dprCount = <DprCounts>[].obs;
