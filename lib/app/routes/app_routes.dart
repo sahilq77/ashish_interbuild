@@ -27,6 +27,7 @@ import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_
 import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_form_view.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/client_commitment/update_client_commitment/update_client_commitment_form_view.dart';
+import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_cards/dpr_card_view_screen.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/dpr_package_list/dpr_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/edit_pboq/edit_pboq_form_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/edit_pboq/edit_pboq_form_view.dart';
@@ -96,6 +97,7 @@ class AppRoutes {
   static const String deductionForm = '/deduction-form';
   static const String measurmentSheetDeductionList =
       '/measurment-sheet-deduction-list';
+  static const String dprCardView = '/dpr-card-view';
   static const String dailyProgressReport = '/daily-progress-report';
   static const String dprPackageList = '/dpr-package-list';
   static const String updateDailyReportList =
@@ -243,6 +245,17 @@ class AppRoutes {
     ),
 
     // ─── DAILY PROGRESS REPORT ─────────────────────────────
+    GetPage(
+      name: dprCardView,
+      page: () => const DprCardViewScreen(),
+      bindings: [
+        DailyProgressReportBinding(),
+        ZoneBinding(),
+        ZoneLocationBinding(),
+      ],
+      transition: Transition.rightToLeft,
+    ),
+
     GetPage(
       name: dailyProgressReport,
       page: () => const DailyProgressReportViiew(),
