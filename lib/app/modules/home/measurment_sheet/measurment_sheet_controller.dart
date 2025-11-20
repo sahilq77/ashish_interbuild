@@ -52,7 +52,8 @@ class MeasurementSheetController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>;
+    if (Get.arguments!=null) {
+       final args = Get.arguments as Map<String, dynamic>;
     projectId.value = args["project_id"] ?? 0;
     packageId.value = args["package_id"] ?? 0;
     packageName.value = args["package_name"] ?? "";
@@ -60,6 +61,8 @@ class MeasurementSheetController extends GetxController {
     log(
       "MeasurementSheetController → projectId=${projectId.value} packageId=${packageId.value}",
     );
+    }
+   
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         fetchPboq(reset: true, context: Get.context!);

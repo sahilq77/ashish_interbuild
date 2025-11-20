@@ -975,45 +975,87 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
           }
 
           final count = controller.dprCount.value.first;
-
-          return count.totalMs == 0 || 0 > count.totalMs
-              ? Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.defaultBlack,
-                      width: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => Get.toNamed(AppRoutes.addPBOQ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 6),
-                          Text(
-                            'Add',
-                            style: AppStyle.labelPrimaryPoppinsBlack.responsive
-                                .copyWith(
-                                  fontSize:
-                                      ResponsiveHelper.getResponsiveFontSize(
-                                        14,
-                                      ),
-                                ),
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                Get.toNamed(
+                  AppRoutes.addPBOQ,
+                  arguments: {
+                    "project_id": int.parse(count.projectId),
+                    "package_id": int.parse(count.packageId),
+                    "pboq_id": int.parse(count.pboqId),
+                    "uom": controller.uom.value,
+                  },
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 6),
+                    Text(
+                      'Add',
+                      style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                          .copyWith(
+                            fontSize: ResponsiveHelper.getResponsiveFontSize(
+                              14,
+                            ),
                           ),
-                        ],
-                      ),
                     ),
-                  ),
-                )
-              : SizedBox.shrink();
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          // return count.totalMs == 0 || 0 > count.totalMs
+          //     ? Container(
+          //         margin: const EdgeInsets.symmetric(horizontal: 16),
+          //         decoration: BoxDecoration(
+          //           border: Border.all(
+          //             color: AppColors.defaultBlack,
+          //             width: 0.5,
+          //           ),
+          //           borderRadius: BorderRadius.circular(8),
+          //         ),
+          //         child: InkWell(
+          //           borderRadius: BorderRadius.circular(8),
+          //           onTap: () => Get.toNamed(AppRoutes.addPBOQ),
+          //           child: Padding(
+          //             padding: const EdgeInsets.symmetric(
+          //               horizontal: 16,
+          //               vertical: 10,
+          //             ),
+          //             child: Row(
+          //               mainAxisSize: MainAxisSize.min,
+          //               children: [
+          //                 const SizedBox(width: 6),
+          //                 Text(
+          //                   'Add',
+          //                   style: AppStyle.labelPrimaryPoppinsBlack.responsive
+          //                       .copyWith(
+          //                         fontSize:
+          //                             ResponsiveHelper.getResponsiveFontSize(
+          //                               14,
+          //                             ),
+          //                       ),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     : SizedBox.shrink();
         }),
       ],
       bottom: PreferredSize(
