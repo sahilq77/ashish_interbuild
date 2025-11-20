@@ -175,7 +175,7 @@ class UpdateProgressReportController extends GetxController {
         final data = response.data.data;
         dprCount.add(
           DprCounts(
-            projectId: response.data.dprCounts!.packageId,
+            projectId: response.data.dprCounts!.projectId,
             packageId: response.data.dprCounts!.packageId,
             pboqId: response.data.dprCounts!.pboqId,
             totalMs: response.data.dprCounts!.totalMs,

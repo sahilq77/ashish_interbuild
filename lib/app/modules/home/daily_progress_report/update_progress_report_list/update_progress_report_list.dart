@@ -50,7 +50,11 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
         controller.fetchDprList(reset: true, context: Get.context!);
         zoneController.fetchZones(context: Get.context!);
         zoneLocationController.fetchZoneLocations(context: Get.context!);
-        pboqController.fetchPboqs(context: Get.context!, projectId: controller.dprController.projectId.value, packageId: controller.dprController.packageId.value);
+        pboqController.fetchPboqs(
+          context: Get.context!,
+          projectId: controller.dprController.projectId.value,
+          packageId: controller.dprController.packageId.value,
+        );
       }
     });
   }
@@ -969,88 +973,88 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
 
           final count = controller.dprCount.value.first;
 
-          // return Container(
-          //   margin: const EdgeInsets.symmetric(horizontal: 16),
-          //   decoration: BoxDecoration(
-          //     border: Border.all(color: AppColors.defaultBlack, width: 0.5),
-          //     borderRadius: BorderRadius.circular(8),
-          //   ),
-          //   child: InkWell(
-          //     borderRadius: BorderRadius.circular(8),
-          //     onTap: () {
-          //       final args = {
-          //         "project_id": int.parse(count.projectId),
-          //         "package_id": int.parse(count.packageId),
-          //         "pboq_id": int.parse(count.pboqId),
-          //       };
-          //       log('UpdateProgressReportList → Navigating to AddPBOQ with args: $args', name: 'UpdateProgressReport');
-          //       Get.toNamed(
-          //         AppRoutes.addPBOQ,
-          //         arguments: args,
-          //       );
-          //     },
-          //     child: Padding(
-          //       padding: const EdgeInsets.symmetric(
-          //         horizontal: 16,
-          //         vertical: 10,
-          //       ),
-          //       child: Row(
-          //         mainAxisSize: MainAxisSize.min,
-          //         children: [
-          //           const SizedBox(width: 6),
-          //           Text(
-          //             'Add',
-          //             style: AppStyle.labelPrimaryPoppinsBlack.responsive
-          //                 .copyWith(
-          //                   fontSize: ResponsiveHelper.getResponsiveFontSize(
-          //                     14,
-          //                   ),
-          //                 ),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // );
-
-        return  count.totalMs == 0 && count.totalMs > 0
-              ? Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.defaultBlack,
-                      width: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => Get.toNamed(AppRoutes.addPBOQ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 6),
-                          Text(
-                            'Add',
-                            style: AppStyle.labelPrimaryPoppinsBlack.responsive
-                                .copyWith(
-                                  fontSize:
-                                      ResponsiveHelper.getResponsiveFontSize(
-                                        14,
-                                      ),
-                                ),
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.defaultBlack, width: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                final args = {
+                  "project_id": int.parse(count.projectId),
+                  "package_id": int.parse(count.packageId),
+                  "pboq_id": int.parse(count.pboqId),
+                };
+                log(
+                  'UpdateProgressReportList → Navigating to AddPBOQ with args: $args',
+                  name: 'UpdateProgressReport',
+                );
+                Get.toNamed(AppRoutes.addPBOQ, arguments: args);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 6),
+                    Text(
+                      'Add',
+                      style: AppStyle.labelPrimaryPoppinsBlack.responsive
+                          .copyWith(
+                            fontSize: ResponsiveHelper.getResponsiveFontSize(
+                              14,
+                            ),
                           ),
-                        ],
-                      ),
                     ),
-                  ),
-                )
-              : SizedBox.shrink();
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          // return  count.totalMs == 0 && count.totalMs > 0
+          //       ? Container(
+          //           margin: const EdgeInsets.symmetric(horizontal: 16),
+          //           decoration: BoxDecoration(
+          //             border: Border.all(
+          //               color: AppColors.defaultBlack,
+          //               width: 0.5,
+          //             ),
+          //             borderRadius: BorderRadius.circular(8),
+          //           ),
+          //           child: InkWell(
+          //             borderRadius: BorderRadius.circular(8),
+          //             onTap: () => Get.toNamed(AppRoutes.addPBOQ),
+          //             child: Padding(
+          //               padding: const EdgeInsets.symmetric(
+          //                 horizontal: 16,
+          //                 vertical: 10,
+          //               ),
+          //               child: Row(
+          //                 mainAxisSize: MainAxisSize.min,
+          //                 children: [
+          //                   const SizedBox(width: 6),
+          //                   Text(
+          //                     'Add',
+          //                     style: AppStyle.labelPrimaryPoppinsBlack.responsive
+          //                         .copyWith(
+          //                           fontSize:
+          //                               ResponsiveHelper.getResponsiveFontSize(
+          //                                 14,
+          //                               ),
+          //                         ),
+          //                   ),
+          //                 ],
+          //               ),
+          //             ),
+          //           ),
+          //         )
+          //       : SizedBox.shrink();
         }),
       ],
       bottom: PreferredSize(
@@ -1147,8 +1151,11 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                       _filterDropdownWithIcon(
                         label: 'PBOQ',
                         items: pboqController.pboqNames,
-                        selected: controller.selectedPboq.value.isEmpty ? null : controller.selectedPboq.value,
-                        onChanged: (v) => controller.selectedPboq.value = v ?? '',
+                        selected: controller.selectedPboq.value.isEmpty
+                            ? null
+                            : controller.selectedPboq.value,
+                        onChanged: (v) =>
+                            controller.selectedPboq.value = v ?? '',
                         icon: Icons.list_alt,
                       ),
 
