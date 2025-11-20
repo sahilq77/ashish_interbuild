@@ -47,7 +47,7 @@ class UpdateProgressReportController extends GetxController {
   Timer? _debounce;
   RxString sourceName = "".obs;
   RxString systemId = "".obs;
-   RxString uom = "".obs;
+  RxString uom = "".obs;
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
   final RxList<DprCounts> dprCount = <DprCounts>[].obs;
@@ -192,27 +192,56 @@ class UpdateProgressReportController extends GetxController {
           );
           appColumnDetails.value = response.data.appColumnDetails;
         }
-        if (data.isEmpty || data.length < length) hasMoreData.value = false;
-        if (reset) {
-          dprList.assignAll(data);
+        if (data.isEmpty) {
+          hasMoreData.value = false;
+          if (reset || start.value == 0) {
+            _showError('No data available');
+          }
         } else {
-          dprList.addAll(data);
+          if (reset) {
+            dprList.assignAll(data);
+          } else {
+            dprList.addAll(data);
+          }
+          _applyClientFilters();
+          start.value += length;
+
+          if (data.length < length) {
+            hasMoreData.value = false;
+          }
         }
-        _applyClientFilters();
-        start.value += length;
       } else {
-        _showError(response?.message ?? 'No data');
+        if (reset || start.value == 0) {
+          _showError(response?.message ?? 'No data');
+        } else {
+          hasMoreData.value = false;
+        }
       }
     } on NoInternetException catch (e) {
-      _showError(e.message);
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } on TimeoutException catch (e) {
-      _showError(e.message);
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } on HttpException catch (e) {
-      _showError('${e.message} (Code: ${e.statusCode})');
+      if (reset || start.value == 0) {
+        _showError('${e.message} (Code: ${e.statusCode})');
+      }
+      hasMoreData.value = false;
     } on ParseException catch (e) {
-      _showError(e.message);
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } catch (e) {
-      _showError('Unexpected error: $e');
+      if (reset || start.value == 0) {
+        _showError('Unexpected error: $e');
+      }
+      hasMoreData.value = false;
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -220,7 +249,6 @@ class UpdateProgressReportController extends GetxController {
   }
 
   void _showError(String msg) {
-    hasMoreData.value = false;
     errorMessage.value = msg;
     AppSnackbarStyles.showError(title: 'Error', message: msg);
   }
