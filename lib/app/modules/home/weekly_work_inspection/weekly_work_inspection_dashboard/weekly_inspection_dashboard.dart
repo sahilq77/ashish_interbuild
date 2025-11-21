@@ -31,6 +31,11 @@ class WeeklyInspectionDashboard extends StatelessWidget {
                   "Skyline Towers ➔ WIR Dashboard",
                   style: AppStyle.bodySmallPoppinsPrimary,
                 ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                Text(
+                  "Note: By Default Current Ongoing Week's Inspection Targets are showed",
+                  style: AppStyle.bodySmallPoppinsPrimary,
+                ),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
                 Obx(
                   () => controller.isLoading.value

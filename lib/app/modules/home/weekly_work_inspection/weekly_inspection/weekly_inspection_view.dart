@@ -55,6 +55,14 @@ class WeeklyInspectionView extends StatelessWidget {
                   ],
                 ),
               ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
+                child: Text(
+                  "Note: By Default Current Ongoing Week's Inspection Targets are showed",
+                  style: AppStyle.bodySmallPoppinsPrimary,
+                ),
+              ),
+
               Expanded(
                 child: Obx(
                   () => controller.isLoading.value

@@ -306,7 +306,8 @@ class Networkcall {
             final getWirdashboard = getWeeeklyDashboardResponseFromJson(str);
             return getWirdashboard;
           case 23:
-            final getWirList = getUpdateDprListResponseFromJson(response.body);
+            final getWirList = getDprListResponseFromJson(response.body);
+            return [getWirList];
 
           default:
             log("Invalid request code: $requestCode");

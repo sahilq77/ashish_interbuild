@@ -11,9 +11,10 @@ import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_control
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class WeeklyInspectionController extends GetxController {
-final zoneController = Get.find<ZoneController>();
+  final zoneController = Get.find<ZoneController>();
   final RxList<DprItem> dprList = <DprItem>[].obs;
   final RxList<DprItem> filteredMeasurementSheets = <DprItem>[].obs;
   final RxBool isLoading = true.obs;
@@ -38,6 +39,9 @@ final zoneController = Get.find<ZoneController>();
   final RxString selectedZone = ''.obs;
   final RxString selectedStartDate = ''.obs; // YYYY-MM-DD
   final RxString selectedEndDate = ''.obs; // YYYY-MM-DD
+  // Dynamic week date filters
+  RxString filterInspectionFromDate = ''.obs;
+  RxString filterInspectionToDate = ''.obs;
 
   // Temporary for dialog (not applied until "Apply")
   DateTime? tempStartDate;
@@ -59,7 +63,10 @@ final zoneController = Get.find<ZoneController>();
       packageId.value = args["package_id"] ?? 0;
     }
 
-    log("Weekly Inspection → projectId=${projectId.value} packageId=${packageId.value}");
+    log(
+      "Weekly Inspection → projectId=${projectId.value} packageId=${packageId.value}",
+    );
+    _setCurrentWeekDates();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         zoneController.fetchZones(context: Get.context!);
@@ -75,12 +82,23 @@ final zoneController = Get.find<ZoneController>();
     super.onClose();
   }
 
+  void _setCurrentWeekDates() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+    filterInspectionFromDate.value = DateFormat(
+      'yyyy-MM-dd',
+    ).format(startOfWeek);
+    filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(endOfWeek);
+  }
+
   String _buildQueryParams({bool includePagination = true}) {
     final parts = <String>[
       'project_id=${projectId.value}',
       'filter_package=${packageId.value == 0 ? "" : packageId.value}',
-      'filter_revised_start_date=${selectedStartDate.value}',
-      'filter_revised_finish_date=${selectedEndDate.value}',
+      'filter_inspection_from_date=${filterInspectionFromDate.value}',
+      'filter_inspection_to_date=${filterInspectionToDate.value}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
@@ -92,7 +110,7 @@ final zoneController = Get.find<ZoneController>();
     }
 
     parts.add('order_by=${_orderBy.value}');
-    parts.add('order_dir=${isAscending.value ? "asc" : "desc"}');
+    // parts.add('order_dir=${isAscending.value ? "desc" : "asc"}');
 
     if (includePagination) {
       parts.add('start=${start.value}');
