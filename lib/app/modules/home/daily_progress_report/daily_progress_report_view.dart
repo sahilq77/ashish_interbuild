@@ -91,7 +91,7 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                               (controller.hasMoreData.value ||
                                       controller.isLoadingMore.value
                                   ? 1
-                                  : 0),
+                                  : 1),
                           itemBuilder: (context, index) {
                             if (index >=
                                 controller.filteredMeasurementSheets.length) {
@@ -114,6 +114,11 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                           'No more data',
                                           style: TextStyle(
                                             color: AppColors.grey,
+                                            fontSize:
+                                                ResponsiveHelper.getResponsiveFontSize(
+                                                  14,
+                                                ),
+                                            fontStyle: FontStyle.italic,
                                           ),
                                         ),
                                 ),
