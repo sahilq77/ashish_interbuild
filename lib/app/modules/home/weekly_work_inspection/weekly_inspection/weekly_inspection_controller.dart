@@ -102,13 +102,19 @@ class WeeklyInspectionController extends GetxController {
     filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(endOfWeek);
   }
 
-  void _generateYearList() {
+  void _generateYearList() async {
     final currentYear = DateTime.now().year;
     yearList.clear();
     for (int i = 0; i < 5; i++) {
       yearList.add((currentYear - i).toString());
     }
+
     selectedYear.value = currentYear.toString();
+    await weeklypController.fetchPeriods(
+      context: Get.context!,
+      forceFetch: true,
+      year: int.parse(selectedYear.value),
+    );
   }
 
   void _autoSelectCurrentWeek() {
@@ -247,6 +253,13 @@ class WeeklyInspectionController extends GetxController {
     _setCurrentWeekDates();
     _generateYearList();
     _autoSelectCurrentWeek();
+    weeklypController.selectedPeriodVal.value = '';
+    weeklypController.periodLabels.clear();
+    await weeklypController.fetchPeriods(
+      context: Get.context!,
+      forceFetch: true,
+      year: int.parse(selectedYear.value),
+    );
     await fetchDprList(reset: true, context: Get.context!);
   }
 

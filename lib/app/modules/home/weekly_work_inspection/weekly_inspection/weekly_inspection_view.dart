@@ -325,7 +325,7 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                                                       onPressed: () {
                                                         Get.toNamed(
                                                           AppRoutes
-                                                              .updateDailyReportList,
+                                                              .updateWeeklyInspection,
                                                           arguments: {
                                                             "selected_source":
                                                                 controller

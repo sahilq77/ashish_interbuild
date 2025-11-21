@@ -61,6 +61,13 @@ class WeeklyPeriodController extends GetxController {
           log(
             'Weekly Periods Loaded: ${periodsList.map((p) => "${p.label}: ${p.weekCode}").toList()}',
           );
+          
+          // Auto-select period if is_selected is "1"
+          final selectedPeriod = periodsList.firstWhereOrNull((p) => p.isSelected == "1");
+          if (selectedPeriod != null) {
+            selectedPeriodVal.value = selectedPeriod.label;
+            log('Auto-selected period: ${selectedPeriod.label}');
+          }
         } else {
           errorMessage.value = response[0].message ?? "Failed to load periods";
           Get.snackbar(
@@ -151,5 +158,10 @@ class WeeklyPeriodController extends GetxController {
     return periodsList.firstWhereOrNull(
       (p) => p.weekCode.toString() == weekCode,
     );
+  }
+
+  /// Get the currently selected period (where is_selected == "1")
+  WeeklyPeriod? getSelectedPeriod() {
+    return periodsList.firstWhereOrNull((p) => p.isSelected == "1");
   }
 }
