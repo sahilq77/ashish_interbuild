@@ -19,6 +19,7 @@ import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_measurmentsheet_response.dart';
 import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
 import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
+import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -301,13 +302,11 @@ class Networkcall {
               response.body,
             );
             return [getDprReportDetailList];
-             case 22:
-            final getDPRdashboard = getDashboardResponseFromJson(str);
-            return getDPRdashboard;
-              case 23:
-            final getWirList = getUpdateDprListResponseFromJson(
-              response.body,
-            );
+          case 22:
+            final getWirdashboard = getWeeeklyDashboardResponseFromJson(str);
+            return getWirdashboard;
+          case 23:
+            final getWirList = getUpdateDprListResponseFromJson(response.body);
 
           default:
             log("Invalid request code: $requestCode");

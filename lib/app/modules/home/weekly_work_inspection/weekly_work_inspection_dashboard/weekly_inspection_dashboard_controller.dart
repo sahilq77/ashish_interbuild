@@ -1,6 +1,5 @@
 import 'dart:developer';
-
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
+import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
@@ -9,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class WeeklyInspectionDashboardController extends GetxController {
-  var dprCount = <DprCounts>[].obs;
+  var wirCount = <WirCounts>[].obs;
   var errorMessage = ''.obs;
   RxBool isLoading = true.obs;
   RxString imageLink = "".obs;
@@ -17,7 +16,7 @@ class WeeklyInspectionDashboardController extends GetxController {
   RxInt projectId = 0.obs;
   RxInt packageId = 0.obs;
 
-  // Expose individual reactive values derived from dprCount.first
+  // Expose individual reactive values derived from wirCount.first
   late RxDouble monthlyTarget;
   late RxDouble monthlyAchieve;
   late RxDouble monthlyPercent;
@@ -73,42 +72,47 @@ class WeeklyInspectionDashboardController extends GetxController {
       errorMessage.value = '';
 
       if (isRefresh) {
-        dprCount.clear();
+        wirCount.clear();
       }
 
       final response =
           await Networkcall().getMethod(
                 Networkutility.getWIRdashboardApi,
-                "${Networkutility.getWIRdashboard}?project_id=$projectId&filter_package=$packageId",
+                "${Networkutility.getWIRdashboard}?project_id=$projectId&filter_package=$packageId&start=0&length=10&filter_inspection_from_date=2025-11-14&filter_inspection_to_date=2025-11-21",
                 context,
               )
-              as List<GetDashboardResponse>?;
+              as List<GetWeeklyDashboard>?;
 
       if (response != null &&
           response.isNotEmpty &&
           response[0].status == true) {
-        final count = response[0].dprCounts;
+        final count = response[0].wirCounts;
 
-        dprCount.add(count);
+        wirCount.add(count);
         log("${monthlyTarget.value}");
         // Update all reactive values from the API response
-        monthlyTarget.value = double.tryParse(count.monthTarget ?? '0') ?? 0.0;
+        monthlyTarget.value =
+            double.tryParse(count.totalTarget.toString() ?? '0') ?? 0.0;
         monthlyAchieve.value =
-            double.tryParse(count.monthAchievedTarget ?? '0') ?? 0.0;
+            double.tryParse(count.totalAchievedTarget.toString() ?? '0') ?? 0.0;
         monthlyPercent.value =
-            double.tryParse(count.monthAchievedTargetPer ?? '0') ?? 0.0;
+            double.tryParse(count.totalAchievedTargetPer ?? '0') ?? 0.0;
 
-        weeklyTarget.value = double.tryParse(count.weeklyTarget ?? '0') ?? 0.0;
+        weeklyTarget.value =
+            double.tryParse(count.monthTarget.toString() ?? '0') ?? 0.0;
         weeklyAchieve.value =
-            double.tryParse(count.weeklyAchievedTarget ?? '0') ?? 0.0;
+            double.tryParse(count.monthAchievedTarget.toString() ?? '0') ?? 0.0;
         weeklyPercent.value =
-            double.tryParse(count.weeklyAchievedTargetPer ?? '0') ?? 0.0;
+            double.tryParse(count.monthAchievedTargetPer.toString() ?? '0') ??
+            0.0;
 
-        dailyTarget.value = double.tryParse(count.todayTarget ?? '0') ?? 0.0;
+        dailyTarget.value =
+            double.tryParse(count.weeklyTarget.toString() ?? '0') ?? 0.0;
         dailyAchieve.value =
-            double.tryParse(count.todayAchievedTarget ?? '0') ?? 0.0;
+            double.tryParse(count.weeklyAchievedTarget.toString() ?? '0') ??
+            0.0;
         dailyPercent.value =
-            double.tryParse(count.todayAchievedTargetPer ?? '0') ?? 0.0;
+            double.tryParse(count.weeklyAchievedTargetPer ?? '0') ?? 0.0;
       } else {
         final message = response?.isNotEmpty == true
             ? response![0].message
@@ -139,7 +143,7 @@ class WeeklyInspectionDashboardController extends GetxController {
 
   String formatCurrency(double amount) {
     if (amount == 0) return '₹0.00';
-    return '₹${amount.toStringAsFixed(2)} Cr'; // or without 'Cr' as needed
+    return '₹${amount.toStringAsFixed(2)} '; // or without 'Cr' as needed
   }
 
   String formatPercentage(double percent) {
