@@ -6,6 +6,7 @@ import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class WeeklyInspectionDashboardController extends GetxController {
   var wirCount = <WirCounts>[].obs;
@@ -15,6 +16,10 @@ class WeeklyInspectionDashboardController extends GetxController {
   RxString packageName = "".obs;
   RxInt projectId = 0.obs;
   RxInt packageId = 0.obs;
+  
+  // Dynamic week date filters
+  RxString filterInspectionFromDate = ''.obs;
+  RxString filterInspectionToDate = ''.obs;
 
   // Expose individual reactive values derived from wirCount.first
   late RxDouble monthlyTarget;
@@ -44,6 +49,9 @@ class WeeklyInspectionDashboardController extends GetxController {
     // Initialize reactive variables with default values
     _initializeReactiveValues();
 
+    // Set current week dates
+    _setCurrentWeekDates();
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchDashboardData(context: Get.context!);
     });
@@ -62,6 +70,15 @@ class WeeklyInspectionDashboardController extends GetxController {
     dailyAchieve = 0.0.obs;
     dailyPercent = 0.0.obs;
   }
+  
+  void _setCurrentWeekDates() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    
+    filterInspectionFromDate.value = DateFormat('yyyy-MM-dd').format(startOfWeek);
+    filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(endOfWeek);
+  }
 
   Future<void> fetchDashboardData({
     required BuildContext context,
@@ -78,7 +95,7 @@ class WeeklyInspectionDashboardController extends GetxController {
       final response =
           await Networkcall().getMethod(
                 Networkutility.getWIRdashboardApi,
-                "${Networkutility.getWIRdashboard}?project_id=$projectId&filter_package=$packageId&start=0&length=10&filter_inspection_from_date=2025-11-14&filter_inspection_to_date=2025-11-21",
+                "${Networkutility.getWIRdashboard}?project_id=$projectId&filter_package=$packageId&start=0&length=10&filter_inspection_from_date=${filterInspectionFromDate.value}&filter_inspection_to_date=${filterInspectionToDate.value}",
                 context,
               )
               as List<GetWeeklyDashboard>?;
