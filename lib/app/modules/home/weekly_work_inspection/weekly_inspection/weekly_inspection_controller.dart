@@ -110,17 +110,23 @@ class WeeklyInspectionController extends GetxController {
     }
     selectedYear.value = currentYear.toString();
   }
-  
+
   void _autoSelectCurrentWeek() {
     final today = DateTime.now();
     final periods = weeklypController.periodsList;
-    
+
     for (var period in periods) {
-      if (today.isAfter(period.weekFromDate.subtract(const Duration(days: 1))) && 
+      if (today.isAfter(
+            period.weekFromDate.subtract(const Duration(days: 1)),
+          ) &&
           today.isBefore(period.weekToDate.add(const Duration(days: 1)))) {
         weeklypController.selectedPeriodVal.value = period.label;
-        filterInspectionFromDate.value = DateFormat('yyyy-MM-dd').format(period.weekFromDate);
-        filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(period.weekToDate);
+        filterInspectionFromDate.value = DateFormat(
+          'yyyy-MM-dd',
+        ).format(period.weekFromDate);
+        filterInspectionToDate.value = DateFormat(
+          'yyyy-MM-dd',
+        ).format(period.weekToDate);
         break;
       }
     }
@@ -238,6 +244,9 @@ class WeeklyInspectionController extends GetxController {
     start.value = 0;
     hasMoreData.value = true;
     filteredMeasurementSheets.clear();
+    _setCurrentWeekDates();
+    _generateYearList();
+    _autoSelectCurrentWeek();
     await fetchDprList(reset: true, context: Get.context!);
   }
 

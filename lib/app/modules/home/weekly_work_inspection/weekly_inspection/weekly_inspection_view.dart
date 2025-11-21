@@ -96,16 +96,28 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                           value: weeklypController.selectedPeriodVal.value,
                           items: weeklypController.periodLabels,
                           onChanged: (v) {
-                          if (v != null) {
-                            final selectedPeriod = weeklypController.periodsList.firstWhere(
-                              (p) => p.label == v,
-                              orElse: () => weeklypController.periodsList.first,
-                            );
-                            controller.filterInspectionFromDate.value = DateFormat('yyyy-MM-dd').format(selectedPeriod.weekFromDate);
-                            controller.filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(selectedPeriod.weekToDate);
-                            controller.fetchDprList(reset: true, context: context);
-                          }
-                        },
+                            if (v != null) {
+                              final selectedPeriod = weeklypController
+                                  .periodsList
+                                  .firstWhere(
+                                    (p) => p.label == v,
+                                    orElse: () =>
+                                        weeklypController.periodsList.first,
+                                  );
+                              controller.filterInspectionFromDate.value =
+                                  DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(selectedPeriod.weekFromDate);
+                              controller.filterInspectionToDate.value =
+                                  DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(selectedPeriod.weekToDate);
+                              controller.fetchDprList(
+                                reset: true,
+                                context: context,
+                              );
+                            }
+                          },
                           hint: 'Week',
                           enabled: true,
                           errorText: "",
@@ -128,14 +140,26 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                   () => controller.isLoading.value
                       ? _buildShimmerEffect(context)
                       : controller.errorMessage.value.isNotEmpty
-                      ? Center(
-                          child: Text(
-                            controller.errorMessage.value,
-                            style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                      ? SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: Center(
+                              child: Text(
+                                controller.errorMessage.value,
+                                style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                              ),
+                            ),
                           ),
                         )
                       : controller.filteredMeasurementSheets.isEmpty
-                      ? const Center(child: Text('No data found'))
+                      ? SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: const Center(child: Text('No data found')),
+                          ),
+                        )
                       : ListView.builder(
                           padding: ResponsiveHelper.padding(16),
                           itemCount:
