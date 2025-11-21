@@ -77,6 +77,8 @@ class WeeklyInspectionController extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         zoneController.fetchZones(context: Get.context!);
+        weeklypController.fetchPeriods(context: Get.context!);
+        _autoSelectCurrentWeek();
         fetchDprList(reset: true, context: Get.context!);
       }
     });
@@ -107,6 +109,21 @@ class WeeklyInspectionController extends GetxController {
       yearList.add((currentYear - i).toString());
     }
     selectedYear.value = currentYear.toString();
+  }
+  
+  void _autoSelectCurrentWeek() {
+    final today = DateTime.now();
+    final periods = weeklypController.periodsList;
+    
+    for (var period in periods) {
+      if (today.isAfter(period.weekFromDate.subtract(const Duration(days: 1))) && 
+          today.isBefore(period.weekToDate.add(const Duration(days: 1)))) {
+        weeklypController.selectedPeriodVal.value = period.label;
+        filterInspectionFromDate.value = DateFormat('yyyy-MM-dd').format(period.weekFromDate);
+        filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(period.weekToDate);
+        break;
+      }
+    }
   }
 
   String _buildQueryParams({bool includePagination = true}) {

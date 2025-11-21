@@ -13,6 +13,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 class WeeklyInspectionView extends StatefulWidget {
@@ -66,9 +67,10 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                 padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Flexible(
-                      child: Obx(
-                        () => _buildDropdownField(
+                    Obx(
+                      () => SizedBox(
+                        width: ResponsiveHelper.screenWidth * 0.300,
+                        child: _buildDropdownField(
                           label: 'Year',
                           value: controller.selectedYear.value,
                           items: controller.yearList,
@@ -87,13 +89,23 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                       ),
                     ),
                     SizedBox(width: ResponsiveHelper.spacing(5)),
-                    Flexible(
+                    Expanded(
                       child: Obx(
                         () => _buildDropdownField(
                           label: 'Week',
                           value: weeklypController.selectedPeriodVal.value,
                           items: weeklypController.periodLabels,
-                          onChanged: (v) {},
+                          onChanged: (v) {
+                          if (v != null) {
+                            final selectedPeriod = weeklypController.periodsList.firstWhere(
+                              (p) => p.label == v,
+                              orElse: () => weeklypController.periodsList.first,
+                            );
+                            controller.filterInspectionFromDate.value = DateFormat('yyyy-MM-dd').format(selectedPeriod.weekFromDate);
+                            controller.filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(selectedPeriod.weekToDate);
+                            controller.fetchDprList(reset: true, context: context);
+                          }
+                        },
                           hint: 'Week',
                           enabled: true,
                           errorText: "",
