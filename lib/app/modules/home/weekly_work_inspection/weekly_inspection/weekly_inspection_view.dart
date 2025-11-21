@@ -76,6 +76,8 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                           items: controller.yearList,
                           onChanged: (v) {
                             controller.selectedYear.value = v ?? '';
+                            weeklypController.selectedPeriodVal.value = "";
+                            weeklypController.periodLabels.clear();
                             weeklypController.fetchPeriods(
                               context: context,
                               forceFetch: true,
