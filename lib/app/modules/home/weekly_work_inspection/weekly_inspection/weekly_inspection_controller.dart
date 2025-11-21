@@ -7,6 +7,7 @@ import 'package:ashishinterbuild/app/data/models/measurement_sheet/measurment_sh
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/weekly_period/weekly_period_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/widgets.dart';
@@ -15,6 +16,7 @@ import 'package:intl/intl.dart';
 
 class WeeklyInspectionController extends GetxController {
   final zoneController = Get.find<ZoneController>();
+  final WeeklyPeriodController weeklypController = Get.find();
   final RxList<DprItem> dprList = <DprItem>[].obs;
   final RxList<DprItem> filteredMeasurementSheets = <DprItem>[].obs;
   final RxBool isLoading = true.obs;
@@ -43,6 +45,10 @@ class WeeklyInspectionController extends GetxController {
   RxString filterInspectionFromDate = ''.obs;
   RxString filterInspectionToDate = ''.obs;
 
+  // Year dropdown
+  RxString selectedYear = ''.obs;
+  RxList<String> yearList = <String>[].obs;
+
   // Temporary for dialog (not applied until "Apply")
   DateTime? tempStartDate;
   DateTime? tempEndDate;
@@ -67,6 +73,7 @@ class WeeklyInspectionController extends GetxController {
       "Weekly Inspection → projectId=${projectId.value} packageId=${packageId.value}",
     );
     _setCurrentWeekDates();
+    _generateYearList();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         zoneController.fetchZones(context: Get.context!);
@@ -91,6 +98,15 @@ class WeeklyInspectionController extends GetxController {
       'yyyy-MM-dd',
     ).format(startOfWeek);
     filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(endOfWeek);
+  }
+
+  void _generateYearList() {
+    final currentYear = DateTime.now().year;
+    yearList.clear();
+    for (int i = 0; i < 5; i++) {
+      yearList.add((currentYear - i).toString());
+    }
+    selectedYear.value = currentYear.toString();
   }
 
   String _buildQueryParams({bool includePagination = true}) {

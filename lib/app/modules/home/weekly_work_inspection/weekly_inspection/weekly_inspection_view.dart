@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/global_controller/weekly_period/weekly_period_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/daily_progress_report/daily_progress_report_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/home_controller.dart';
@@ -14,9 +15,15 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class WeeklyInspectionView extends StatelessWidget {
+class WeeklyInspectionView extends StatefulWidget {
   const WeeklyInspectionView({super.key});
 
+  @override
+  State<WeeklyInspectionView> createState() => _WeeklyInspectionViewState();
+}
+
+class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
+  final WeeklyPeriodController weeklypController = Get.find();
   @override
   Widget build(BuildContext context) {
     final WeeklyInspectionController controller = Get.find();
@@ -52,6 +59,47 @@ class WeeklyInspectionView extends StatelessWidget {
                     _buildFilterButton(context, controller),
                     SizedBox(width: ResponsiveHelper.spacing(8)),
                     _buildSortButton(controller),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Obx(
+                        () => _buildDropdownField(
+                          label: 'Year',
+                          value: controller.selectedYear.value,
+                          items: controller.yearList,
+                          onChanged: (v) {
+                            controller.selectedYear.value = v ?? '';
+                            weeklypController.fetchPeriods(
+                              context: context,
+                              forceFetch: true,
+                              year: int.parse(controller.selectedYear.value),
+                            );
+                          },
+                          hint: 'Year',
+                          enabled: true,
+                          errorText: "",
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(5)),
+                    Flexible(
+                      child: Obx(
+                        () => _buildDropdownField(
+                          label: 'Week',
+                          value: weeklypController.selectedPeriodVal.value,
+                          items: weeklypController.periodLabels,
+                          onChanged: (v) {},
+                          hint: 'Week',
+                          enabled: true,
+                          errorText: "",
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -753,6 +801,50 @@ class WeeklyInspectionView extends StatelessWidget {
           constraints: const BoxConstraints(),
         ),
       ),
+    );
+  }
+
+  // Dropdown Field
+  Widget _buildDropdownField({
+    required String label,
+    required String value,
+    required List<String> items,
+    required Function(String?)? onChanged,
+    required String hint,
+    bool enabled = true,
+    String? errorText, // Add this
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppStyle.reportCardRowCount.responsive),
+        const SizedBox(height: 8),
+        DropdownSearch<String>(
+          selectedItem: value.isNotEmpty ? value : null,
+          items: items,
+          onChanged: onChanged,
+          enabled: enabled,
+          dropdownDecoratorProps: DropDownDecoratorProps(
+            dropdownSearchDecoration: InputDecoration(
+              hintText: hint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              filled: !enabled,
+              fillColor: !enabled ? Colors.grey[200] : null,
+              errorText: errorText, // Show error
+            ),
+          ),
+          popupProps: const PopupProps.menu(
+            showSearchBox: true,
+            showSelectedItems: true,
+          ),
+        ),
+      ],
     );
   }
 }

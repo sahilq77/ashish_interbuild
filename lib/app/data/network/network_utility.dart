@@ -69,6 +69,9 @@ class Networkutility {
 
   static String getWIRList = "${baseUrl + "wir/list"}";
   static int getWIRListApi = 23;
+
+  static String getWeekPeriods = "${baseUrl + "week-periods"}";
+  static int getWeekPeriodsApi = 24;
 }
 
 

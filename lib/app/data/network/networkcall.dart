@@ -8,6 +8,7 @@ import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashb
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_update_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
+import 'package:ashishinterbuild/app/data/models/global_model/week_periods/get_week_periods_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_response.dart';
 import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
@@ -308,6 +309,9 @@ class Networkcall {
           case 23:
             final getWirList = getDprListResponseFromJson(response.body);
             return [getWirList];
+          case 24:
+            final getWeeklyPeriod = getWeeklyPeriodsResponseFromJson(str);
+            return getWeeklyPeriod;
 
           default:
             log("Invalid request code: $requestCode");
