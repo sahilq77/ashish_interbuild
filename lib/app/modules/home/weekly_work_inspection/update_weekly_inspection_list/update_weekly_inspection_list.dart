@@ -8,15 +8,22 @@ import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class UpdateWeeklyInspectionList extends StatefulWidget {
   const UpdateWeeklyInspectionList({super.key});
@@ -952,8 +959,14 @@ class _UpdateWeeklyInspectionListState
                     alignment: WrapAlignment
                         .start, // same as your centerStart behavior
                     children: List.generate(imageLink.length, (index) {
+                      final fileName = imageLink[index]
+                          .split('/')
+                          .last
+                          .split('?')
+                          .first;
                       return GestureDetector(
-                        onTap: () {
+                        onTap: () async {
+                          await _downloadImage(imageLink[index], fileName);
                           print("Download ${imageLink[index]}");
                         },
                         child: Chip(
@@ -974,33 +987,140 @@ class _UpdateWeeklyInspectionListState
     );
   }
 
+  Future<bool> _requestImageDownloadPermission() async {
+    if (!Platform.isAndroid) return true;
+
+    final deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+
+    Permission permission;
+    if (androidInfo.version.sdkInt >= 33) {
+      // Android 13+ → Use Photos permission for images
+      permission = Permission.photos;
+    } else {
+      // Older Android → Use storage
+      permission = Permission.storage;
+    }
+
+    var status = await permission.status;
+
+    if (status.isDenied) {
+      status = await permission.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      // Fluttertoast.showToast(
+      //   msg: "Please allow photos/storage access in Settings → Apps → Your App",
+      //   toastLength: Toast.LENGTH_LONG,
+      // );
+      await openAppSettings();
+      return false;
+    }
+
+    return status.isGranted;
+  }
+
+  Future<void> _downloadImage(String url, String fileName) async {
+    try {
+      // Step 1: Request proper permissions based on Android version
+      if (!await _requestImageDownloadPermission()) {
+        AppSnackbarStyles.showError(
+          title: "Permission Denied",
+          message: "Cannot download image without storage permission",
+        );
+        return;
+      }
+
+      // Step 2: Determine save directory (Downloads folder preferred)
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory();
+        }
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
+        AppSnackbarStyles.showError(
+          title: "Error",
+          message: "Cannot access storage",
+        );
+        return;
+      }
+
+      final savePath = "${directory.path}/$fileName";
+
+      // Show downloading toast
+      // Fluttertoast.showToast(msg: "Downloading image...");
+
+      // Step 3: Download with Dio + progress
+      final dio = Dio();
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            final progress = (received / total * 100).toStringAsFixed(0);
+            // Fluttertoast.cancel(); // Cancel previous toast
+            Fluttertoast.showToast(
+              msg: "Downloading: $progress%",
+              toastLength: Toast.LENGTH_SHORT,
+            );
+          }
+        },
+      );
+
+      // Step 4: Verify file was downloaded
+      final file = File(savePath);
+      if (await file.exists() && await file.length() > 0) {
+        AppSnackbarStyles.showSuccess(
+          title: "Downloaded",
+          message: "Image saved: $fileName",
+        );
+
+        // Optional: Open the image
+        // final result = await OpenFile.open(savePath);
+        // if (result.type != ResultType.done) {
+        //   print("Could not open file: ${result.message}");
+        // }
+      } else {
+        throw Exception("Downloaded file is empty");
+      }
+    } catch (e) {
+      debugPrint("Image download error: $e");
+      // Fluttertoast.showToast(
+      //   msg: "Download failed",
+      //   backgroundColor: Colors.red,
+      // );
+      AppSnackbarStyles.showError(
+        title: "Download Failed",
+        message: "Could not download image",
+      );
+    }
+  }
+
   List<String> _extractImageLinks(String text) {
     if (text.isEmpty) return [];
 
-    // Regex to find URLs ending with image extensions
     final RegExp imageRegex = RegExp(
-      r'(https?://[^\s]+?\.(jpg|jpeg|png|gif|webp))',
+      r'https?://[^\s]+?\.(jpg|jpeg|png|gif|webp)(\?[^\s]*)?',
       caseSensitive: false,
     );
 
-    // Find all matches
     final matches = imageRegex
         .allMatches(text)
         .map((m) => m.group(0)!)
         .toList();
 
-    // Also handle simple filenames like "image.jpg" if you expect full URLs only, keep this
-    // Or split by comma/space if multiple links are in one string
     if (matches.isEmpty) {
-      // Fallback: split by common separators and check extension
-      return text.split(RegExp(r'[,;\s]+')).where((link) {
-        final trimmed = link.trim();
-        return trimmed.isNotEmpty &&
-            (trimmed.toLowerCase().endsWith('.jpg') ||
-                trimmed.toLowerCase().endsWith('.jpeg') ||
-                trimmed.toLowerCase().endsWith('.png') ||
-                trimmed.toLowerCase().endsWith('.gif') ||
-                trimmed.toLowerCase().endsWith('.webp'));
+      // Fallback: split by comma, space, or semicolon
+      return text.split(RegExp(r'[\s,;]+')).where((s) {
+        final trimmed = s.trim();
+        return trimmed.contains(
+          RegExp(r'\.(jpg|jpeg|png|gif|webp)', caseSensitive: false),
+        );
       }).toList();
     }
 
