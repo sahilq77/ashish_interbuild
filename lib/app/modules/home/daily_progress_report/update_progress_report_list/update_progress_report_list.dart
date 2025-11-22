@@ -10,14 +10,20 @@ import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 class UpdateProgressReportList extends StatefulWidget {
   const UpdateProgressReportList({super.key});
@@ -914,6 +920,9 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
   }
 
   Widget _buildDetailRow(String label, String value) {
+    List<String> imageLink = [];
+    imageLink = _extractImageLinks(value);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -934,15 +943,203 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
           style: AppStyle.reportCardSubTitle,
         ),
         Expanded(
-          child: Text(
-            value,
-            style: AppStyle.reportCardSubTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
-          ),
+          child:
+              value.contains(("jpg")) ||
+                  value.contains(("jpeg")) ||
+                  value.contains(("png"))
+              ? Padding(
+                  padding: EdgeInsets.only(left: ResponsiveHelper.spacing(5)),
+                  child: Wrap(
+                    spacing: ResponsiveHelper.spacing(
+                      5,
+                    ), // horizontal space between icons
+                    runSpacing: ResponsiveHelper.spacing(
+                      5,
+                    ), // vertical space between lines
+                    alignment: WrapAlignment
+                        .start, // same as your centerStart behavior
+                    children: List.generate(imageLink.length, (index) {
+                      final fileName =
+                          imageLink[index] +
+                          DateTime.now()
+                              .toString()
+                              .split('/')
+                              .last
+                              .split('?')
+                              .first;
+                      return GestureDetector(
+                        onTap: () async {
+                          await _downloadImage(imageLink[index], fileName);
+                          print("Download ${imageLink[index]}");
+                        },
+                        child: Chip(
+                          label: Icon(Icons.download, color: AppColors.primary),
+                        ),
+                      );
+                    }),
+                  ),
+                )
+              : Text(
+                  value,
+                  style: AppStyle.reportCardSubTitle.responsive.copyWith(
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+                  ),
+                ),
         ),
       ],
     );
+  }
+
+  Future<bool> _requestImageDownloadPermission() async {
+    if (!Platform.isAndroid) return true;
+
+    final deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+
+    Permission permission;
+    if (androidInfo.version.sdkInt >= 33) {
+      // Android 13+ → Use Photos permission for images
+      permission = Permission.photos;
+    } else {
+      // Older Android → Use storage
+      permission = Permission.storage;
+    }
+
+    var status = await permission.status;
+
+    if (status.isDenied) {
+      status = await permission.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      // Fluttertoast.showToast(
+      //   msg: "Please allow photos/storage access in Settings → Apps → Your App",
+      //   toastLength: Toast.LENGTH_LONG,
+      // );
+      await openAppSettings();
+      return false;
+    }
+
+    return status.isGranted;
+  }
+
+  Future<void> _downloadImage(String url, String originalFileName) async {
+    try {
+      // Request permission
+      if (!await _requestImageDownloadPermission()) {
+        AppSnackbarStyles.showError(
+          title: "Permission Denied",
+          message: "Cannot download image without storage permission",
+        );
+        return;
+      }
+
+      // Get directory (preferably Downloads)
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.existsSync()) {
+          directory = await getExternalStorageDirectory();
+        }
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
+        AppSnackbarStyles.showError(
+          title: "Error",
+          message: "Cannot access storage",
+        );
+        return;
+      }
+
+      // Create a clean and unique filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final dateFormatted = DateFormat(
+        'yyyyMMdd_HHmmss',
+      ).format(DateTime.now());
+
+      // Extract extension safely
+      String extension = '.jpg'; // default
+      final uri = Uri.tryParse(url);
+      if (uri != null && uri.pathSegments.isNotEmpty) {
+        final lastSegment = uri.pathSegments.last;
+        final dotIndex = lastSegment.lastIndexOf('.');
+        if (dotIndex != -1 && dotIndex < lastSegment.length - 1) {
+          extension = lastSegment.substring(dotIndex); // includes the dot
+          if (![
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+          ].contains(extension.toLowerCase())) {
+            extension = '.jpg'; // fallback
+          }
+        }
+      }
+
+      // Final filename: IMG_20251122_153045_123.jpg
+      final fileName = 'IMG_${dateFormatted}_$timestamp$extension';
+      final savePath = "${directory.path}/$fileName";
+
+      final dio = Dio();
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            final progress = (received / total * 100).toStringAsFixed(0);
+            Fluttertoast.showToast(
+              msg: "Downloading: $progress%",
+              toastLength: Toast.LENGTH_SHORT,
+            );
+          }
+        },
+      );
+
+      final file = File(savePath);
+      if (await file.exists() && await file.length() > 0) {
+        AppSnackbarStyles.showSuccess(
+          title: "Success",
+          message: "Image saved as $fileName",
+        );
+      } else {
+        throw Exception("File is empty or not created");
+      }
+    } catch (e) {
+      debugPrint("Download error: $e");
+      AppSnackbarStyles.showError(
+        title: "Failed",
+        message: "Could not download image",
+      );
+    }
+  }
+
+  List<String> _extractImageLinks(String text) {
+    if (text.isEmpty) return [];
+
+    final RegExp imageRegex = RegExp(
+      r'https?://[^\s]+?\.(jpg|jpeg|png|gif|webp)(\?[^\s]*)?',
+      caseSensitive: false,
+    );
+
+    final matches = imageRegex
+        .allMatches(text)
+        .map((m) => m.group(0)!)
+        .toList();
+
+    if (matches.isEmpty) {
+      // Fallback: split by comma, space, or semicolon
+      return text.split(RegExp(r'[\s,;]+')).where((s) {
+        final trimmed = s.trim();
+        return trimmed.contains(
+          RegExp(r'\.(jpg|jpeg|png|gif|webp)', caseSensitive: false),
+        );
+      }).toList();
+    }
+
+    return matches;
   }
 
   Text _sectionTitle(String title) {

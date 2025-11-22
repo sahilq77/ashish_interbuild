@@ -1020,9 +1020,9 @@ class _UpdateWeeklyInspectionListState
     return status.isGranted;
   }
 
-  Future<void> _downloadImage(String url, String fileName) async {
+  Future<void> _downloadImage(String url, String originalFileName) async {
     try {
-      // Step 1: Request proper permissions based on Android version
+      // Request permission
       if (!await _requestImageDownloadPermission()) {
         AppSnackbarStyles.showError(
           title: "Permission Denied",
@@ -1031,11 +1031,11 @@ class _UpdateWeeklyInspectionListState
         return;
       }
 
-      // Step 2: Determine save directory (Downloads folder preferred)
+      // Get directory (preferably Downloads)
       Directory? directory;
       if (Platform.isAndroid) {
         directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.exists()) {
+        if (!await directory.existsSync()) {
           directory = await getExternalStorageDirectory();
         }
       } else {
@@ -1050,12 +1050,36 @@ class _UpdateWeeklyInspectionListState
         return;
       }
 
+      // Create a clean and unique filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final dateFormatted = DateFormat(
+        'yyyyMMdd_HHmmss',
+      ).format(DateTime.now());
+
+      // Extract extension safely
+      String extension = '.jpg'; // default
+      final uri = Uri.tryParse(url);
+      if (uri != null && uri.pathSegments.isNotEmpty) {
+        final lastSegment = uri.pathSegments.last;
+        final dotIndex = lastSegment.lastIndexOf('.');
+        if (dotIndex != -1 && dotIndex < lastSegment.length - 1) {
+          extension = lastSegment.substring(dotIndex); // includes the dot
+          if (![
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+          ].contains(extension.toLowerCase())) {
+            extension = '.jpg'; // fallback
+          }
+        }
+      }
+
+      // Final filename: IMG_20251122_153045_123.jpg
+      final fileName = 'IMG_${dateFormatted}_$timestamp$extension';
       final savePath = "${directory.path}/$fileName";
 
-      // Show downloading toast
-      // Fluttertoast.showToast(msg: "Downloading image...");
-
-      // Step 3: Download with Dio + progress
       final dio = Dio();
       await dio.download(
         url,
@@ -1063,7 +1087,6 @@ class _UpdateWeeklyInspectionListState
         onReceiveProgress: (received, total) {
           if (total != -1) {
             final progress = (received / total * 100).toStringAsFixed(0);
-            // Fluttertoast.cancel(); // Cancel previous toast
             Fluttertoast.showToast(
               msg: "Downloading: $progress%",
               toastLength: Toast.LENGTH_SHORT,
@@ -1072,30 +1095,19 @@ class _UpdateWeeklyInspectionListState
         },
       );
 
-      // Step 4: Verify file was downloaded
       final file = File(savePath);
       if (await file.exists() && await file.length() > 0) {
         AppSnackbarStyles.showSuccess(
-          title: "Downloaded",
-          message: "Image saved: $fileName",
+          title: "Success",
+          message: "Image saved as $fileName",
         );
-
-        // Optional: Open the image
-        // final result = await OpenFile.open(savePath);
-        // if (result.type != ResultType.done) {
-        //   print("Could not open file: ${result.message}");
-        // }
       } else {
-        throw Exception("Downloaded file is empty");
+        throw Exception("File is empty or not created");
       }
     } catch (e) {
-      debugPrint("Image download error: $e");
-      // Fluttertoast.showToast(
-      //   msg: "Download failed",
-      //   backgroundColor: Colors.red,
-      // );
+      debugPrint("Download error: $e");
       AppSnackbarStyles.showError(
-        title: "Download Failed",
+        title: "Failed",
         message: "Could not download image",
       );
     }
