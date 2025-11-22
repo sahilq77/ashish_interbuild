@@ -37,6 +37,7 @@ import 'package:ashishinterbuild/app/modules/home/measurment_sheet/measurment_sh
 import 'package:ashishinterbuild/app/modules/home/measurment_sheet/mesurment_package_list/mesurment_package_list.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_card_view.dart/weekly_inspection_card_view.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection_package_list/weekly_inspection_package_list.dart';
+import 'package:ashishinterbuild/app/modules/home/work_front_update/wfu_card/wfu_card_view.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_dashboard/work_front_update_dashboard_binding.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_detail/work_front_update_detail_list_binding.dart';
@@ -141,6 +142,7 @@ class AppRoutes {
   static const String noInternet = '/nointernet';
   static const String workFrontUpdateProjectList =
       '/work-front-update-project-list';
+  static const String workFrontUpdateCardView = '/work-front-update-card-view';
   static const String workFrontUpdatePackageList =
       '/work-front-update-package-list';
 
@@ -458,6 +460,13 @@ class AppRoutes {
     ),
 
     // ─── WORK FRONT UPDATE ─────────────────────────────────
+    GetPage(
+      name: workFrontUpdateCardView,
+      page: () => const WfuCardView(),
+      binding: WorkFrontUpdateProjectListBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
     GetPage(
       name: workFrontUpdateProjectList,
       page: () => const WorkFrontUpdateProjectList(),

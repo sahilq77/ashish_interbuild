@@ -100,8 +100,11 @@ class WorkFrontUpdateProjectList extends StatelessWidget {
 
                       return GestureDetector(
                         onTap: () => Get.toNamed(
-                          AppRoutes.workFrontUpdatePackageList,
-                          arguments: project.projectId,
+                          AppRoutes.workFrontUpdateCardView,
+                          arguments: {
+                            "project_id": int.parse(project.projectId),
+                            "package_id": 0,
+                          },
                         ),
                         child: Card(
                           margin: EdgeInsets.only(
