@@ -314,9 +314,9 @@ class Networkcall {
           case 24:
             final getWeeklyPeriod = getWeeklyPeriodsResponseFromJson(str);
             return getWeeklyPeriod;
-          // case 24:
-          //   final getWeeklyPeriod = getWeeklyPeriodsResponseFromJson(str);
-          //   return getWeeklyPeriod;
+          case 24:
+            final getWeeklyPeriod = getWeeklyPeriodsResponseFromJson(str);
+            return getWeeklyPeriod;
           case 25:
             final getWIRDetailList =
                 getUpdateWeeklyInspectionListResponseFromJson(response.body);

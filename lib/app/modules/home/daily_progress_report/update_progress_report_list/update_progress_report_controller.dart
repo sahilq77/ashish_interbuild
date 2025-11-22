@@ -164,9 +164,9 @@ class UpdateProgressReportController extends GetxController {
     errorMessage.value = '';
     try {
       final String query = _buildQueryParams(includePagination: true);
-      final String endpoint = Networkutility.getWirDetailList + query;
+      final String endpoint = Networkutility.getDprReportDetailList + query;
       final responseList = await Networkcall().getMethod(
-        Networkutility.getWirDetailListApi,
+        Networkutility.getDprReportDetailListApi,
         endpoint,
         context,
       );
