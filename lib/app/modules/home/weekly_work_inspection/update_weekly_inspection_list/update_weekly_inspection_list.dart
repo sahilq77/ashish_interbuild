@@ -9,10 +9,12 @@ import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -319,6 +321,7 @@ class _UpdateWeeklyInspectionListState
                                                 )
                                                 .toList(),
                                           ],
+
                                           SizedBox(
                                             height:
                                                 ResponsiveHelper.screenHeight *
@@ -910,6 +913,9 @@ class _UpdateWeeklyInspectionListState
   }
 
   Widget _buildDetailRow(String label, String value) {
+    List<String> imageLink = [];
+    imageLink = _extractImageLinks(value);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -930,15 +936,75 @@ class _UpdateWeeklyInspectionListState
           style: AppStyle.reportCardSubTitle,
         ),
         Expanded(
-          child: Text(
-            value,
-            style: AppStyle.reportCardSubTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
-          ),
+          child:
+              value.contains(("jpg")) ||
+                  value.contains(("jpeg")) ||
+                  value.contains(("png"))
+              ? Padding(
+                  padding: EdgeInsets.only(left: ResponsiveHelper.spacing(5)),
+                  child: Wrap(
+                    spacing: ResponsiveHelper.spacing(
+                      5,
+                    ), // horizontal space between icons
+                    runSpacing: ResponsiveHelper.spacing(
+                      5,
+                    ), // vertical space between lines
+                    alignment: WrapAlignment
+                        .start, // same as your centerStart behavior
+                    children: List.generate(imageLink.length, (index) {
+                      return GestureDetector(
+                        onTap: () {
+                          print("Download ${imageLink[index]}");
+                        },
+                        child: Chip(
+                          label: Icon(Icons.download, color: AppColors.primary),
+                        ),
+                      );
+                    }),
+                  ),
+                )
+              : Text(
+                  value,
+                  style: AppStyle.reportCardSubTitle.responsive.copyWith(
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+                  ),
+                ),
         ),
       ],
     );
+  }
+
+  List<String> _extractImageLinks(String text) {
+    if (text.isEmpty) return [];
+
+    // Regex to find URLs ending with image extensions
+    final RegExp imageRegex = RegExp(
+      r'(https?://[^\s]+?\.(jpg|jpeg|png|gif|webp))',
+      caseSensitive: false,
+    );
+
+    // Find all matches
+    final matches = imageRegex
+        .allMatches(text)
+        .map((m) => m.group(0)!)
+        .toList();
+
+    // Also handle simple filenames like "image.jpg" if you expect full URLs only, keep this
+    // Or split by comma/space if multiple links are in one string
+    if (matches.isEmpty) {
+      // Fallback: split by common separators and check extension
+      return text.split(RegExp(r'[,;\s]+')).where((link) {
+        final trimmed = link.trim();
+        return trimmed.isNotEmpty &&
+            (trimmed.toLowerCase().endsWith('.jpg') ||
+                trimmed.toLowerCase().endsWith('.jpeg') ||
+                trimmed.toLowerCase().endsWith('.png') ||
+                trimmed.toLowerCase().endsWith('.gif') ||
+                trimmed.toLowerCase().endsWith('.webp'));
+      }).toList();
+    }
+
+    return matches;
   }
 
   Text _sectionTitle(String title) {
@@ -1269,6 +1335,90 @@ class _UpdateWeeklyInspectionListState
           padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
           constraints: const BoxConstraints(),
         ),
+      ),
+    );
+  }
+}
+
+class _ImageViewerDialog extends StatefulWidget {
+  final List<XFile> images;
+  const _ImageViewerDialog({required this.images});
+
+  @override
+  State<_ImageViewerDialog> createState() => _ImageViewerDialogState();
+}
+
+class _ImageViewerDialogState extends State<_ImageViewerDialog> {
+  late PageController _pageController;
+  int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.black,
+      insetPadding: EdgeInsets.zero,
+      child: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (i) => setState(() => currentIndex = i),
+            itemCount: widget.images.length,
+            itemBuilder: (context, index) {
+              return InteractiveViewer(
+                child: Center(
+                  child: Image.file(
+                    File(widget.images[index].path),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              );
+            },
+          ),
+          // Close button
+          Positioned(
+            top: 40,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          // Image counter
+          if (widget.images.length > 1)
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${currentIndex + 1} / ${widget.images.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
