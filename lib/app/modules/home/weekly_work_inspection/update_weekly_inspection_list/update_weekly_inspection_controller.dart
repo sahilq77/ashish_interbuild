@@ -378,7 +378,7 @@ class UpdateWeeklyInspectionController extends GetxController {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse(Networkutility.updateDailyProgressReport),
+        Uri.parse(Networkutility.updateWIR),
       );
 
       if (AppUtility.authToken?.isNotEmpty == true) {

@@ -75,6 +75,9 @@ class Networkutility {
 
   static String getWirDetailList = "${baseUrl + "wir/details"}";
   static int getWirDetailListApi = 25;
+
+   static String updateWIR = "${baseUrl + "wir/update"}";
+  static int updateWIRApi = 25;
 }
 
 
