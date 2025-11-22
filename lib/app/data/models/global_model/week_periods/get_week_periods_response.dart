@@ -46,12 +46,14 @@ class WeeklyPeriod {
   String label;
   DateTime weekFromDate;
   DateTime weekToDate;
+  String isSelected;
 
   WeeklyPeriod({
     required this.weekCode,
     required this.label,
     required this.weekFromDate,
     required this.weekToDate,
+    required this.isSelected,
   });
 
   factory WeeklyPeriod.fromJson(Map<String, dynamic> json) => WeeklyPeriod(
@@ -59,6 +61,7 @@ class WeeklyPeriod {
     label: json["label"] ?? "",
     weekFromDate: DateTime.parse(json["week_from_date"]),
     weekToDate: DateTime.parse(json["week_to_date"]),
+    isSelected: json["is_selected"] ?? "0",
   );
 
   Map<String, dynamic> toJson() => {
@@ -68,5 +71,6 @@ class WeeklyPeriod {
         "${weekFromDate.year.toString().padLeft(4, '0')}-${weekFromDate.month.toString().padLeft(2, '0')}-${weekFromDate.day.toString().padLeft(2, '0')}",
     "week_to_date":
         "${weekToDate.year.toString().padLeft(4, '0')}-${weekToDate.month.toString().padLeft(2, '0')}-${weekToDate.day.toString().padLeft(2, '0')}",
+    "is_selected": isSelected,
   };
 }

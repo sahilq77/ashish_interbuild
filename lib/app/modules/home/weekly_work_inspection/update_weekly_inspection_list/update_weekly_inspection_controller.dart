@@ -1,236 +1,437 @@
-
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/daily_progress_report_model.dart';
-import 'package:ashishinterbuild/app/data/models/daily_progress_report/update_daily_progress_report_model.dart';
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_update_list_response.dart';
+import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_controller.dart';
+import 'package:ashishinterbuild/app/utils/app_utility.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 
 class UpdateWeeklyInspectionController extends GetxController {
-  final RxList<UpdateDailyProgressReportModel> measurementSheets = <UpdateDailyProgressReportModel>[].obs;
-  final RxList<UpdateDailyProgressReportModel> filteredMeasurementSheets = <UpdateDailyProgressReportModel>[].obs;
-  final RxInt expandedIndex = (-1).obs;
-  final RxBool isLoading = true.obs;
-  final TextEditingController searchController = TextEditingController();
+  final WeeklyInspectionController wiController = Get.put(WeeklyInspectionController());
 
-  @override
-  void onInit() {
-    super.onInit();
-    loadDummyData();
-    filteredMeasurementSheets.assignAll(measurementSheets);
-  }
+  final RxList<WIRItem> wirList = <WIRItem>[].obs;
+  final RxList<WIRItem> filteredWirItems = <WIRItem>[].obs;
+  final RxBool isLoading = true.obs;
+ final RxBool isLoadingu = true.obs; 
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasMoreData = true.obs;
+  final RxString errorMessage = ''.obs;
+  final RxInt expandedIndex = (-1).obs;
+  final TextEditingController searchController = TextEditingController();
+  final RxInt start = 0.obs;
+  final int length = 10;
+  final RxString _search = ''.obs;
+  final RxString _orderBy = ''.obs;
+  final RxBool isAscending = true.obs;
+  final RxnString selectedPackageFilter = RxnString(null);
+  Timer? _debounce;
+
+  RxString sourceName = "".obs;
+  RxString systemId = "".obs;
+  RxString uom = "".obs;
+
+  final RxList<String> frontDisplayColumns = <String>[].obs;
+  final RxList<String> buttonDisplayColumns = <String>[].obs;
+
+  final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
+    columns: [],
+    frontDisplayColumns: [],
+    frontSecondaryDisplayColumns: [],
+    buttonDisplayColumn: [],
+  ).obs;
+
+  final RxString selectedZone = ''.obs;
+  final RxString selectedZoneLocation = ''.obs;
+  final RxString selectedPboq = ''.obs;
+  final Rxn<DateTime> selectedDate = Rxn<DateTime>();
+
+  RxString packageName = "".obs;
+  RxString pboqName = "".obs;
+
+  // Multi-select & multi-image
+  final RxBool isMultiSelectMode = false.obs;
+  final RxSet<int> selectedIndices = <int>{}.obs;
+  final RxMap<int, List<XFile>> rowImages = <int, List<XFile>>{}.obs;
+  final ImagePicker _picker = ImagePicker();
+
+  RxString startDate = "".obs;
+  RxString endDate = "".obs;
 
   @override
   void onClose() {
     searchController.dispose();
+    _debounce?.cancel();
     super.onClose();
   }
 
-  Future<void> loadDummyData() async {
-    isLoading.value = true;
-    await Future.delayed(Duration(seconds: 2));
-    measurementSheets.assignAll([
-      UpdateDailyProgressReportModel(
-        srNo: "1",
-        systemId: "SYS001",
-        source: "Source A",
-        zone: "Zone A",
-        location: "Location 1",
-        subLocation: "Sub Loc 1",
-        cboqCode: "CBOQ001",
-        pboq: "PBOQ001",
-        pboa: "PBOA001",
-        pboaQty: "50",
-        pboaAmount: "5000",
-        revisedStartDate: "2025-10-01",
-        revisedEndDate: "2025-10-15",
-        length: "10",
-        breadth: "5",
-        height: "3",
-        msQty: "50",
-        uploadedFile: "file1.pdf",
-        progress: "75%",
-        execution: "Completed",
-        updatedOn: "2025-10-10",
-      ),
-      UpdateDailyProgressReportModel(
-        srNo: "2",
-        systemId: "SYS002",
-        source: "Source B",
-        zone: "Zone B",
-        location: "Location 2",
-        subLocation: "Sub Loc 2",
-        cboqCode: "CBOQ002",
-        pboq: "PBOQ002",
-        pboa: "PBOA002",
-        pboaQty: "75",
-        pboaAmount: "7500",
-        revisedStartDate: "2025-10-02",
-        revisedEndDate: "2025-10-16",
-        length: "12",
-        breadth: "6",
-        height: "4",
-        msQty: "75",
-        uploadedFile: "file2.pdf",
-        progress: "50%",
-        execution: "In Progress",
-        updatedOn: "2025-10-11",
-      ),
-      UpdateDailyProgressReportModel(
-        srNo: "3",
-        systemId: "SYS003",
-        source: "Source C",
-        zone: "Zone C",
-        location: "Location 3",
-        subLocation: "Sub Loc 3",
-        cboqCode: "CBOQ003",
-        pboq: "PBOQ003",
-        pboa: "PBOA003",
-        pboaQty: "30",
-        pboaAmount: "3000",
-        revisedStartDate: "2025-10-03",
-        revisedEndDate: "2025-10-17",
-        length: "8",
-        breadth: "4",
-        height: "2",
-        msQty: "30",
-        uploadedFile: "file3.pdf",
-        progress: "90%",
-        execution: "Completed",
-        updatedOn: "2025-10-12",
-      ),
-      UpdateDailyProgressReportModel(
-        srNo: "4",
-        systemId: "SYS004",
-        source: "Source D",
-        zone: "Zone D",
-        location: "Location 4",
-        subLocation: "Sub Loc 4",
-        cboqCode: "CBOQ004",
-        pboq: "PBOQ004",
-        pboa: "PBOA004",
-        pboaQty: "90",
-        pboaAmount: "9000",
-        revisedStartDate: "2025-10-04",
-        revisedEndDate: "2025-10-18",
-        length: "15",
-        breadth: "7",
-        height: "5",
-        msQty: "90",
-        uploadedFile: "file4.pdf",
-        progress: "60%",
-        execution: "In Progress",
-        updatedOn: "2025-10-13",
-      ),
-    ]);
-    filteredMeasurementSheets.assignAll(measurementSheets);
-    isLoading.value = false;
+  String _buildQueryParams({bool includePagination = true}) {
+    final String dateFilter = selectedDate.value != null
+        ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
+        : DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    final parts = <String>[
+      'project_id=${wiController.projectId.value}',
+      'filter_package=${wiController.packageId.value == 0 ? "" : wiController.packageId.value}',
+      'selected_source=${sourceName.value}',
+      'selected_system_id=${systemId.value}',
+      'filter_inspection_from_date=2025-11-17',
+      'filter_inspection_to_date=2025-11-23',
+    ];
+
+    if (selectedZone.value.isNotEmpty) {
+      parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
+    } else {
+      parts.add('filter_zone=');
+    }
+    if (selectedZoneLocation.value.isNotEmpty) {
+      parts.add('filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}');
+    } else {
+      parts.add('filter_zone_location=');
+    }
+    if (selectedPboq.value.isNotEmpty) {
+      parts.add('filter_pboq=${Uri.encodeComponent(selectedPboq.value)}');
+    } else {
+      parts.add('filter_pboq=');
+    }
+    if (_search.value.isNotEmpty) {
+      parts.add('search=${Uri.encodeComponent(_search.value)}');
+    }
+    parts.add('order_by=${_orderBy.value}');
+    if (includePagination) {
+      parts.add('start=${start.value}');
+      parts.add('length=$length');
+    }
+
+    return parts.isNotEmpty ? '?${parts.join('&')}' : '';
+  }
+
+  Future<void> fetchWirList({
+    required BuildContext context,
+    bool reset = false,
+    bool isPagination = false,
+  }) async {
+    if (reset) {
+      start.value = 0;
+      wirList.clear();
+      hasMoreData.value = true;
+    }
+    if (!hasMoreData.value && !reset) return;
+
+    if (isPagination) {
+      isLoadingMore.value = true;
+    } else {
+      isLoading.value = true;
+    }
+    errorMessage.value = '';
+
+    try {
+      final String query = _buildQueryParams(includePagination: true);
+      final String endpoint = Networkutility.getWirDetailList + query;
+
+      final responseList = await Networkcall().getMethod(
+        Networkutility.getWirDetailListApi,
+        endpoint,
+        context,
+      );
+
+      final response = responseList?.first as GetUpdateWeeklyInspectionListResponse?;
+
+      if (response != null && response.status == true) {
+        final data = response.data.data;
+
+        if (frontDisplayColumns.isEmpty) {
+          frontDisplayColumns.assignAll(response.data.appColumnDetails.frontDisplayColumns);
+          buttonDisplayColumns.assignAll(response.data.appColumnDetails.buttonDisplayColumn);
+          appColumnDetails.value = response.data.appColumnDetails;
+        }
+
+        if (data.isEmpty) {
+          hasMoreData.value = false;
+          if (reset || start.value == 0) _showError('No WIR data available');
+        } else {
+          if (reset) {
+            wirList.assignAll(data);
+          } else {
+            wirList.addAll(data);
+          }
+          _applyClientFilters();
+          start.value += length;
+          if (data.length < length) hasMoreData.value = false;
+        }
+      } else {
+        if (reset || start.value == 0) {
+          _showError(response?.message ?? 'No data found');
+        } else {
+          hasMoreData.value = false;
+        }
+      }
+    } on NoInternetException catch (e) {
+      _showError(e.message);
+      hasMoreData.value = false;
+    } on TimeoutException catch (e) {
+      _showError(e.message);
+      hasMoreData.value = false;
+    } on HttpException catch (e) {
+      _showError('${e.message} (Code: ${e.statusCode})');
+      hasMoreData.value = false;
+    } on ParseException catch (e) {
+      _showError(e.message);
+      hasMoreData.value = false;
+    } catch (e) {
+      _showError('Unexpected error: $e');
+      hasMoreData.value = false;
+    } finally {
+      isLoading.value = false;
+      isLoadingMore.value = false;
+    }
+  }
+
+  void _showError(String msg) {
+    errorMessage.value = msg;
+    AppSnackbarStyles.showError(title: 'Error', message: msg);
   }
 
   Future<void> refreshData() async {
-    isLoading.value = true;
-    measurementSheets.clear();
-    filteredMeasurementSheets.clear();
-    await Future.delayed(Duration(seconds: 2));
-    await loadDummyData();
     searchController.clear();
+    _search.value = '';
+    _orderBy.value = '';
+    isAscending.value = true;
+    selectedPackageFilter.value = null;
+    selectedZone.value = '';
+    selectedZoneLocation.value = '';
+    selectedPboq.value = '';
+    selectedDate.value = null;
+
+    start.value = 0;
+    hasMoreData.value = true;
+    filteredWirItems.clear();
+    toggleMultiSelectMode(off: true);
+    await fetchWirList(reset: true, context: Get.context!);
   }
 
-  void viewMeasurementSheet(UpdateDailyProgressReportModel sheet) {
-    print('Viewing: ${sheet.pboa}');
+  void loadMore(BuildContext context) {
+    if (!isLoadingMore.value && hasMoreData.value) {
+      fetchWirList(context: context, isPagination: true);
+    }
   }
 
   void toggleExpanded(int index) {
-    if (expandedIndex.value == index) {
-      expandedIndex.value = -1;
-    } else {
-      expandedIndex.value = index;
-    }
+    expandedIndex.value = expandedIndex.value == index ? -1 : index;
   }
 
-  // void searchSurveys(String query) {
-  //   if (query.isEmpty) {
-  //     filteredMeasurementSheets.assignAll(measurementSheets);
-  //   } else {
-  //     filteredMeasurementSheets.assignAll(
-  //       measurementSheets
-  //           .where((sheet) =>
-  //               sheet.pboa.toLowerCase().contains(query.toLowerCase()) ||
-  //               sheet.zone.toLowerCase().contains(query.toLowerCase()) ||
-  //               sheet.location.toLowerCase().contains(query.toLowerCase()))
-  //           .toList(),
-  //     );
-  //   }
-  // }
-   // Filter & Sort Variables
-  final RxnString selectedPackageFilter = RxnString(null);
-  final RxBool isAscending = true.obs;
-
-  // Get unique package names for filter dropdown
   List<String> getPackageNames() {
-    return measurementSheets.map((sheet) => sheet.location).toSet().toList();
+    return wirList.map((e) => e.getField('Package Name')).toSet().toList();
   }
 
-  // Apply filters (called from dialog)
-  void applyFilters() {
-    var filtered = measurementSheets.toList();
-
-    if (selectedPackageFilter.value != null) {
-      filtered = filtered
-          .where((sheet) => sheet.location == selectedPackageFilter.value)
-          .toList();
-    }
-
-    if (searchController.text.isNotEmpty) {
-      filtered = filtered
-          .where(
-            (sheet) =>
-                sheet.location.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ) ||
-                sheet.pboa.toLowerCase().contains(
-                  searchController.text.toLowerCase(),
-                ),
-          )
-          .toList();
-    }
-
-    filteredMeasurementSheets.assignAll(filtered);
-    applySorting();
+  String getFieldValue(WIRItem item, String columnName) {
+    return item.getField(columnName).replaceAll(RegExp(r'<[^>]*>'), '').trim();
   }
 
-  // Clear all filters
+  List<String> getFrontDisplayColumns() => appColumnDetails.value.frontDisplayColumns;
+  List<String> getFrontSecondaryDisplayColumns() => appColumnDetails.value.frontSecondaryDisplayColumns;
+  List<String> getButtonDisplayColumns() => appColumnDetails.value.buttonDisplayColumn;
+
+  void _applyClientFilters() {
+    var list = wirList.toList();
+
+    if (selectedPackageFilter.value != null && selectedPackageFilter.value!.isNotEmpty) {
+      list = list.where((e) => e.getField('Package Name') == selectedPackageFilter.value).toList();
+    }
+
+    filteredWirItems.assignAll(list);
+  }
+
+  void applyFilters() => _applyClientFilters();
+
   void clearFilters() {
     selectedPackageFilter.value = null;
+    selectedZone.value = "";
+    selectedZoneLocation.value = "";
+    selectedPboq.value = "";
+    selectedDate.value = null;
     searchController.clear();
-    filteredMeasurementSheets.assignAll(measurementSheets);
-    applySorting();
+    _search.value = '';
+    fetchWirList(context: Get.context!, reset: true);
   }
 
-  // Toggle sort order
+  void toggleMultiSelectMode({bool off = false}) {
+    isMultiSelectMode.value = off ? false : !isMultiSelectMode.value;
+    if (!isMultiSelectMode.value) {
+      selectedIndices.clear();
+      rowImages.clear();
+    }
+  }
+
+  void startMultiSelect(int index) {
+    isMultiSelectMode.value = true;
+    selectedIndices.add(index);
+  }
+
+  void toggleItemSelection(int index) {
+    selectedIndices.contains(index) ? selectedIndices.remove(index) : selectedIndices.add(index);
+  }
+
+  Future<void> pickImageForRow(int index) async {
+    showModalBottomSheet(
+      context: Get.context!,
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(Get.context!);
+                _pickImages(index, ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(Get.context!);
+                _pickImages(index, ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImages(int index, ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? image = await _picker.pickImage(source: source);
+        if (image != null) {
+          rowImages.putIfAbsent(index, () => []);
+          rowImages[index]!.add(image);
+          rowImages.refresh();
+        }
+      } else {
+        final images = await _picker.pickMultiImage();
+        if (images != null && images.isNotEmpty) {
+          rowImages.putIfAbsent(index, () => []);
+          rowImages[index]!.addAll(images);
+          rowImages.refresh();
+        }
+      }
+    } catch (e) {
+      AppSnackbarStyles.showError(title: 'Error', message: 'Failed to pick image: $e');
+    }
+  }
+
+  void removeImageFromRow(int rowIndex, int imageIndex) {
+    final images = rowImages[rowIndex];
+    if (images != null && imageIndex < images.length) {
+      images.removeAt(imageIndex);
+      if (images.isEmpty) rowImages.remove(rowIndex);
+      rowImages.refresh();
+    }
+  }
+
+  // Batch update selected WIR items
+  Future<void> batchUpdateSelectedWIRs() async {
+    if (selectedIndices.isEmpty) {
+      AppSnackbarStyles.showError(title: 'Error', message: 'Please select at least one item');
+      return;
+    }
+
+    isLoadingu.value = true;
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(Networkutility.updateDailyProgressReport), // Make sure this endpoint is correct
+      );
+
+      if (AppUtility.authToken?.isNotEmpty == true) {
+        request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
+      }
+
+      for (int i = 0; i < selectedIndices.length; i++) {
+        final index = selectedIndices.elementAt(i);
+        final item = filteredWirItems[index];
+
+        final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
+
+        request.fields['ms_rows[$i][project_id]'] = wiController.projectId.toString();
+        request.fields['ms_rows[$i][system_id]'] = systemId.value.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
+        request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
+        request.fields['ms_rows[$i][progress_status]'] = '1';
+        request.fields['ms_rows[$i][dpr_date]'] = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        request.fields['ms_rows[$i][executed_qty]'] = item.getField('MS QTY')?.toString() ?? '0';
+
+        // Attach images
+        if (rowImages[index] != null) {
+          for (int j = 0; j < rowImages[index]!.length; j++) {
+            final file = rowImages[index]![j];
+            final multipartFile = await http.MultipartFile.fromPath(
+              'ms_rows[$i][attachment][]',
+              file.path,
+              filename: path.basename(file.path),
+            );
+            request.files.add(multipartFile);
+          }
+        }
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      log('Batch WIR Update Response: $responseBody');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(responseBody);
+        if (jsonResponse['status'] == true) {
+          AppSnackbarStyles.showSuccess(
+            title: 'Success',
+            message: jsonResponse['message'] ?? 'Weekly Inspection updated successfully',
+          );
+
+          selectedIndices.clear();
+          rowImages.clear();
+          toggleMultiSelectMode(off: true);
+          await fetchWirList(reset: true, context: Get.context!);
+        } else {
+          AppSnackbarStyles.showError(title: 'Failed', message: jsonResponse['message'] ?? 'Update failed');
+        }
+      } else {
+        AppSnackbarStyles.showError(title: 'Server Error', message: 'Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('WIR Batch Update Error: $e');
+      AppSnackbarStyles.showError(title: 'Error', message: 'Failed to update: $e');
+    } finally {
+      isLoadingu.value = false;
+    }
+  }
+
   void toggleSorting() {
     isAscending.value = !isAscending.value;
-    applySorting();
+    _orderBy.value = isAscending.value ? 'asc' : 'desc';
+    fetchWirList(reset: true, context: Get.context!);
   }
 
-  // Apply sorting by CBOQ Name
-  void applySorting() {
-    if (isAscending.value) {
-      filteredMeasurementSheets.sort(
-        (a, b) => a.pboa.compareTo(b.pboa),
-      );
-    } else {
-      filteredMeasurementSheets.sort(
-        (a, b) => b.pboa.compareTo(a.pboa),
-      );
-    }
-  }
-
-  // Update search to re-apply filters + sorting
-  void searchSurveys(String query) {
-    if (query.isEmpty && selectedPackageFilter.value == null) {
-      filteredMeasurementSheets.assignAll(measurementSheets);
-    } else {
-      applyFilters(); // This will respect both search + filter
-    }
-    applySorting();
+  void searchWirItems(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      final trimmed = query.trim();
+      if (_search.value != trimmed) {
+        _search.value = trimmed;
+        fetchWirList(reset: true, context: Get.context!);
+      }
+    });
   }
 }

@@ -21,6 +21,7 @@ import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_meas
 import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
 import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_response.dart';
+import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_update_list_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -312,6 +313,12 @@ class Networkcall {
           case 24:
             final getWeeklyPeriod = getWeeklyPeriodsResponseFromJson(str);
             return getWeeklyPeriod;
+          case 24:
+            final getWeeklyPeriod = getWeeklyPeriodsResponseFromJson(str);
+            return getWeeklyPeriod;
+          case 25:
+            final getWIRDetailList =
+                getUpdateWeeklyInspectionListResponseFromJson(response.body);
 
           default:
             log("Invalid request code: $requestCode");
