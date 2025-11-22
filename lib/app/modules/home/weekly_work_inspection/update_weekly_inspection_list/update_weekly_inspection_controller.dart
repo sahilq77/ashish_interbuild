@@ -17,12 +17,14 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 class UpdateWeeklyInspectionController extends GetxController {
-  final WeeklyInspectionController wiController = Get.put(WeeklyInspectionController());
+  final WeeklyInspectionController wiController = Get.put(
+    WeeklyInspectionController(),
+  );
 
   final RxList<WIRItem> wirList = <WIRItem>[].obs;
   final RxList<WIRItem> filteredWirItems = <WIRItem>[].obs;
   final RxBool isLoading = true.obs;
- final RxBool isLoadingu = true.obs; 
+  final RxBool isLoadingu = true.obs;
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMoreData = true.obs;
   final RxString errorMessage = ''.obs;
@@ -84,8 +86,8 @@ class UpdateWeeklyInspectionController extends GetxController {
       'filter_package=${wiController.packageId.value == 0 ? "" : wiController.packageId.value}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
-      'filter_inspection_from_date=2025-11-17',
-      'filter_inspection_to_date=2025-11-23',
+      'filter_inspection_from_date=${startDate.value}',
+      'filter_inspection_to_date=${endDate.value}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
@@ -94,7 +96,9 @@ class UpdateWeeklyInspectionController extends GetxController {
       parts.add('filter_zone=');
     }
     if (selectedZoneLocation.value.isNotEmpty) {
-      parts.add('filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}');
+      parts.add(
+        'filter_zone_location=${Uri.encodeComponent(selectedZoneLocation.value)}',
+      );
     } else {
       parts.add('filter_zone_location=');
     }
@@ -144,29 +148,35 @@ class UpdateWeeklyInspectionController extends GetxController {
         context,
       );
 
-      final response = responseList?.first as GetUpdateWeeklyInspectionListResponse?;
+      final response =
+          responseList?.first as GetUpdateWeeklyInspectionListResponse?;
 
       if (response != null && response.status == true) {
-        final data = response.data.data;
-
+        // FIXED: Correctly get the list of items
+        final List<WIRItem> items = response.data.data;
+        log("Items $items");
         if (frontDisplayColumns.isEmpty) {
-          frontDisplayColumns.assignAll(response.data.appColumnDetails.frontDisplayColumns);
-          buttonDisplayColumns.assignAll(response.data.appColumnDetails.buttonDisplayColumn);
+          frontDisplayColumns.assignAll(
+            response.data.appColumnDetails.frontDisplayColumns,
+          );
+          buttonDisplayColumns.assignAll(
+            response.data.appColumnDetails.buttonDisplayColumn,
+          );
           appColumnDetails.value = response.data.appColumnDetails;
         }
 
-        if (data.isEmpty) {
+        if (items.isEmpty) {
           hasMoreData.value = false;
           if (reset || start.value == 0) _showError('No WIR data available');
         } else {
           if (reset) {
-            wirList.assignAll(data);
+            wirList.assignAll(items);
           } else {
-            wirList.addAll(data);
+            wirList.addAll(items);
           }
           _applyClientFilters();
           start.value += length;
-          if (data.length < length) hasMoreData.value = false;
+          if (items.length < length) hasMoreData.value = false;
         }
       } else {
         if (reset || start.value == 0) {
@@ -237,15 +247,23 @@ class UpdateWeeklyInspectionController extends GetxController {
     return item.getField(columnName).replaceAll(RegExp(r'<[^>]*>'), '').trim();
   }
 
-  List<String> getFrontDisplayColumns() => appColumnDetails.value.frontDisplayColumns;
-  List<String> getFrontSecondaryDisplayColumns() => appColumnDetails.value.frontSecondaryDisplayColumns;
-  List<String> getButtonDisplayColumns() => appColumnDetails.value.buttonDisplayColumn;
+  List<String> getFrontDisplayColumns() =>
+      appColumnDetails.value.frontDisplayColumns;
+  List<String> getFrontSecondaryDisplayColumns() =>
+      appColumnDetails.value.frontSecondaryDisplayColumns;
+  List<String> getButtonDisplayColumns() =>
+      appColumnDetails.value.buttonDisplayColumn;
 
   void _applyClientFilters() {
     var list = wirList.toList();
 
-    if (selectedPackageFilter.value != null && selectedPackageFilter.value!.isNotEmpty) {
-      list = list.where((e) => e.getField('Package Name') == selectedPackageFilter.value).toList();
+    if (selectedPackageFilter.value != null &&
+        selectedPackageFilter.value!.isNotEmpty) {
+      list = list
+          .where(
+            (e) => e.getField('Package Name') == selectedPackageFilter.value,
+          )
+          .toList();
     }
 
     filteredWirItems.assignAll(list);
@@ -278,7 +296,9 @@ class UpdateWeeklyInspectionController extends GetxController {
   }
 
   void toggleItemSelection(int index) {
-    selectedIndices.contains(index) ? selectedIndices.remove(index) : selectedIndices.add(index);
+    selectedIndices.contains(index)
+        ? selectedIndices.remove(index)
+        : selectedIndices.add(index);
   }
 
   Future<void> pickImageForRow(int index) async {
@@ -329,7 +349,10 @@ class UpdateWeeklyInspectionController extends GetxController {
         }
       }
     } catch (e) {
-      AppSnackbarStyles.showError(title: 'Error', message: 'Failed to pick image: $e');
+      AppSnackbarStyles.showError(
+        title: 'Error',
+        message: 'Failed to pick image: $e',
+      );
     }
   }
 
@@ -342,10 +365,12 @@ class UpdateWeeklyInspectionController extends GetxController {
     }
   }
 
-  // Batch update selected WIR items
   Future<void> batchUpdateSelectedWIRs() async {
     if (selectedIndices.isEmpty) {
-      AppSnackbarStyles.showError(title: 'Error', message: 'Please select at least one item');
+      AppSnackbarStyles.showError(
+        title: 'Error',
+        message: 'Please select at least one item',
+      );
       return;
     }
 
@@ -353,7 +378,7 @@ class UpdateWeeklyInspectionController extends GetxController {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse(Networkutility.updateDailyProgressReport), // Make sure this endpoint is correct
+        Uri.parse(Networkutility.updateDailyProgressReport),
       );
 
       if (AppUtility.authToken?.isNotEmpty == true) {
@@ -366,15 +391,20 @@ class UpdateWeeklyInspectionController extends GetxController {
 
         final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
 
-        request.fields['ms_rows[$i][project_id]'] = wiController.projectId.toString();
-        request.fields['ms_rows[$i][system_id]'] = systemId.value.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+        request.fields['ms_rows[$i][project_id]'] = wiController.projectId
+            .toString();
+        request.fields['ms_rows[$i][system_id]'] = systemId.value
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .trim();
         request.fields['ms_rows[$i][source_table]'] = sourceName.value;
         request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
         request.fields['ms_rows[$i][progress_status]'] = '1';
-        request.fields['ms_rows[$i][dpr_date]'] = DateFormat('yyyy-MM-dd').format(DateTime.now());
-        request.fields['ms_rows[$i][executed_qty]'] = item.getField('MS QTY')?.toString() ?? '0';
+        request.fields['ms_rows[$i][dpr_date]'] = DateFormat(
+          'yyyy-MM-dd',
+        ).format(DateTime.now());
+        request.fields['ms_rows[$i][executed_qty]'] =
+            item.getField('MS QTY')?.toString() ?? '0';
 
-        // Attach images
         if (rowImages[index] != null) {
           for (int j = 0; j < rowImages[index]!.length; j++) {
             final file = rowImages[index]![j];
@@ -397,7 +427,9 @@ class UpdateWeeklyInspectionController extends GetxController {
         if (jsonResponse['status'] == true) {
           AppSnackbarStyles.showSuccess(
             title: 'Success',
-            message: jsonResponse['message'] ?? 'Weekly Inspection updated successfully',
+            message:
+                jsonResponse['message'] ??
+                'Weekly Inspection updated successfully',
           );
 
           selectedIndices.clear();
@@ -405,14 +437,23 @@ class UpdateWeeklyInspectionController extends GetxController {
           toggleMultiSelectMode(off: true);
           await fetchWirList(reset: true, context: Get.context!);
         } else {
-          AppSnackbarStyles.showError(title: 'Failed', message: jsonResponse['message'] ?? 'Update failed');
+          AppSnackbarStyles.showError(
+            title: 'Failed',
+            message: jsonResponse['message'] ?? 'Update failed',
+          );
         }
       } else {
-        AppSnackbarStyles.showError(title: 'Server Error', message: 'Status: ${response.statusCode}');
+        AppSnackbarStyles.showError(
+          title: 'Server Error',
+          message: 'Status: ${response.statusCode}',
+        );
       }
     } catch (e) {
       log('WIR Batch Update Error: $e');
-      AppSnackbarStyles.showError(title: 'Error', message: 'Failed to update: $e');
+      AppSnackbarStyles.showError(
+        title: 'Error',
+        message: 'Failed to update: $e',
+      );
     } finally {
       isLoadingu.value = false;
     }

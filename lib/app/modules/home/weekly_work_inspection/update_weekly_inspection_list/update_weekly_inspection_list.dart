@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
-import 'package:ashishinterbuild/app/modules/home/daily_progress_report/update_progress_report_list/update_progress_report_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -83,7 +82,7 @@ class _UpdateWeeklyInspectionListState
               Padding(
                 padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
                 child: Text(
-                  "Skyline Towers ➔ DPR Dashboard ➔ DPR",
+                  "Skyline Towers ➔ Weekly Inspection ➔ WIR Detail",
                   style: AppStyle.bodySmallPoppinsPrimary,
                 ),
               ),
@@ -185,8 +184,7 @@ class _UpdateWeeklyInspectionListState
                                   ? 1
                                   : 1),
                           itemBuilder: (context, index) {
-                            if (index >=
-                                controller.filteredWirItems.length) {
+                            if (index >= controller.filteredWirItems.length) {
                               if (controller.hasMoreData.value &&
                                   !controller.isLoadingMore.value) {
                                 WidgetsBinding.instance.addPostFrameCallback((
@@ -217,8 +215,7 @@ class _UpdateWeeklyInspectionListState
                               );
                             }
 
-                            final sheet =
-                                controller.filteredWirItems[index];
+                            final sheet = controller.filteredWirItems[index];
                             return GestureDetector(
                               onTap: () {
                                 if (controller.isMultiSelectMode.value &&

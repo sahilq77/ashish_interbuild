@@ -59,11 +59,12 @@ class WIRData {
     draw: json["draw"] ?? 0,
     recordsTotal: json["recordsTotal"] ?? 0,
     recordsFiltered: json["recordsFiltered"] ?? 0,
-    appColumnDetails: AppColumnDetails.fromJson(json["app_column_details"]),
-    data: List<WIRItem>.from(json["data"].map((x) => WIRItem.fromJson(x))),
-    // dprCounts: json["wir_counts"] != null
-    //     ? WIRCounts.fromJson(json["wir_counts"])
-    //     : null,
+    appColumnDetails: AppColumnDetails.fromJson(
+      json["app_column_details"] ?? {},
+    ),
+    data: json["data"] != null
+        ? List<WIRItem>.from(json["data"].map((x) => WIRItem.fromJson(x)))
+        : <WIRItem>[],
   );
 
   Map<String, dynamic> toJson() => {

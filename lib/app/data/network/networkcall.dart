@@ -319,6 +319,7 @@ class Networkcall {
           case 25:
             final getWIRDetailList =
                 getUpdateWeeklyInspectionListResponseFromJson(response.body);
+            return [getWIRDetailList];
 
           default:
             log("Invalid request code: $requestCode");
