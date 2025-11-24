@@ -697,6 +697,7 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                     style: AppButtonStyles.elevatedSmallBlack(),
                     onPressed: () {
                       controller.batchUpdateSelectedDPRs();
+                      Navigator.of(context).pop();
                     },
                     child: Text(
                       'Confirm',
