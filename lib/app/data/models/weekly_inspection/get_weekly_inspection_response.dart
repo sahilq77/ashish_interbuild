@@ -54,13 +54,13 @@ class GetWeeklyDashboard {
 }
 
 class WirCounts {
-  int totalTarget;
+  dynamic totalTarget;
   int totalAchievedTarget;
   String totalAchievedTargetPer;
-  int monthTarget;
+  dynamic monthTarget;
   int monthAchievedTarget;
   String monthAchievedTargetPer;
-  int weeklyTarget;
+  dynamic weeklyTarget;
   int weeklyAchievedTarget;
   String weeklyAchievedTargetPer;
 
