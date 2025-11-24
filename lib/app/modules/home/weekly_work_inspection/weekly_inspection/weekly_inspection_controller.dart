@@ -77,7 +77,7 @@ class WeeklyInspectionController extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         zoneController.fetchZones(context: Get.context!);
-        weeklypController.fetchPeriods(context: Get.context!);
+        // weeklypController.fetchPeriods(context: Get.context!);
         _autoSelectCurrentWeek();
         fetchDprList(reset: true, context: Get.context!);
       }
@@ -341,5 +341,23 @@ class WeeklyInspectionController extends GetxController {
         fetchDprList(reset: true, context: Get.context!);
       }
     });
+  }
+
+  String extractFromDate(String attachmentsHtml) {
+    final regExp = RegExp(r'filter_inspection_from_date=(\d{4}-\d{2}-\d{2})');
+    final match = regExp.firstMatch(attachmentsHtml);
+    return match?.group(1) ?? ''; // Returns "2025-11-17" or empty string
+  }
+
+  String extractToDate(String attachmentsHtml) {
+    final regExp = RegExp(r'filter_inspection_to_date=(\d{4}-\d{2}-\d{2})');
+    final match = regExp.firstMatch(attachmentsHtml);
+    return match?.group(1) ?? ''; // Returns "2025-11-23" or empty string
+  }
+
+  String extractUrl(String href) {
+    final regExp = RegExp(r"window\.location\.href='([^']+)'");
+    final match = regExp.firstMatch(href);
+    return match?.group(1) ?? ''; // Returns "2025-11-23" or empty string
   }
 }

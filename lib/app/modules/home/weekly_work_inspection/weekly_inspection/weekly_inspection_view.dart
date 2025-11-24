@@ -67,10 +67,10 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                 padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Obx(
-                      () => SizedBox(
-                        width: ResponsiveHelper.screenWidth * 0.300,
-                        child: _buildDropdownField(
+                    SizedBox(
+                      width: ResponsiveHelper.screenWidth * 0.300,
+                      child: Obx(
+                        () => _buildDropdownField(
                           label: 'Year',
                           value: controller.selectedYear.value,
                           items: controller.yearList,
@@ -90,6 +90,7 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                         ),
                       ),
                     ),
+
                     SizedBox(width: ResponsiveHelper.spacing(5)),
                     Expanded(
                       child: Obx(
@@ -356,8 +357,16 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                                                                   sheet,
                                                                   "PBOQ",
                                                                 ),
-                                                            // "fromDate"
-                                                            // "toDate":
+                                                            "fromDate": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "Attachments",
+                                                                ),
+                                                            "toDate": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "Attachments",
+                                                                ),
                                                           },
                                                         );
                                                       },
