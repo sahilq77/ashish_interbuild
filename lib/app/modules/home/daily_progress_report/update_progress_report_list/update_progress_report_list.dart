@@ -47,6 +47,8 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
       controller.sourceName.value = args["selected_source"] ?? "";
       controller.systemId.value = args["selected_system_id"] ?? "";
       controller.uom.value = args["uom"] ?? "";
+      controller.packageName.value = args["packageName"] ?? "";
+      controller.pboqName.value = args["pboqName"] ?? "";
     }
 
     // Set default values if still 0

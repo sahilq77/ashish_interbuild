@@ -273,6 +273,16 @@ class _DailyProgressReportViiewState extends State<DailyProgressReportViiew> {
                                                                   sheet,
                                                                   "UOM",
                                                                 ),
+                                                            "packageName": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "Package Name",
+                                                                ),
+                                                            "pboqName": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "PBOQ",
+                                                                ),
                                                           },
                                                         );
                                                       },
