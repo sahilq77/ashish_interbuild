@@ -488,7 +488,22 @@ class UpdateProgressReportController extends GetxController {
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
+      // ===== ADD THIS BLOCK TO LOG THE FULL REQUEST BODY =====
+      log('=== MULTIPART REQUEST DETAILS ===');
+      // Log all text fields
+      log('Fields:');
+      request.fields.forEach((key, value) {
+        log('  $key: $value');
+      });
 
+      log('Files:');
+      for (var file in request.files) {
+        final fileName = file.filename ?? 'unknown_filename';
+        final fieldName = file.field;
+        final length = file.length; // content length in bytes
+        log('  Field: $fieldName => File: $fileName (${length} bytes)');
+      }
+      log('=====================================');
       log('Update DPR Response: $responseBody');
 
       if (response.statusCode == 200) {

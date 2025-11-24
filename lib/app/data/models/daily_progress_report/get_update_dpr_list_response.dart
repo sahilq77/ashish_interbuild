@@ -1,9 +1,10 @@
 import 'dart:convert';
 
+GetUpdateDPRListResponse getUpdateDprListResponseFromJson(String str) =>
+    GetUpdateDPRListResponse.fromJson(json.decode(str));
 
-GetUpdateDPRListResponse getUpdateDprListResponseFromJson(String str) => GetUpdateDPRListResponse.fromJson(json.decode(str));
-
-String getUpdateDprListResponseToJson(GetUpdateDPRListResponse data) => json.encode(data.toJson());
+String getUpdateDprListResponseToJson(GetUpdateDPRListResponse data) =>
+    json.encode(data.toJson());
 
 class GetUpdateDPRListResponse {
   bool status;
@@ -18,12 +19,13 @@ class GetUpdateDPRListResponse {
     required this.data,
   });
 
-  factory GetUpdateDPRListResponse.fromJson(Map<String, dynamic> json) => GetUpdateDPRListResponse(
-    status: json["status"],
-    error: json["error"],
-    message: json["message"],
-    data: DprData.fromJson(json["data"]),
-  );
+  factory GetUpdateDPRListResponse.fromJson(Map<String, dynamic> json) =>
+      GetUpdateDPRListResponse(
+        status: json["status"],
+        error: json["error"],
+        message: json["message"],
+        data: DprData.fromJson(json["data"]),
+      );
 
   Map<String, dynamic> toJson() => {
     "status": status,
@@ -56,7 +58,9 @@ class DprData {
     recordsFiltered: json["recordsFiltered"] ?? 0,
     appColumnDetails: AppColumnDetails.fromJson(json["app_column_details"]),
     data: List<DprItem>.from(json["data"].map((x) => DprItem.fromJson(x))),
-    dprCounts: json["dpr_counts"] != null ? DprCounts.fromJson(json["dpr_counts"]) : null,
+    dprCounts: json["dpr_counts"] != null
+        ? DprCounts.fromJson(json["dpr_counts"])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -82,18 +86,31 @@ class AppColumnDetails {
     required this.buttonDisplayColumn,
   });
 
-  factory AppColumnDetails.fromJson(Map<String, dynamic> json) => AppColumnDetails(
-    columns: List<String>.from(json["columns"].map((x) => x)),
-    frontDisplayColumns: List<String>.from(json["front_display_columns"].map((x) => x)),
-    frontSecondaryDisplayColumns: List<String>.from(json["front_secondary_display_columns"].map((x) => x)),
-    buttonDisplayColumn: List<String>.from(json["button_display_column"].map((x) => x)),
-  );
+  factory AppColumnDetails.fromJson(Map<String, dynamic> json) =>
+      AppColumnDetails(
+        columns: List<String>.from(json["columns"].map((x) => x)),
+        frontDisplayColumns: List<String>.from(
+          json["front_display_columns"].map((x) => x),
+        ),
+        frontSecondaryDisplayColumns: List<String>.from(
+          json["front_secondary_display_columns"].map((x) => x),
+        ),
+        buttonDisplayColumn: List<String>.from(
+          json["button_display_column"].map((x) => x),
+        ),
+      );
 
   Map<String, dynamic> toJson() => {
     "columns": List<dynamic>.from(columns.map((x) => x)),
-    "front_display_columns": List<dynamic>.from(frontDisplayColumns.map((x) => x)),
-    "front_secondary_display_columns": List<dynamic>.from(frontSecondaryDisplayColumns.map((x) => x)),
-    "button_display_column": List<dynamic>.from(buttonDisplayColumn.map((x) => x)),
+    "front_display_columns": List<dynamic>.from(
+      frontDisplayColumns.map((x) => x),
+    ),
+    "front_secondary_display_columns": List<dynamic>.from(
+      frontSecondaryDisplayColumns.map((x) => x),
+    ),
+    "button_display_column": List<dynamic>.from(
+      buttonDisplayColumn.map((x) => x),
+    ),
   };
 }
 
@@ -130,8 +147,8 @@ class DprCounts {
 }
 
 class DprStatus {
-  int target;
-  int achievedTarget;
+  dynamic target;
+  dynamic achievedTarget;
   String targetAmount;
   String achievedTargetAmount;
 
@@ -143,10 +160,10 @@ class DprStatus {
   });
 
   factory DprStatus.fromJson(Map<String, dynamic> json) => DprStatus(
-    target: json["target"] ?? 0,
-    achievedTarget: json["achieved_target"] ?? 0,
-    targetAmount: json["target_amount"] ?? "0.00",
-    achievedTargetAmount: json["achieved_target_amount"] ?? "0.00",
+    target: json["target"] ?? "",
+    achievedTarget: json["achieved_target"] ?? "",
+    targetAmount: json["target_amount"] ?? "",
+    achievedTargetAmount: json["achieved_target_amount"] ?? "",
   );
 
   Map<String, dynamic> toJson() => {
