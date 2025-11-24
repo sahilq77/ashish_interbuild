@@ -24,7 +24,7 @@ class UpdateWeeklyInspectionController extends GetxController {
   final RxList<WIRItem> wirList = <WIRItem>[].obs;
   final RxList<WIRItem> filteredWirItems = <WIRItem>[].obs;
   final RxBool isLoading = true.obs;
-  final RxBool isLoadingu = true.obs;
+  final RxBool isLoadingu = false.obs;
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMoreData = true.obs;
   final RxString errorMessage = ''.obs;
@@ -86,8 +86,8 @@ class UpdateWeeklyInspectionController extends GetxController {
       'filter_package=${wiController.packageId.value == 0 ? "" : wiController.packageId.value}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
-      'filter_inspection_from_date=2025-11-24',
-      'filter_inspection_to_date=2025-11-30',
+      'filter_inspection_from_date=${'2025-11-24'}',
+      'filter_inspection_to_date=${'2025-11-30'}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
@@ -381,35 +381,58 @@ class UpdateWeeklyInspectionController extends GetxController {
         Uri.parse(Networkutility.updateWIR),
       );
 
+      // Add auth header
       if (AppUtility.authToken?.isNotEmpty == true) {
         request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
       }
+
+      final now = DateTime.now();
+      final formattedDate = DateFormat('yyyy-MM-dd').format(now);
+      final weekNo = getWeekNumber(now).toString(); // You'll need this helper
+      final year = now.year.toString();
 
       for (int i = 0; i < selectedIndices.length; i++) {
         final index = selectedIndices.elementAt(i);
         final item = filteredWirItems[index];
 
         final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
+        final executedQty = item.getField('MS QTY')?.toString() ?? '0';
+
+        // Ensure systemId is clean integer!
+        final cleanSystemId = systemId.value
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .trim()
+            .replaceAll(RegExp(r'[^0-9]'), ''); // Extra safety
 
         request.fields['ms_rows[$i][project_id]'] = wiController.projectId
             .toString();
-        request.fields['ms_rows[$i][system_id]'] = systemId.value
-            .replaceAll(RegExp(r'<[^>]*>'), '')
-            .trim();
-        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
         request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
         request.fields['ms_rows[$i][progress_status]'] = '1';
-        request.fields['ms_rows[$i][dpr_date]'] = DateFormat(
-          'yyyy-MM-dd',
-        ).format(DateTime.now());
-        request.fields['ms_rows[$i][executed_qty]'] =
-            item.getField('MS QTY')?.toString() ?? '0';
+        request.fields['ms_rows[$i][pending_status]'] =
+            '0'; // or appropriate value
+        request.fields['ms_rows[$i][executed_qty]'] = executedQty;
+        request.fields['ms_rows[$i][dpr_pending_qty]'] =
+            '0'; // adjust logic if needed
 
-        if (rowImages[index] != null) {
+        request.fields['ms_rows[$i][dpr_date]'] = formattedDate;
+        request.fields['ms_rows[$i][dpr_from_date]'] = formattedDate;
+        request.fields['ms_rows[$i][dpr_to_date]'] = formattedDate;
+
+        // Optional: inspection dates (set if needed)
+        // request.fields['ms_rows[$i][inspection_from_date]'] = formattedDate;
+        // request.fields['ms_rows[$i][inspection_to_date]'] = formattedDate;
+
+        request.fields['ms_rows[$i][week_no]'] = weekNo;
+        request.fields['ms_rows[$i][year]'] = year;
+        request.fields['ms_rows[$i][system_id]'] = cleanSystemId;
+        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
+
+        // Handle file attachments per row
+        if (rowImages[index] != null && rowImages[index]!.isNotEmpty) {
           for (int j = 0; j < rowImages[index]!.length; j++) {
             final file = rowImages[index]![j];
             final multipartFile = await http.MultipartFile.fromPath(
-              'ms_rows[$i][attachment][]',
+              'ms_rows[$i][attachment][]', // Correct syntax for array of files per row
               file.path,
               filename: path.basename(file.path),
             );
@@ -457,6 +480,24 @@ class UpdateWeeklyInspectionController extends GetxController {
     } finally {
       isLoadingu.value = false;
     }
+  }
+
+  // Helper: Get ISO week number
+  int getWeekNumber(DateTime date) {
+    int dayOfYear = int.parse(DateFormat('D').format(date));
+    int woy = ((dayOfYear - date.weekday + 10) / 7).floor();
+    if (woy < 1) {
+      woy = _weeksInYear(date.year - 1);
+    } else if (woy > _weeksInYear(date.year)) {
+      woy = 1;
+    }
+    return woy;
+  }
+
+  int _weeksInYear(int year) {
+    DateTime dec28 = DateTime(year, 12, 28);
+    int dayOfDec28 = int.parse(DateFormat('D').format(dec28));
+    return ((dayOfDec28 - dec28.weekday + 10) / 7).floor();
   }
 
   void toggleSorting() {

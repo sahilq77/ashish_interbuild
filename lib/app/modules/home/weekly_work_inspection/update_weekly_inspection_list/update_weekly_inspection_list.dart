@@ -50,8 +50,8 @@ class _UpdateWeeklyInspectionListState
       controller.sourceName.value = args["selected_source"] ?? "";
       controller.systemId.value = args["selected_system_id"] ?? "";
       controller.uom.value = args["uom"] ?? "";
-      controller.startDate.value = args["startDate"] ?? "";
-      controller.endDate.value = args["endDate"] ?? "";
+      controller.startDate.value = args["fromDate"] ?? "";
+      controller.endDate.value = args["toDate"] ?? "";
       controller.packageName.value = args["packageName"] ?? "";
       controller.pboqName.value = args["pboqName"] ?? "";
     }
@@ -59,7 +59,7 @@ class _UpdateWeeklyInspectionListState
     // Set default values if still 0
 
     log(
-      "Weekly Inspection → Source=${controller.sourceName.value} System Id=${controller.systemId.value}",
+      "Weekly Inspection → Source=${controller.sourceName.value} System Id=${controller.systemId.value}  fromDate=${controller.startDate.value} toDate=${controller.endDate.value}",
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
@@ -451,7 +451,7 @@ class _UpdateWeeklyInspectionListState
                                                             .value &&
                                                         controller.getFieldValue(
                                                               sheet,
-                                                              "execution_status",
+                                                              "inspection_disabled",
                                                             ) ==
                                                             "0")
                                                       Transform.scale(
@@ -470,78 +470,139 @@ class _UpdateWeeklyInspectionListState
                                                               AppColors.primary,
                                                         ),
                                                       ),
+                                                    Row(
+                                                      children: [
+                                                        Transform.scale(
+                                                          scale: 1,
+                                                          child: Checkbox(
+                                                            value: false,
+                                                            onChanged: (val) {
+                                                              controller
+                                                                  .toggleItemSelection(
+                                                                    index,
+                                                                  );
+                                                            },
+                                                            activeColor:
+                                                                AppColors
+                                                                    .primary,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          "Update",
+                                                          style: AppStyle
+                                                              .reportCardRowCount
+                                                              .responsive
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                              ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Transform.scale(
+                                                          scale: 1,
+                                                          child: Checkbox(
+                                                            value: true,
+                                                            onChanged: (val) {
+                                                              controller
+                                                                  .toggleItemSelection(
+                                                                    index,
+                                                                  );
+                                                            },
+                                                            activeColor:
+                                                                AppColors
+                                                                    .primary,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          "Pending",
+                                                          style: AppStyle
+                                                              .reportCardRowCount
+                                                              .responsive
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                              ),
+                                                        ),
+                                                      ],
+                                                    ),
                                                     const Spacer(),
                                                     if (controller.getFieldValue(
                                                           sheet,
-                                                          "execution_status",
+                                                          "inspection_disabled",
                                                         ) ==
-                                                        "0")
-                                                      Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          if (controller
-                                                                  .rowImages
-                                                                  .containsKey(
-                                                                    index,
-                                                                  ) &&
-                                                              controller
-                                                                      .rowImages[index] !=
-                                                                  null &&
-                                                              controller
-                                                                  .rowImages[index]!
-                                                                  .isNotEmpty)
-                                                            Container(
-                                                              padding:
-                                                                  const EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        8,
-                                                                    vertical: 4,
-                                                                  ),
-                                                              decoration: BoxDecoration(
-                                                                color: AppColors
-                                                                    .primary
-                                                                    .withOpacity(
-                                                                      0.1,
-                                                                    ),
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      12,
-                                                                    ),
-                                                              ),
-                                                              child: Text(
-                                                                '${controller.rowImages[index]!.length} images',
-                                                                style: TextStyle(
-                                                                  color: AppColors
-                                                                      .primary,
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          const SizedBox(
-                                                            width: 8,
-                                                          ),
-                                                          IconButton(
-                                                            onPressed: () =>
-                                                                controller
-                                                                    .pickImageForRow(
-                                                                      index,
-                                                                    ),
-                                                            icon: Icon(
-                                                              Icons.add_a_photo,
-                                                              color: AppColors
-                                                                  .primary,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                    else
+                                                        "1")
                                                       _updatedBadge(),
                                                   ],
                                                 ),
+                                                if (controller.getFieldValue(
+                                                      sheet,
+                                                      "inspection_disabled",
+                                                    ) ==
+                                                    "0")
+                                                  Row(
+                                                    // mainAxisSize:
+                                                    //     MainAxisSize.min,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    // crossAxisAlignment:
+                                                    //     CrossAxisAlignment.end,
+                                                    children: [
+                                                      if (controller.rowImages
+                                                              .containsKey(
+                                                                index,
+                                                              ) &&
+                                                          controller
+                                                                  .rowImages[index] !=
+                                                              null &&
+                                                          controller
+                                                              .rowImages[index]!
+                                                              .isNotEmpty)
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 4,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: AppColors
+                                                                .primary
+                                                                .withOpacity(
+                                                                  0.1,
+                                                                ),
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  12,
+                                                                ),
+                                                          ),
+                                                          child: Text(
+                                                            '${controller.rowImages[index]!.length} images',
+                                                            style: TextStyle(
+                                                              color: AppColors
+                                                                  .primary,
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      const SizedBox(width: 8),
+                                                      IconButton(
+                                                        onPressed: () =>
+                                                            controller
+                                                                .pickImageForRow(
+                                                                  index,
+                                                                ),
+                                                        icon: Icon(
+                                                          Icons.add_a_photo,
+                                                          color:
+                                                              AppColors.primary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 if (controller.rowImages
                                                         .containsKey(index) &&
                                                     controller
