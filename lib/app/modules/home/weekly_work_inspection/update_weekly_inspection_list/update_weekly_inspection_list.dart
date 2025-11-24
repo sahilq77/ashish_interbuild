@@ -52,6 +52,8 @@ class _UpdateWeeklyInspectionListState
       controller.uom.value = args["uom"] ?? "";
       controller.startDate.value = args["startDate"] ?? "";
       controller.endDate.value = args["endDate"] ?? "";
+      controller.packageName.value = args["packageName"] ?? "";
+      controller.pboqName.value = args["pboqName"] ?? "";
     }
 
     // Set default values if still 0

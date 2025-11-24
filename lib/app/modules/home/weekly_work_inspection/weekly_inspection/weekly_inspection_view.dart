@@ -346,9 +346,18 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                                                                   sheet,
                                                                   "UOM",
                                                                 ),
-
+                                                            "packageName": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "Package Name",
+                                                                ),
+                                                            "pboqName": controller
+                                                                .getFieldValue(
+                                                                  sheet,
+                                                                  "PBOQ",
+                                                                ),
                                                             // "fromDate"
-                                                            // "toDate": 
+                                                            // "toDate":
                                                           },
                                                         );
                                                       },

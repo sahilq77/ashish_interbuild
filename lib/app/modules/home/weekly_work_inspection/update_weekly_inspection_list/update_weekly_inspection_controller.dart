@@ -86,8 +86,8 @@ class UpdateWeeklyInspectionController extends GetxController {
       'filter_package=${wiController.packageId.value == 0 ? "" : wiController.packageId.value}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
-      'filter_inspection_from_date=${startDate.value}',
-      'filter_inspection_to_date=${endDate.value}',
+      'filter_inspection_from_date=2025-11-24',
+      'filter_inspection_to_date=2025-11-30',
     ];
 
     if (selectedZone.value.isNotEmpty) {
