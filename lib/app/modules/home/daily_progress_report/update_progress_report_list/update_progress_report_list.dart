@@ -588,30 +588,37 @@ class _UpdateProgressReportListState extends State<UpdateProgressReportList> {
                                                               Positioned(
                                                                 top: 2,
                                                                 right: 2,
-                                                                child: GestureDetector(
-                                                                  onTap: () => controller
-                                                                      .removeImageFromRow(
+                                                                child: ElevatedButton(
+                                                                  onPressed: () =>
+                                                                      controller.removeImageFromRow(
                                                                         index,
                                                                         imageIndex,
                                                                       ),
-                                                                  child: Container(
+                                                                  style: ElevatedButton.styleFrom(
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .red, // button background
+                                                                    foregroundColor:
+                                                                        Colors
+                                                                            .white, // ripple color
+                                                                    shape:
+                                                                        const CircleBorder(), // makes it round
                                                                     padding:
                                                                         const EdgeInsets.all(
                                                                           2,
-                                                                        ),
-                                                                    decoration: const BoxDecoration(
-                                                                      color: Colors
-                                                                          .red,
-                                                                      shape: BoxShape
-                                                                          .circle,
-                                                                    ),
-                                                                    child: const Icon(
-                                                                      Icons
-                                                                          .close,
-                                                                      color: Colors
-                                                                          .white,
-                                                                      size: 12,
-                                                                    ),
+                                                                        ), // small padding
+                                                                    minimumSize:
+                                                                        const Size(
+                                                                          20,
+                                                                          20,
+                                                                        ), // compact size
+                                                                    tapTargetSize:
+                                                                        MaterialTapTargetSize
+                                                                            .shrinkWrap, // reduces extra tap area
+                                                                  ),
+                                                                  child: const Icon(
+                                                                    Icons.close,
+                                                                    size: 12,
                                                                   ),
                                                                 ),
                                                               ),
