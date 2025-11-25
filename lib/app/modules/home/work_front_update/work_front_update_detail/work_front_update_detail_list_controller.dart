@@ -449,7 +449,7 @@ class WorkFrontUpdateDetailListController extends GetxController {
         final item = filteredMeasurementSheets[i];
 
         final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
-        final msQty = item.getField('MS QTY')?.toString() ?? '0';
+        final msQty = item.getField('MS Qty')?.toString() ?? '0';
 
         request.fields['ms_rows[$i][project_id]'] = wfuController.projectId
             .toString();
@@ -462,8 +462,7 @@ class WorkFrontUpdateDetailListController extends GetxController {
         request.fields['ms_rows[$i][received_date]'] = DateFormat(
           'yyyy-MM-dd',
         ).format(DateTime.now());
-        request.fields['ms_rows[$i][executed_qty]'] =
-            item.getField('MS QTY')?.toString() ?? '0';
+        request.fields['ms_rows[$i][executed_qty]'] = "$msQty";
 
         // Add images for this row
         if (rowImages[index] != null) {
