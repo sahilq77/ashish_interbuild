@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_images.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart'
     show AppButtonStyles;
@@ -103,7 +104,20 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                   ),
-                  SizedBox(height: ResponsiveHelper.spacing(48)),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.forgotPassword, arguments: false);
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: AppStyle.bodyRegularPoppinsPrimary,
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: ResponsiveHelper.spacing(20)),
 
                   // ---------- LOGIN BUTTON ----------
                   SizedBox(

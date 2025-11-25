@@ -1,3 +1,5 @@
+import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_view.dart';
+import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_binding.dart';
@@ -152,6 +154,7 @@ class AppRoutes {
       '/work-front-update-detail-list';
 
   static const String workFrontUpdateDashboard = '/work-front-update-dashboard';
+    static const String forgotPassword = '/forgot-password';
 
   // ──────────────────────────────────────────────────────────────
   //  Inside your AppRoutes class (replace the whole `routes` list)
@@ -504,6 +507,15 @@ class AppRoutes {
       page: () => const NoInternetScreen(),
       transition: Transition.rightToLeft,
     ),
+
+//====================>FORGOT PASSWORD<=====================
+    GetPage(
+      name: forgotPassword,
+      page: () => const ForgotPasswordView(),
+      bindings:[ForgotPasswordBinding()] ,
+      transition: Transition.rightToLeft,
+    ),
+    
   ];
 }
 
