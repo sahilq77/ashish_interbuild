@@ -82,6 +82,9 @@ class Networkutility {
   //<======================= WORK FRONT UPDATE MODULE ============================>
   static String getWFUdashboard = "${baseUrl + "wf/list"}";
   static int getWFUdashboardApi = 27;
+
+  static String getWFUList = "${baseUrl + "wf/list"}";
+  static int getWFUListApi = 28;
 }
 
 

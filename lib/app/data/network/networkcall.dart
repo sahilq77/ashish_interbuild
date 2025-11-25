@@ -23,6 +23,7 @@ import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_r
 import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_response.dart';
 import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_update_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/work_front_update/get_work_front_dashboard_response.dart';
+import 'package:ashishinterbuild/app/data/models/work_front_update/get_work_front_update_list_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -324,6 +325,11 @@ class Networkcall {
           case 27:
             final getWFdashboard = geWorkFrontDashboardResponseFromJson(str);
             return getWFdashboard;
+          case 28:
+            final getWFUList = getWorkfontupdateListResponseFromJson(
+              response.body,
+            );
+            return [getWFUList];
 
           default:
             log("Invalid request code: $requestCode");
