@@ -440,13 +440,8 @@ class _WorkFrontUpdateDetailListViewState
                                                           .spaceBetween,
                                                   children: [
                                                     if (controller
-                                                            .isMultiSelectMode
-                                                            .value &&
-                                                        controller.getFieldValue(
-                                                              sheet,
-                                                              "execution_status",
-                                                            ) ==
-                                                            "0")
+                                                        .isMultiSelectMode
+                                                        .value)
                                                       Transform.scale(
                                                         scale: 1.2,
                                                         child: Checkbox(
@@ -464,11 +459,9 @@ class _WorkFrontUpdateDetailListViewState
                                                         ),
                                                       ),
                                                     const Spacer(),
-                                                    if (controller.getFieldValue(
-                                                          sheet,
-                                                          "execution_status",
-                                                        ) ==
-                                                        "0")
+                                                    if (controller
+                                                        .isMultiSelectMode
+                                                        .value)
                                                       Row(
                                                         mainAxisSize:
                                                             MainAxisSize.min,
@@ -530,8 +523,13 @@ class _WorkFrontUpdateDetailListViewState
                                                             ),
                                                           ),
                                                         ],
-                                                      )
-                                                    else
+                                                      ),
+                                                    if (controller
+                                                            .getFieldValue(
+                                                              sheet,
+                                                              "progress_status",
+                                                            ) ==
+                                                        "1")
                                                       _updatedBadge(),
                                                   ],
                                                 ),

@@ -431,7 +431,7 @@ class WorkFrontUpdateDetailListController extends GetxController {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse(Networkutility.updateDailyProgressReport),
+        Uri.parse(Networkutility.wfuUpdate),
       );
 
       // Add headers
@@ -459,7 +459,7 @@ class WorkFrontUpdateDetailListController extends GetxController {
         request.fields['ms_rows[$i][source_table]'] = sourceName.value;
         request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
         request.fields['ms_rows[$i][progress_status]'] = '1';
-        request.fields['ms_rows[$i][dpr_date]'] = DateFormat(
+        request.fields['ms_rows[$i][received_date]'] = DateFormat(
           'yyyy-MM-dd',
         ).format(DateTime.now());
         request.fields['ms_rows[$i][executed_qty]'] =

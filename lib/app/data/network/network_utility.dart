@@ -88,6 +88,10 @@ class Networkutility {
 
   static String getWFUDetailList = "${baseUrl + "wf/details"}";
   static int getWFUDetailListApi = 29;
+
+  static String wfuUpdate = "${baseUrl + "wf/update"}";
+  static int wfuUpdateApi = 20;
+  
 }
 
 
