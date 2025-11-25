@@ -36,7 +36,7 @@ class _WorkFrontUpdateListViewState extends State<WorkFrontUpdateListView> {
             Padding(
               padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
               child: Text(
-                "Skyline Towers → DPR Dashboard → DPR",
+                "Skyline Towers ➔ WFU Dashboard ➔ WFU List",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
@@ -230,7 +230,7 @@ class _WorkFrontUpdateListViewState extends State<WorkFrontUpdateListView> {
                                                     onPressed: () {
                                                       Get.toNamed(
                                                         AppRoutes
-                                                            .updateDailyReportList,
+                                                            .workFrontUpdateDetailList,
                                                         arguments: {
                                                           "selected_source":
                                                               controller

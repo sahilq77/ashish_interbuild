@@ -77,8 +77,8 @@ class WorkFrontUpdateListController extends GetxController {
     final parts = <String>[
       'project_id=${projectId.value}',
       'filter_package=${packageId.value == 0 ? "" : packageId.value}',
-      'filter_revised_start_date=${selectedStartDate.value}',
-      'filter_revised_end_date=${selectedEndDate.value}',
+      'received_date =${''}',
+      // 'filter_revised_end_date=${selectedEndDate.value}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
