@@ -1,230 +1,297 @@
-import 'package:ashishinterbuild/app/data/models/work_front_update/work_front_update_model.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'package:ashishinterbuild/app/data/models/work_front_update/get_work_front_update_list_response.dart';
+import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class WorkFrontUpdateListController extends GetxController {
-  // ------------------------------------------------------------------
-  // Reactive data
-  // ------------------------------------------------------------------
-  final RxList<WorkFrontUpdateModel> items = <WorkFrontUpdateModel>[].obs;
-  final RxList<WorkFrontUpdateModel> filteredMeasurementSheets = <WorkFrontUpdateModel>[].obs;
-  final RxInt expandedIndex = (-1).obs;
+  final zoneController = Get.find<ZoneController>();
+  final RxList<WorkfontupdateItem> wfuList = <WorkfontupdateItem>[].obs;
+  final RxList<WorkfontupdateItem> filteredMeasurementSheets = <WorkfontupdateItem>[].obs;
   final RxBool isLoading = true.obs;
-
-  // Search & Filter
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasMoreData = true.obs;
+  final RxString errorMessage = ''.obs;
+  final RxInt expandedIndex = (-1).obs;
   final TextEditingController searchController = TextEditingController();
-  final RxnString selectedPackageFilter = RxnString();
-  final RxnString selectedZoneFilter = RxnString(); // <<< NEW: Zone filter
+  final RxInt start = 0.obs;
+  final int length = 10;
+  final RxString _search = ''.obs;
+  final RxString _orderBy = ''.obs;
   final RxBool isAscending = true.obs;
+  final RxnString selectedPackageFilter = RxnString(null);
+  Timer? _debounce;
+  RxInt projectId = 0.obs;
+  RxInt packageId = 0.obs;
+  final RxList<String> frontDisplayColumns = <String>[].obs;
+  final RxList<String> buttonDisplayColumns = <String>[].obs;
 
-  // ------------------------------------------------------------------
+  // FILTERS
+  final RxString selectedZone = ''.obs;
+  final RxString selectedStartDate = ''.obs; // YYYY-MM-DD
+  final RxString selectedEndDate = ''.obs; // YYYY-MM-DD
+
+  // Temporary for dialog (not applied until "Apply")
+  DateTime? tempStartDate;
+  DateTime? tempEndDate;
+
+  final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
+    columns: [],
+    frontDisplayColumns: [],
+    frontSecondaryDisplayColumns: [],
+    buttonDisplayColumn: [],
+  ).obs;
+
   @override
   void onInit() {
     super.onInit();
-    loadDummyData();
-    searchController.addListener(applyFilters);
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      projectId.value = args["project_id"] ?? 0;
+      packageId.value = args["package_id"] ?? 0;
+    }
+
+    log("WFU LIST → projectId=${projectId.value} packageId=${packageId.value}");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        zoneController.fetchZones(context: Get.context!);
+        fetchDprList(reset: true, context: Get.context!);
+      }
+    });
   }
 
   @override
   void onClose() {
     searchController.dispose();
+    _debounce?.cancel();
     super.onClose();
   }
 
-  // ------------------------------------------------------------------
-  // Dummy data
-  // ------------------------------------------------------------------
-  Future<void> loadDummyData() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 1));
-
-    final dummy = [
-      WorkFrontUpdateModel(
-        srNo: 1,
-        systemId: 335,
-        packageName: "Ashok Package",
-        cboqCode: "C002",
-        pboq: "CBOQ-2",
-        pboa: "Floor leveling",
-        pboaQty: 300,
-        pboaRate: 0.30,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID1",
-        trade: "Civil",
-        zone: "Private Zone,Public Zone",
-        rate: 0.30,
-        amount: 90.00,
-        msQty: 300,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 2,
-        systemId: 336,
-        packageName: "Ravi Package",
-        cboqCode: "C003",
-        pboq: "CBOQ-3",
-        pboa: "Wall plaster",
-        pboaQty: 500,
-        pboaRate: 0.45,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID2",
-        trade: "Civil",
-        zone: "Public Zone",
-        rate: 0.45,
-        amount: 225.00,
-        msQty: 500,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 3,
-        systemId: 337,
-        packageName: "Ashok Package",
-        cboqCode: "C004",
-        pboq: "CBOQ-4",
-        pboa: "Ceiling work",
-        pboaQty: 200,
-        pboaRate: 0.60,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID3",
-        trade: "Civil",
-        zone: "Private Zone",
-        rate: 0.60,
-        amount: 120.00,
-        msQty: 200,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 4,
-        systemId: 338,
-        packageName: "Ravi Package",
-        cboqCode: "C005",
-        pboq: "CBOQ-5",
-        pboa: "Painting",
-        pboaQty: 400,
-        pboaRate: 0.25,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID4",
-        trade: "Finishing",
-        zone: "Public Zone,Private Zone",
-        rate: 0.25,
-        amount: 100.00,
-        msQty: 400,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
-      WorkFrontUpdateModel(
-        srNo: 5,
-        systemId: 339,
-        packageName: "Suresh Package",
-        cboqCode: "C006",
-        pboq: "CBOQ-6",
-        pboa: "Tile work",
-        pboaQty: 150,
-        pboaRate: 0.80,
-        doer: "-",
-        uom: "SMT",
-        fix: "ID5",
-        trade: "Finishing",
-        zone: "Private Zone",
-        rate: 0.80,
-        amount: 120.00,
-        msQty: 150,
-        cumRecQty: 0,
-        cumRecAmount: 0.0,
-        workFrontRecAmount: "0.00%",
-      ),
+  String _buildQueryParams({bool includePagination = true}) {
+    final parts = <String>[
+      'project_id=${projectId.value}',
+      'filter_package=${packageId.value == 0 ? "" : packageId.value}',
+      'filter_revised_start_date=${selectedStartDate.value}',
+      'filter_revised_finish_date=${selectedEndDate.value}',
     ];
 
-    items.assignAll(dummy);
-    filteredMeasurementSheets.assignAll(items);
-    isLoading.value = false;
+    if (selectedZone.value.isNotEmpty) {
+      parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
+    }
+
+    if (_search.value.isNotEmpty) {
+      parts.add('search=${Uri.encodeComponent(_search.value)}');
+    }
+
+    parts.add('order_by=${_orderBy.value}');
+    parts.add('order_dir=${isAscending.value ? "asc" : "desc"}');
+
+    if (includePagination) {
+      parts.add('start=${start.value}');
+      parts.add('length=$length');
+    }
+
+    return parts.isNotEmpty ? '?${parts.join('&')}' : '';
   }
 
-  // ------------------------------------------------------------------
-  // Refresh
-  // ------------------------------------------------------------------
+  Future<void> fetchDprList({
+    required BuildContext context,
+    bool reset = false,
+    bool isPagination = false,
+  }) async {
+    if (reset) {
+      start.value = 0;
+      wfuList.clear();
+      hasMoreData.value = true;
+    }
+    if (!hasMoreData.value && !reset) return;
+    if (isPagination) {
+      isLoadingMore.value = true;
+    } else {
+      isLoading.value = true;
+    }
+    errorMessage.value = '';
+    try {
+      final String query = _buildQueryParams(includePagination: true);
+      final String endpoint = Networkutility.getWFUList + query;
+      final responseList = await Networkcall().getMethod(
+        Networkutility.getWFUListApi,
+        endpoint,
+        context,
+      );
+      final response = responseList?.first as GetWorkfontupdateListResponse?;
+
+      if (response != null && response.status) {
+        final data = response.data.data;
+        if (frontDisplayColumns.isEmpty) {
+          frontDisplayColumns.assignAll(
+            response.data.appColumnDetails.frontDisplayColumns,
+          );
+          buttonDisplayColumns.assignAll(
+            response.data.appColumnDetails.buttonDisplayColumn,
+          );
+          appColumnDetails.value = response.data.appColumnDetails;
+        }
+        if (data.isEmpty) {
+          hasMoreData.value = false;
+          if (reset || start.value == 0) {
+            _showError('No data available');
+          }
+        } else {
+          if (reset) {
+            wfuList.assignAll(data);
+          } else {
+            wfuList.addAll(data);
+          }
+          _applyClientFilters();
+          start.value += length;
+
+          if (data.length < length) {
+            hasMoreData.value = false;
+          }
+        }
+      } else {
+        if (reset || start.value == 0) {
+          _showError(response?.message ?? 'No data');
+        } else {
+          hasMoreData.value = false;
+        }
+      }
+    } on NoInternetException catch (e) {
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
+    } on TimeoutException catch (e) {
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
+    } on HttpException catch (e) {
+      if (reset || start.value == 0) {
+        _showError('${e.message} (Code: ${e.statusCode})');
+      }
+      hasMoreData.value = false;
+    } on ParseException catch (e) {
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
+    } catch (e) {
+      if (reset || start.value == 0) {
+        _showError('Unexpected error: $e');
+      }
+      hasMoreData.value = false;
+    } finally {
+      isLoading.value = false;
+      isLoadingMore.value = false;
+    }
+  }
+
+  void _showError(String msg) {
+    errorMessage.value = msg;
+    AppSnackbarStyles.showError(title: 'Error', message: msg);
+  }
+
   Future<void> refreshData() async {
-    items.clear();
-    filteredMeasurementSheets.clear();
-    await loadDummyData();
     searchController.clear();
+    _search.value = '';
+    _orderBy.value = '';
+    isAscending.value = true;
     selectedPackageFilter.value = null;
-    selectedZoneFilter.value = null; // <<< Reset zone filter
+    selectedZone.value = '';
+    selectedStartDate.value = '';
+    selectedEndDate.value = '';
+    tempStartDate = null;
+    tempEndDate = null;
+    start.value = 0;
+    hasMoreData.value = true;
+    filteredMeasurementSheets.clear();
+    await fetchDprList(reset: true, context: Get.context!);
   }
 
-  // ------------------------------------------------------------------
-  // Expand / Collapse
-  // ------------------------------------------------------------------
+  void loadMore(BuildContext context) {
+    if (!isLoadingMore.value && hasMoreData.value) {
+      fetchDprList(context: context, isPagination: true);
+    }
+  }
+
   void toggleExpanded(int index) {
-    expandedIndex.value = (expandedIndex.value == index) ? -1 : index;
+    if (expandedIndex.value == index) {
+      expandedIndex.value = -1;
+    } else {
+      expandedIndex.value = index;
+    }
   }
 
-  // ------------------------------------------------------------------
-  // ---------- FILTER & SORT ----------
-  // ------------------------------------------------------------------
-  List<String> getPackageNames() =>
-      items.map((e) => e.packageName).toSet().toList();
+  List<String> getPackageNames() {
+    return wfuList.map((e) => e.getField('Package Name')).toSet().toList();
+  }
 
-  List<String> getZoneNames() => // <<< NEW: Get unique zones
-      items.map((e) => e.zone).where((z) => z.isNotEmpty).toSet().toList();
+  String getFieldValue(WorkfontupdateItem item, String columnName) {
+    return item.getField(columnName).replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  }
+
+  List<String> getFrontDisplayColumns() {
+    return appColumnDetails.value.frontDisplayColumns.toSet().toList();
+  }
+
+  List<String> getFrontSecondaryDisplayColumns() {
+    return appColumnDetails.value.frontSecondaryDisplayColumns.toSet().toList();
+  }
+
+  List<String> getButtonDisplayColumns() {
+    return appColumnDetails.value.buttonDisplayColumn.toSet().toList();
+  }
 
   void applyFilters() {
-    var list = items.toList();
-
-    // ---- Package filter ----
-    if (selectedPackageFilter.value != null) {
-      list = list
-          .where((e) => e.packageName == selectedPackageFilter.value)
-          .toList();
-    }
-
-    // ---- Zone filter ----
-    if (selectedZoneFilter.value != null) {
-      list = list
-          .where((e) => e.zone == selectedZoneFilter.value)
-          .toList();
-    }
-
-    // ---- Search ----
-    final query = searchController.text.trim().toLowerCase();
-    if (query.isNotEmpty) {
-      list = list.where((e) =>
-          e.packageName.toLowerCase().contains(query) ||
-          e.cboqCode.toLowerCase().contains(query) ||
-          e.pboa.toLowerCase().contains(query) ||
-          e.zone.toLowerCase().contains(query)).toList();
-    }
-
-    // ---- Sort by CBOQ Code ----
-    list.sort((a, b) => isAscending.value
-        ? a.cboqCode.compareTo(b.cboqCode)
-        : b.cboqCode.compareTo(a.cboqCode));
-
-    filteredMeasurementSheets.assignAll(list);
+    _applyClientFilters();
   }
 
-  void toggleSorting() {
-    isAscending.value = !isAscending.value;
-    applyFilters();
+  void _applyClientFilters() {
+    var list = wfuList.toList();
+    if (selectedPackageFilter.value != null &&
+        selectedPackageFilter.value!.isNotEmpty) {
+      list = list
+          .where(
+            (e) => e.getField('Package Name') == selectedPackageFilter.value,
+          )
+          .toList();
+    }
+    filteredMeasurementSheets.assignAll(list);
   }
 
   void clearFilters() {
     selectedPackageFilter.value = null;
-    selectedZoneFilter.value = null; // <<< Clear zone
+    selectedZone.value = '';
+    selectedStartDate.value = '';
+    selectedEndDate.value = '';
+    tempStartDate = null;
+    tempEndDate = null;
     searchController.clear();
-    applyFilters();
+    _search.value = '';
+    fetchDprList(context: Get.context!, reset: true);
   }
 
-  void searchSurveys(String _) => applyFilters();
+  void toggleSorting() {
+    isAscending.value = !isAscending.value;
+    _orderBy.value = isAscending.value ? 'desc' : 'asc';
+    fetchDprList(reset: true, context: Get.context!);
+  }
+
+  void searchSurveys(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      final trimmed = query.trim();
+      if (_search.value != trimmed) {
+        _search.value = trimmed;
+        fetchDprList(reset: true, context: Get.context!);
+      }
+    });
+  }
 }

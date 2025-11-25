@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/work_front_update/work_front_update_list_view/work_front_update_list_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
@@ -9,9 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-class WorkFrontUpdateListView extends StatelessWidget {
+class WorkFrontUpdateListView extends StatefulWidget {
   const WorkFrontUpdateListView({super.key});
 
+  @override
+  State<WorkFrontUpdateListView> createState() =>
+      _WorkFrontUpdateListViewState();
+}
+
+class _WorkFrontUpdateListViewState extends State<WorkFrontUpdateListView> {
   @override
   Widget build(BuildContext context) {
     final WorkFrontUpdateListController controller = Get.find();
@@ -26,16 +33,13 @@ class WorkFrontUpdateListView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Breadcrumb
             Padding(
-              padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
               child: Text(
-                "Skyline Towers ➔ WFU Dashboard ➔ Work Front Update",
+                "Skyline Towers → DPR Dashboard → DPR",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
-
-            // Search + Filter + Sort
             Padding(
               padding: ResponsiveHelper.padding(16),
               child: Row(
@@ -48,149 +52,236 @@ class WorkFrontUpdateListView extends StatelessWidget {
                 ],
               ),
             ),
-
-            // List
             Expanded(
               child: Obx(
                 () => controller.isLoading.value
                     ? _buildShimmerEffect(context)
+                    : controller.errorMessage.value.isNotEmpty
+                    ? Center(
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                        ),
+                      )
+                    : controller.filteredMeasurementSheets.isEmpty
+                    ? const Center(child: Text('No data found'))
                     : ListView.builder(
                         padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.filteredMeasurementSheets.length,
+                        itemCount:
+                            controller.filteredMeasurementSheets.length +
+                            (controller.hasMoreData.value ||
+                                    controller.isLoadingMore.value
+                                ? 1
+                                : 1),
                         itemBuilder: (context, index) {
+                          if (index >=
+                              controller.filteredMeasurementSheets.length) {
+                            if (controller.hasMoreData.value &&
+                                !controller.isLoadingMore.value) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                controller.loadMore(context);
+                              });
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: controller.hasMoreData.value
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                        'No more data',
+                                        style: TextStyle(
+                                          color: AppColors.grey,
+                                          fontSize:
+                                              ResponsiveHelper.getResponsiveFontSize(
+                                                14,
+                                              ),
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          }
+
                           final sheet =
                               controller.filteredMeasurementSheets[index];
                           return GestureDetector(
                             onTap: () => controller.toggleExpanded(index),
-                            child: Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.spacing(16),
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
+                            child: Obx(() {
+                              final isExpanded =
+                                  controller.expandedIndex.value == index;
+                              return Card(
+                                margin: EdgeInsets.only(
+                                  bottom: ResponsiveHelper.screenHeight * 0.02,
                                 ),
-                                child: Obx(
-                                  () => Padding(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.white,
+                                        Colors.grey.shade50,
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
                                     padding: ResponsiveHelper.padding(16),
                                     child: Column(
                                       children: [
-                                        // ----- Header (always visible) -----
-                                        _buildDetailRow(
-                                          "PBOQ Name",
-                                          sheet.pboq,
-                                        ),
+                                        if (controller
+                                            .getFrontDisplayColumns()
+                                            .isNotEmpty)
+                                          ...controller
+                                              .getFrontDisplayColumns()
+                                              .take(1)
+                                              .map((col) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                              .toList(),
 
-                                        // ----- Expandable details -----
-                                        if (controller.expandedIndex.value ==
-                                            index) ...[
-                                          _buildDetailRow("PBOA", sheet.pboa),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOA Qty",
-                                            "${sheet.pboaQty}",
-                                          ),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow(
-                                            "PBOA Rate",
-                                            "${sheet.pboaRate}",
-                                          ),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow(
-                                            "System ID",
-                                            "${sheet.systemId}",
-                                          ),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow(
-                                            "CBOQ Code",
-                                            sheet.cboqCode,
-                                          ),
-                                          _buildDetailRow("Doer", sheet.doer),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("UOM", sheet.uom),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("Fix", sheet.fix),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("Trade", sheet.trade),
-                                          SizedBox(
-                                            height: ResponsiveHelper.spacing(4),
-                                          ),
-                                          _buildDetailRow("Zone", sheet.zone),
-                                        ],
+                                        if (isExpanded &&
+                                            controller
+                                                .appColumnDetails
+                                                .value
+                                                .columns
+                                                .isNotEmpty)
+                                          ...controller
+                                              .appColumnDetails
+                                              .value
+                                              .columns
+                                              .where(
+                                                (col) => !controller
+                                                    .getFrontDisplayColumns()
+                                                    .contains(col),
+                                              )
+                                              .map(
+                                                (col) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
 
                                         SizedBox(
-                                          height: ResponsiveHelper.spacing(8),
+                                          height:
+                                              ResponsiveHelper.screenHeight *
+                                              0.01,
                                         ),
-
-                                        // ----- Bottom row -----
                                         Row(
                                           children: [
-                                            Expanded(
-                                              child: Text(
-                                                "Qty: ${sheet.msQty}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                "Amt: ${sheet.amount}",
-                                                style: AppStyle
-                                                    .labelPrimaryPoppinsBlack
-                                                    .responsive
-                                                    .copyWith(fontSize: 13),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: OutlinedButton(
-                                                style:
-                                                    AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () {
-                                                  Get.toNamed(
-                                                    AppRoutes
-                                                        .workFrontUpdateDetailList,
-                                                  );
-                                                },
-                                                child: Text(
-                                                  "MS Qty: ${sheet.msQty}",
-                                                  style: AppStyle
-                                                      .labelPrimaryPoppinsBlack
-                                                      .responsive
-                                                      .copyWith(fontSize: 10),
-                                                ),
-                                              ),
-                                            ),
+                                            if (controller
+                                                .getFrontSecondaryDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller
+                                                  .getFrontSecondaryDisplayColumns()
+                                                  .map((col) {
+                                                    return Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              bottom: 6,
+                                                            ),
+                                                        child: Text(
+                                                          "$col: ${controller.getFieldValue(sheet, col)}",
+                                                          style: AppStyle
+                                                              .labelPrimaryPoppinsBlack
+                                                              .responsive
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  })
+                                                  .toList(),
+                                            const SizedBox(width: 8),
+                                            if (controller
+                                                .getButtonDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller.getButtonDisplayColumns().map((
+                                                col,
+                                              ) {
+                                                return Expanded(
+                                                  child: OutlinedButton(
+                                                    style:
+                                                        AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                    onPressed: () {
+                                                      Get.toNamed(
+                                                        AppRoutes
+                                                            .updateDailyReportList,
+                                                        arguments: {
+                                                          "selected_source":
+                                                              controller
+                                                                  .getFieldValue(
+                                                                    sheet,
+                                                                    "Source",
+                                                                  ),
+                                                          "selected_system_id":
+                                                              controller
+                                                                  .getFieldValue(
+                                                                    sheet,
+                                                                    "System ID",
+                                                                  ),
+                                                          "uom": controller
+                                                              .getFieldValue(
+                                                                sheet,
+                                                                "UOM",
+                                                              ),
+                                                          "packageName": controller
+                                                              .getFieldValue(
+                                                                sheet,
+                                                                "Package Name",
+                                                              ),
+                                                          "pboqName": controller
+                                                              .getFieldValue(
+                                                                sheet,
+                                                                "PBOQ",
+                                                              ),
+                                                        },
+                                                      );
+                                                    },
+                                                    child: Text(
+                                                      "$col: ${controller.getFieldValue(sheet, col)}",
+                                                      style: AppStyle
+                                                          .labelPrimaryPoppinsBlack
+                                                          .responsive
+                                                          .copyWith(
+                                                            fontSize: 10,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
                                           ],
                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           );
                         },
                       ),
@@ -202,9 +293,11 @@ class WorkFrontUpdateListView extends StatelessWidget {
     );
   }
 
-  // -----------------------------------------------------------------
-  // UI Helpers
-  // -----------------------------------------------------------------
+  // Helper: Format Date
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
+  }
+
   TextFormField _buildSearchField(WorkFrontUpdateListController controller) {
     return TextFormField(
       controller: controller.searchController,
@@ -224,18 +317,20 @@ class WorkFrontUpdateListView extends StatelessWidget {
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5,
+      itemCount: 5, // Show 5 shimmer cards
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
           highlightColor: Colors.grey.shade100,
           child: Card(
-            margin: EdgeInsets.only(bottom: ResponsiveHelper.spacing(16)),
+            margin: EdgeInsets.only(
+              bottom: ResponsiveHelper.screenHeight * 0.02,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
-                border: const Border(
+                border: Border(
                   left: BorderSide(color: AppColors.primary, width: 5),
                 ),
               ),
@@ -244,29 +339,31 @@ class WorkFrontUpdateListView extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildShimmerRow(),
-                    const SizedBox(height: 4),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                     _buildShimmerRow(),
-                    const SizedBox(height: 12),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _buildShimmerRow(),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
+                    Divider(),
                     Row(
                       children: [
                         Expanded(
                           child: Container(
                             height: 40,
-                            color: Colors.grey.shade300,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
                         Expanded(
                           child: Container(
                             height: 40,
-                            color: Colors.grey.shade300,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Container(
-                            height: 40,
-                            color: Colors.grey.shade300,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
                       ],
@@ -287,7 +384,7 @@ class WorkFrontUpdateListView extends StatelessWidget {
       children: [
         Container(width: 130, height: 16, color: Colors.grey.shade300),
         const SizedBox(width: 8),
-        const Text(': ', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(': ', style: AppStyle.reportCardSubTitle),
         Expanded(child: Container(height: 16, color: Colors.grey.shade300)),
       ],
     );
@@ -301,18 +398,16 @@ class WorkFrontUpdateListView extends StatelessWidget {
           width: 130,
           child: Text(
             label,
-            style: AppStyle.reportCardTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
+            style: AppStyle.reportCardTitle.responsive.copyWith(fontSize: 13),
           ),
         ),
-        const SizedBox(width: 8),
-        const Text(': ', style: TextStyle(fontWeight: FontWeight.bold)),
+        SizedBox(width: 8),
+        Text(': ', style: AppStyle.reportCardSubTitle),
         Expanded(
           child: Text(
             value,
             style: AppStyle.reportCardSubTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+              fontSize: 13,
             ),
           ),
         ),
@@ -327,20 +422,19 @@ class WorkFrontUpdateListView extends StatelessWidget {
       elevation: 0,
       centerTitle: false,
       title: Text(
-        'Work Front Update',
+        'WFU List',
         style: AppStyle.heading1PoppinsBlack.responsive.copyWith(
           fontSize: ResponsiveHelper.getResponsiveFontSize(18),
           fontWeight: FontWeight.w600,
         ),
       ),
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(0),
-        child: Divider(color: AppColors.grey, height: 0),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: Divider(color: AppColors.grey.withOpacity(0.5), height: 0),
       ),
     );
   }
 
-  // ---------- Filter Button ----------
   Widget _buildFilterButton(
     BuildContext context,
     WorkFrontUpdateListController controller,
@@ -352,20 +446,30 @@ class WorkFrontUpdateListView extends StatelessWidget {
       ),
       child: IconButton(
         icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
+        onPressed: () => _showFilterDialog(context),
         padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
         constraints: const BoxConstraints(),
       ),
     );
   }
 
-  // ---------- Filter Dialog (NOW WITH PACKAGE + ZONE) ----------
-  void _showFilterDialog(
-    BuildContext context,
-    WorkFrontUpdateListController controller,
-  ) {
-    String? tempSelectedPackage = controller.selectedPackageFilter.value;
-    String? tempSelectedZone = controller.selectedZoneFilter.value;
+  void _showFilterDialog(BuildContext context) {
+    final WorkFrontUpdateListController controller = Get.put(
+      WorkFrontUpdateListController(),
+    );
+    final zoneController = Get.find<ZoneController>();
+
+    String? tempZone = controller.selectedZone.value.isEmpty
+        ? null
+        : controller.selectedZone.value;
+
+    // Initialize temp dates
+    controller.tempStartDate = controller.selectedStartDate.value.isNotEmpty
+        ? DateTime.tryParse(controller.selectedStartDate.value)
+        : null;
+    controller.tempEndDate = controller.selectedEndDate.value.isNotEmpty
+        ? DateTime.tryParse(controller.selectedEndDate.value)
+        : null;
 
     showDialog(
       context: context,
@@ -377,92 +481,165 @@ class WorkFrontUpdateListView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
               Container(
                 width: double.infinity,
                 padding: ResponsiveHelper.paddingSymmetric(
                   vertical: 20,
                   horizontal: 16,
                 ),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: const Text(
-                  'Filter Work Front',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
+                decoration: BoxDecoration(
+                  color: AppColors.defaultBlack,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
                   ),
+                ),
+                child: Text(
+                  'Filters',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
                   textAlign: TextAlign.center,
                 ),
               ),
-
-              // Package Dropdown
-              Padding(
-                padding: ResponsiveHelper.padding(20),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(showSearchBox: true),
-                  items: controller.getPackageNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Package',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.business,
-                        color: AppColors.primary,
-                      ),
-                    ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
-                  onChanged: (v) => setState(() => tempSelectedPackage = v),
-                  selectedItem: tempSelectedPackage,
+                  child: Column(
+                    children: [
+                      _filterDropdownWithIcon(
+                        label: 'Zone',
+                        items: zoneController.zoneNames,
+                        selected: tempZone,
+                        onChanged: (v) => setState(() => tempZone = v),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 16),
+                      // DATE RANGE PICKER
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.grey.withOpacity(0.5),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Date Range",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            InkWell(
+                              onTap: () async {
+                                final picked = await showDateRangePicker(
+                                  context: ctx,
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365),
+                                  ),
+                                  initialDateRange:
+                                      controller.tempStartDate != null &&
+                                          controller.tempEndDate != null
+                                      ? DateTimeRange(
+                                          start: controller.tempStartDate!,
+                                          end: controller.tempEndDate!,
+                                        )
+                                      : null,
+                                  builder: (context, child) => Theme(
+                                    data: ThemeData.light().copyWith(
+                                      colorScheme: const ColorScheme.light(
+                                        primary: AppColors.primary,
+                                      ),
+                                    ),
+                                    child: child!,
+                                  ),
+                                );
+                                if (picked != null) {
+                                  final daysDifference = picked.end
+                                      .difference(picked.start)
+                                      .inDays;
+                                  if (daysDifference > 7) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Date range cannot exceed 7 days',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else {
+                                    controller.tempStartDate = picked.start;
+                                    controller.tempEndDate = picked.end;
+                                    setState(() {});
+                                  }
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.date_range,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        controller.tempStartDate == null
+                                            ? "Select Date Range"
+                                            : "${_formatDate(controller.tempStartDate!)} → ${_formatDate(controller.tempEndDate!)}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color:
+                                              controller.tempStartDate == null
+                                              ? Colors.grey[600]
+                                              : Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    if (controller.tempStartDate != null)
+                                      InkWell(
+                                        onTap: () {
+                                          controller.tempStartDate = null;
+                                          controller.tempEndDate = null;
+                                          setState(() {});
+                                        },
+                                        child: const Icon(
+                                          Icons.clear,
+                                          size: 20,
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
-
-              // Zone Dropdown
-              Padding(
-                padding: ResponsiveHelper.paddingSymmetric(
-                  horizontal: 20,
-                  vertical: 0,
-                ),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(showSearchBox: true),
-                  items: controller.getZoneNames(),
-                  dropdownDecoratorProps: DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: 'Select Zone',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.location_on,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  onChanged: (v) => setState(() => tempSelectedZone = v),
-                  selectedItem: tempSelectedZone,
-                ),
-              ),
-
-              // Buttons
               Padding(
                 padding: ResponsiveHelper.paddingSymmetric(
                   horizontal: 20,
@@ -472,47 +649,42 @@ class WorkFrontUpdateListView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.outlinedMediumBlack(),
                         onPressed: () {
                           controller.clearFilters();
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           'Clear',
-                          style: TextStyle(color: AppColors.defaultBlack),
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
                         ),
                       ),
                     ),
                     SizedBox(width: ResponsiveHelper.spacing(16)),
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: ResponsiveHelper.paddingSymmetric(
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        style: AppButtonStyles.elevatedMediumBlack(),
                         onPressed: () {
-                          controller.selectedPackageFilter.value =
-                              tempSelectedPackage;
-                          controller.selectedZoneFilter.value =
-                              tempSelectedZone;
-                          controller.applyFilters();
+                          controller.selectedZone.value = tempZone ?? '';
+                          if (controller.tempStartDate != null &&
+                              controller.tempEndDate != null) {
+                            controller.selectedStartDate.value =
+                                "${controller.tempStartDate!.year}-${controller.tempStartDate!.month.toString().padLeft(2, '0')}-${controller.tempStartDate!.day.toString().padLeft(2, '0')}";
+                            controller.selectedEndDate.value =
+                                "${controller.tempEndDate!.year}-${controller.tempEndDate!.month.toString().padLeft(2, '0')}-${controller.tempEndDate!.day.toString().padLeft(2, '0')}";
+                          } else {
+                            controller.selectedStartDate.value = '';
+                            controller.selectedEndDate.value = '';
+                          }
+                          controller.fetchDprList(
+                            context: context,
+                            reset: true,
+                          );
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           'Apply',
-                          style: TextStyle(color: Colors.white),
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
                         ),
                       ),
                     ),
@@ -526,7 +698,40 @@ class WorkFrontUpdateListView extends StatelessWidget {
     );
   }
 
-  // ---------- Sort Button ----------
+  Widget _filterDropdownWithIcon({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    final List<String> fullList = ['', ...items];
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          showSelectedItems: true,
+        ),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
+      ),
+    );
+  }
+
   Widget _buildSortButton(WorkFrontUpdateListController controller) {
     return Obx(
       () => Container(

@@ -488,7 +488,7 @@ class AppRoutes {
     GetPage(
       name: workFrontUpdateList,
       page: () => const WorkFrontUpdateListView(),
-      binding: WorkFrontUpdateListBinding(),
+      bindings: [WorkFrontUpdateListBinding(), ZoneBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(

@@ -10,9 +10,14 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
-class WorkFrontUpdateDashboard extends StatelessWidget {
+class WorkFrontUpdateDashboard extends StatefulWidget {
   const WorkFrontUpdateDashboard({super.key});
 
+  @override
+  State<WorkFrontUpdateDashboard> createState() => _WorkFrontUpdateDashboardState();
+}
+
+class _WorkFrontUpdateDashboardState extends State<WorkFrontUpdateDashboard> {
   @override
   Widget build(BuildContext context) {
     final WorkFrontUpdateDashboardController controller = Get.find();
@@ -66,6 +71,7 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
                               ),
                               Colors.indigo,
                               true,
+                              controller,
                             ),
                             _buildGridItem(
                               'Total Rec Amount',
@@ -77,6 +83,7 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
                               ),
                               Colors.teal,
                               true,
+                              controller,
                             ),
                             _buildGridItem(
                               'Total Rec %',
@@ -88,6 +95,7 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
                               ),
                               Colors.deepOrange,
                               true,
+                              controller,
                             ),
                           ],
                         ),
@@ -162,10 +170,17 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
     String percent,
     Color gradientColor,
     bool isColor,
+    WorkFrontUpdateDashboardController controller,
   ) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.workFrontUpdateList);
+        Get.toNamed(
+          AppRoutes.workFrontUpdateList,
+          arguments: {
+            "project_id": controller.projectId.value,
+            "package_id": controller.packageId.value,
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -186,7 +201,13 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () {
-              Get.toNamed(AppRoutes.workFrontUpdateList);
+              Get.toNamed(
+                AppRoutes.workFrontUpdateList,
+                arguments: {
+                  "project_id": controller.projectId.value,
+                  "package_id": controller.packageId.value,
+                },
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(10.0),
