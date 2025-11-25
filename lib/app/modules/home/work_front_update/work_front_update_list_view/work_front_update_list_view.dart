@@ -676,7 +676,7 @@ class _WorkFrontUpdateListViewState extends State<WorkFrontUpdateListView> {
                             controller.selectedStartDate.value = '';
                             controller.selectedEndDate.value = '';
                           }
-                          controller.fetchDprList(
+                          controller.fetchWFUList(
                             context: context,
                             reset: true,
                           );

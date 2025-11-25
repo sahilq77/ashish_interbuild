@@ -12,7 +12,8 @@ import 'package:get/get.dart';
 class WorkFrontUpdateListController extends GetxController {
   final zoneController = Get.find<ZoneController>();
   final RxList<WorkfontupdateItem> wfuList = <WorkfontupdateItem>[].obs;
-  final RxList<WorkfontupdateItem> filteredMeasurementSheets = <WorkfontupdateItem>[].obs;
+  final RxList<WorkfontupdateItem> filteredMeasurementSheets =
+      <WorkfontupdateItem>[].obs;
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMoreData = true.obs;
@@ -60,7 +61,7 @@ class WorkFrontUpdateListController extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
         zoneController.fetchZones(context: Get.context!);
-        fetchDprList(reset: true, context: Get.context!);
+        fetchWFUList(reset: true, context: Get.context!);
       }
     });
   }
@@ -77,7 +78,7 @@ class WorkFrontUpdateListController extends GetxController {
       'project_id=${projectId.value}',
       'filter_package=${packageId.value == 0 ? "" : packageId.value}',
       'filter_revised_start_date=${selectedStartDate.value}',
-      'filter_revised_finish_date=${selectedEndDate.value}',
+      'filter_revised_end_date=${selectedEndDate.value}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
@@ -99,7 +100,7 @@ class WorkFrontUpdateListController extends GetxController {
     return parts.isNotEmpty ? '?${parts.join('&')}' : '';
   }
 
-  Future<void> fetchDprList({
+  Future<void> fetchWFUList({
     required BuildContext context,
     bool reset = false,
     bool isPagination = false,
@@ -212,12 +213,12 @@ class WorkFrontUpdateListController extends GetxController {
     start.value = 0;
     hasMoreData.value = true;
     filteredMeasurementSheets.clear();
-    await fetchDprList(reset: true, context: Get.context!);
+    await fetchWFUList(reset: true, context: Get.context!);
   }
 
   void loadMore(BuildContext context) {
     if (!isLoadingMore.value && hasMoreData.value) {
-      fetchDprList(context: context, isPagination: true);
+      fetchWFUList(context: context, isPagination: true);
     }
   }
 
@@ -275,13 +276,13 @@ class WorkFrontUpdateListController extends GetxController {
     tempEndDate = null;
     searchController.clear();
     _search.value = '';
-    fetchDprList(context: Get.context!, reset: true);
+    fetchWFUList(context: Get.context!, reset: true);
   }
 
   void toggleSorting() {
     isAscending.value = !isAscending.value;
     _orderBy.value = isAscending.value ? 'desc' : 'asc';
-    fetchDprList(reset: true, context: Get.context!);
+    fetchWFUList(reset: true, context: Get.context!);
   }
 
   void searchSurveys(String query) {
@@ -290,7 +291,7 @@ class WorkFrontUpdateListController extends GetxController {
       final trimmed = query.trim();
       if (_search.value != trimmed) {
         _search.value = trimmed;
-        fetchDprList(reset: true, context: Get.context!);
+        fetchWFUList(reset: true, context: Get.context!);
       }
     });
   }
