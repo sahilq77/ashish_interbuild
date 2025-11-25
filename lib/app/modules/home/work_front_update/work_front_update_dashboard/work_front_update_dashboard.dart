@@ -8,6 +8,7 @@ import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 
 class WorkFrontUpdateDashboard extends StatelessWidget {
   const WorkFrontUpdateDashboard({super.key});
@@ -34,52 +35,121 @@ class WorkFrontUpdateDashboard extends StatelessWidget {
                 ),
                 SizedBox(height: ResponsiveHelper.screenHeight * 0.03),
                 Obx(
-                  () => GridView.count(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    crossAxisCount: 2,
-                    crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                    mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
-                    childAspectRatio: 1.3,
-                    children: [
-                      _buildGridItem(
-                        'Total Amount',
-                        controller.formatCurrency(
-                          controller.monthlyTarget.value,
+                  () => controller.isLoading.value
+                      ? GridView.count(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          childAspectRatio: 1.3,
+                          children: List.generate(
+                            4,
+                            (index) => _buildShimmerItem(),
+                          ),
+                        )
+                      : GridView.count(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          mainAxisSpacing: ResponsiveHelper.screenWidth * 0.04,
+                          childAspectRatio: 1.3,
+                          children: [
+                            _buildGridItem(
+                              'Total Amount',
+                              controller.formatCurrency(
+                                controller.monthlyTarget.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.monthlyPercent.value,
+                              ),
+                              Colors.indigo,
+                              true,
+                            ),
+                            _buildGridItem(
+                              'Total Rec Amount',
+                              controller.formatCurrency(
+                                controller.monthlyAchieve.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.monthlyPercent.value,
+                              ),
+                              Colors.teal,
+                              true,
+                            ),
+                            _buildGridItem(
+                              'Total Rec %',
+                              controller.formatPercentage(
+                                controller.weeklyPercent.value,
+                              ),
+                              controller.formatPercentage(
+                                controller.weeklyPercent.value,
+                              ),
+                              Colors.deepOrange,
+                              true,
+                            ),
+                          ],
                         ),
-                        controller.formatPercentage(
-                          controller.monthlyPercent.value,
-                        ),
-                        Colors.indigo,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Total Rec Amount',
-                        controller.formatCurrency(
-                          controller.monthlyAchieve.value,
-                        ),
-                        controller.formatPercentage(
-                          controller.monthlyPercent.value,
-                        ),
-                        Colors.teal,
-                        true,
-                      ),
-                      _buildGridItem(
-                        'Total Rec %',
-                        controller.formatPercentage(
-                          controller.weeklyPercent.value,
-                        ),
-                        controller.formatPercentage(
-                          controller.weeklyPercent.value,
-                        ),
-                        Colors.deepOrange,
-                        true,
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerItem() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.grey.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title placeholder
+              Container(
+                height: 16,
+                width: double.infinity,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 12),
+              // Count placeholder
+              Container(height: 24, width: 80, color: Colors.white),
+              const Spacer(),
+              // Percent box placeholder (only for achieve cards)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Container(width: 40, height: 16, color: Colors.white),
+                ),
+              ),
+            ],
           ),
         ),
       ),
