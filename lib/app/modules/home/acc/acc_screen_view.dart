@@ -653,12 +653,23 @@ class _AccScreenViewState extends State<AccScreenView> {
                       ),
                       const SizedBox(height: 16),
                       _filterDropdownWithIcon(
-                        label: 'Package Name',
+                        label: 'Priority',
                         items: packageNameController.packageNames,
                         selected: tempPackage,
                         onChanged: (v) => setState(() => tempPackage = v),
                         icon: Icons.abc,
                       ),
+                      const SizedBox(height: 16),
+                      Obx(
+                        () => _filterDropdownWithIcon(
+                          label: 'Priority',
+                          items: controller.priorities,
+                          selected: controller.priority.value,
+                          onChanged: controller.onPriorityChanged,
+                          icon: Icons.abc,
+                        ),
+                      ),
+
                       const SizedBox(height: 16),
                       // DATE RANGE PICKER
                       Container(

@@ -33,6 +33,8 @@ class AccController extends GetxController {
   RxInt packageId = 0.obs;
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
+  final RxString priority = ''.obs;
+  final RxList<String> priorities = <String>['High', 'Medium', 'Low'].obs;
 
   // FILTERS
   final RxString selectedZone = ''.obs;
@@ -89,6 +91,7 @@ class AccController extends GetxController {
     final parts = <String>[
       'project_id=${proId}',
       'filter_package=${packageId}',
+      'priority=${priority.value}',
       'received_date=${''}',
       // 'filter_revised_end_date=${selectedEndDate.value}',
     ];
@@ -225,6 +228,7 @@ class AccController extends GetxController {
     start.value = 0;
     hasMoreData.value = true;
     filteredMeasurementSheets.clear();
+    clearFilters();
     await fetchWFUList(reset: true, context: Get.context!);
   }
 
@@ -285,6 +289,7 @@ class AccController extends GetxController {
     selectedPackage.value = '';
     selectedStartDate.value = '';
     selectedEndDate.value = '';
+    priority.value = '';
     tempStartDate = null;
     tempEndDate = null;
     searchController.clear();
@@ -296,6 +301,10 @@ class AccController extends GetxController {
     isAscending.value = !isAscending.value;
     _orderBy.value = isAscending.value ? 'desc' : 'asc';
     fetchWFUList(reset: true, context: Get.context!);
+  }
+
+  void onPriorityChanged(String? value) {
+    priority.value = value ?? '';
   }
 
   void searchSurveys(String query) {
