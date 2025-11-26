@@ -17,6 +17,7 @@ import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:intl/intl.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:path_provider/path_provider.dart';
@@ -476,12 +477,12 @@ class _AccScreenViewState extends State<AccScreenView> {
         SizedBox(width: 8),
         Text(': ', style: AppStyle.reportCardSubTitle),
         Expanded(
-          child:
-              value.contains(("jpg")) ||
-                  value.contains(("jpeg")) ||
-                  value.contains(("png")) ||
-                  value.contains(("xlsx")) ||
-                  value.contains(("pdf"))
+          child: value.contains(("https"))
+              //  ||
+              //     value.contains(("jpeg")) ||
+              //     value.contains(("png")) ||
+              //     value.contains(("xlsx")) ||
+              //     value.contains(("pdf"))
               ? Padding(
                   padding: EdgeInsets.only(left: ResponsiveHelper.spacing(5)),
                   child: Wrap(
@@ -504,7 +505,10 @@ class _AccScreenViewState extends State<AccScreenView> {
                               .first;
                       return GestureDetector(
                         onTap: () async {
-                          await _downloadImage(value, fileName);
+                          await _downloadFile(
+                            url: value,
+                            originalFileName: fileName,
+                          );
                           print("Download ${value}");
                         },
                         child: Chip(
@@ -923,95 +927,153 @@ class _AccScreenViewState extends State<AccScreenView> {
     return status.isGranted;
   }
 
-  Future<void> _downloadImage(String url, String originalFileName) async {
+  Future<void> _downloadFile({
+    required String url,
+    required String
+    originalFileName, // Optional: can help detect type if URL lacks extension
+  }) async {
     try {
-      // Request permission
+      // 1. Request permission (improved for Android 13+ scoped storage)
       if (!await _requestImageDownloadPermission()) {
         AppSnackbarStyles.showError(
           title: "Permission Denied",
-          message: "Cannot download image without storage permission",
+          message: "Storage permission required to save files",
         );
         return;
       }
 
-      // Get directory (preferably Downloads)
+      // 2. Determine save directory (best practice per platform)
       Directory? directory;
       if (Platform.isAndroid) {
+        // Try Downloads folder first (recommended)
         directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.existsSync()) {
+        if (!await directory.exists()) {
+          directory = Directory(
+            '/storage/emulated/0/Downloads',
+          ); // Some devices use capital D
+        }
+        if (!await directory.exists()) {
           directory = await getExternalStorageDirectory();
         }
-      } else {
+      } else if (Platform.isIOS) {
         directory = await getApplicationDocumentsDirectory();
       }
 
-      if (directory == null) {
+      if (directory == null || !await directory.exists()) {
         AppSnackbarStyles.showError(
           title: "Error",
-          message: "Cannot access storage",
+          message: "Cannot access storage directory",
         );
         return;
       }
 
-      // Create a clean and unique filename
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final dateFormatted = DateFormat(
-        'yyyyMMdd_HHmmss',
-      ).format(DateTime.now());
+      // 3. Extract file extension intelligently
+      String extension = '.bin'; // fallback
+      String fileNameWithoutExt =
+          'File_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}';
 
-      // Extract extension safely
-      String extension = '.jpg'; // default
+      // Try from URL first
       final uri = Uri.tryParse(url);
       if (uri != null && uri.pathSegments.isNotEmpty) {
-        final lastSegment = uri.pathSegments.last;
+        String lastSegment = uri.pathSegments.last;
+        // Handle URLs with query params like: image.jpg?token=abc
+        if (lastSegment.contains('.')) {
+          lastSegment = lastSegment.split('?').first;
+        }
         final dotIndex = lastSegment.lastIndexOf('.');
         if (dotIndex != -1 && dotIndex < lastSegment.length - 1) {
-          extension = lastSegment.substring(dotIndex); // includes the dot
-          if (![
+          extension = lastSegment.substring(dotIndex); // e.g., ".pdf"
+        }
+      }
+
+      // Fallback: try from originalFileName or Content-Type later via header
+      if ((extension == '.bin' ||
+              ![
+                '.pdf',
+                '.xlsx',
+                '.doc',
+                '.docx',
+                '.jpg',
+                '.jpeg',
+                '.png',
+                '.gif',
+                '.webp',
+              ].contains(extension.toLowerCase())) &&
+          originalFileName.isNotEmpty) {
+        final dotIndex = originalFileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+          final candidateExt = originalFileName
+              .substring(dotIndex)
+              .toLowerCase();
+          if ([
+            '.pdf',
+            '.xlsx',
+            '.doc',
+            '.docx',
             '.jpg',
             '.jpeg',
             '.png',
             '.gif',
             '.webp',
-          ].contains(extension.toLowerCase())) {
-            extension = '.jpg'; // fallback
+          ].contains(candidateExt)) {
+            extension = candidateExt;
           }
         }
       }
 
-      // Final filename: IMG_20251122_153045_123.jpg
-      final fileName = 'IMG_${dateFormatted}_$timestamp$extension';
-      final savePath = "${directory.path}/$fileName";
+      // Final filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = '${fileNameWithoutExt}_$timestamp$extension';
+      final savePath = '${directory.path}/$fileName';
 
+      // 4. Download with Dio
       final dio = Dio();
+
+      // Optional: Set headers if needed (e.g., for auth)
+      // dio.options.headers['Authorization'] = 'Bearer ...';
+
       await dio.download(
         url,
         savePath,
         onReceiveProgress: (received, total) {
           if (total != -1) {
             final progress = (received / total * 100).toStringAsFixed(0);
+            Fluttertoast.cancel(); // Avoid toast spam
             Fluttertoast.showToast(
-              msg: "Downloading: $progress%",
+              msg: "Downloading $extension file: $progress%",
               toastLength: Toast.LENGTH_SHORT,
             );
           }
         },
       );
 
+      // 5. Verify file was saved
       final file = File(savePath);
-      if (await file.exists() && await file.length() > 0) {
+      if (await file.exists() && await file.length() > 100) {
+        // >100 bytes to avoid empty/corrupt
         AppSnackbarStyles.showSuccess(
-          title: "Success",
-          message: "Image saved as $fileName",
+          title: "Downloaded!",
+          message: "Saved as $fileName",
         );
+
+        // Optional: Notify Android gallery/media scanner (for images/PDFs)
+        if (Platform.isAndroid) {
+          try {
+            // await _addToGallery(fileName, savePath, extension);
+          } catch (e) {
+            debugPrint("Failed to refresh gallery: $e");
+          }
+        }
       } else {
-        throw Exception("File is empty or not created");
+        throw Exception("Downloaded file is empty or corrupt");
       }
     } catch (e) {
       debugPrint("Download error: $e");
       AppSnackbarStyles.showError(
-        title: "Failed",
-        message: "Could not download image",
+        title: "Download Failed",
+        message: e.toString().contains("empty")
+            ? "File is empty or corrupted"
+            : "Could not download file",
       );
     }
   }
