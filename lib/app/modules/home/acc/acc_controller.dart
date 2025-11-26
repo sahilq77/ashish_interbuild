@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:ashishinterbuild/app/data/models/acc/acc_model.dart';
 import 'package:ashishinterbuild/app/data/models/acc/get_acc_list_response.dart';
+import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_delete_measurement_sheet_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
@@ -15,6 +17,7 @@ import 'package:get/get.dart';
 
 class AccController extends GetxController {
   final RxList<AccItem> wfuList = <AccItem>[].obs;
+  final RxBool isLoadingd = true.obs;
   final RxList<AccItem> filteredMeasurementSheets = <AccItem>[].obs;
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
@@ -206,6 +209,79 @@ class AccController extends GetxController {
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> deleteAcc({
+    BuildContext? context,
+    required String accId,
+    required String projectId,
+  }) async {
+    try {
+      isLoadingd.value = true;
+      final jsonBody = {"project_id": projectId, "acc_id": accId};
+
+      List<Object?>? list = await Networkcall().postMethod(
+        Networkutility.deleteAccApi,
+        Networkutility.deleteAcc,
+        jsonEncode(jsonBody),
+        Get.context!,
+      );
+
+      if (list != null && list.isNotEmpty) {
+        List<GetDeleteMeasurmentResponse> response =
+            getDeleteMeasurmentResponseFromJson(jsonEncode(list));
+
+        if (response[0].status == true) {
+          AppSnackbarStyles.showSuccess(
+            title: 'Deleted',
+            message: 'Acc deleted successfully!',
+          );
+        } else {
+          final String errorMessage = response[0].error?.isNotEmpty == true
+              ? response[0].error!
+              : (response[0].message?.isNotEmpty == true
+                    ? response[0].message!
+                    : "Failed to delete acc.");
+
+          AppSnackbarStyles.showError(
+            title: 'Delete Failed',
+            message: errorMessage,
+          );
+        }
+      } else {
+        AppSnackbarStyles.showError(
+          title: 'Failed',
+          message: "No response from server",
+        );
+      }
+    } on NoInternetException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(title: 'No Internet', message: e.message);
+    } on TimeoutException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(title: 'Timeout', message: e.message);
+    } on HttpException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(
+        title: 'HTTP Error',
+        message: '${e.message} (Code: ${e.statusCode})',
+      );
+    } on ParseException catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(title: 'Parse Error', message: e.message);
+    } catch (e) {
+      Get.back();
+      AppSnackbarStyles.showError(
+        title: 'Unexpected Error',
+        message: 'Unexpected error: $e',
+      );
+    } finally {
+      isLoadingd.value = false;
+      // Refresh the list after successful deletion
+      if (Get.context != null) {
+        fetchWFUList(reset: true, context: Get.context!);
+      }
     }
   }
 

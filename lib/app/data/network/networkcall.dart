@@ -148,6 +148,12 @@ class Networkcall {
             final deleteMS = getAddDeductionResponseFromJson(str);
             return deleteMS;
 
+
+         case 33:
+            final str = "[${response.body}]";
+            final deleteACC = getDeleteMeasurmentResponseFromJson(str);
+            return deleteACC;
+
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');

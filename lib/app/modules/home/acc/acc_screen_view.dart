@@ -16,6 +16,7 @@ import 'package:get/get.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -343,7 +344,19 @@ class _AccScreenViewState extends State<AccScreenView> {
                                               child: OutlinedButton(
                                                 style:
                                                     AppButtonStyles.outlinedExtraSmallPrimary(),
-                                                onPressed: () {},
+                                                onPressed: () {
+                                                  _showDeleteConfirmationDialog(
+                                                    context,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      "acc_id",
+                                                    ),
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      "project_id",
+                                                    ),
+                                                  );
+                                                },
                                                 child: Icon(Icons.delete),
                                               ),
                                             ),
@@ -363,6 +376,74 @@ class _AccScreenViewState extends State<AccScreenView> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(
+    BuildContext context,
+    String msId,
+    String projectId,
+  ) {
+    final controller = Get.find<AccController>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: Text(
+            'Delete',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: ResponsiveHelper.getResponsiveFontSize(18),
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete this record ?',
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(14),
+            ),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: AppButtonStyles.outlinedSmallBlack(),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: AppStyle.labelPrimaryPoppinsBlack,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    style: AppButtonStyles.elevatedSmallBlack(),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      controller.deleteAcc(
+                        context: context,
+                        accId: msId,
+                        projectId: projectId,
+                      );
+                    },
+                    child: Text(
+                      'Delete',
+                      style: AppStyle.labelPrimaryPoppinsWhite,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -674,128 +755,128 @@ class _AccScreenViewState extends State<AccScreenView> {
                         ),
                       ),
 
-                      const SizedBox(height: 16),
-                      // DATE RANGE PICKER
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.grey.withOpacity(0.5),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Date Range",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            InkWell(
-                              onTap: () async {
-                                final picked = await showDateRangePicker(
-                                  context: ctx,
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime.now().add(
-                                    const Duration(days: 365),
-                                  ),
-                                  initialDateRange:
-                                      controller.tempStartDate != null &&
-                                          controller.tempEndDate != null
-                                      ? DateTimeRange(
-                                          start: controller.tempStartDate!,
-                                          end: controller.tempEndDate!,
-                                        )
-                                      : null,
-                                  builder: (context, child) => Theme(
-                                    data: ThemeData.light().copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: AppColors.primary,
-                                      ),
-                                    ),
-                                    child: child!,
-                                  ),
-                                );
-                                if (picked != null) {
-                                  final daysDifference = picked.end
-                                      .difference(picked.start)
-                                      .inDays;
-                                  if (daysDifference > 7) {
-                                    ScaffoldMessenger.of(ctx).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Date range cannot exceed 7 days',
-                                        ),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  } else {
-                                    controller.tempStartDate = picked.start;
-                                    controller.tempEndDate = picked.end;
+                      // const SizedBox(height: 16),
+                      // // DATE RANGE PICKER
+                      // Container(
+                      //   width: double.infinity,
+                      //   padding: const EdgeInsets.all(12),
+                      //   decoration: BoxDecoration(
+                      //     border: Border.all(
+                      //       color: AppColors.grey.withOpacity(0.5),
+                      //     ),
+                      //     borderRadius: BorderRadius.circular(12),
+                      //   ),
+                      //   child: Column(
+                      //     crossAxisAlignment: CrossAxisAlignment.start,
+                      //     children: [
+                      //       const Text(
+                      //         "Date Range",
+                      //         style: TextStyle(
+                      //           fontWeight: FontWeight.w600,
+                      //           fontSize: 14,
+                      //         ),
+                      //       ),
+                      //       const SizedBox(height: 10),
+                      //       InkWell(
+                      //         onTap: () async {
+                      //           final picked = await showDateRangePicker(
+                      //             context: ctx,
+                      //             firstDate: DateTime(2020),
+                      //             lastDate: DateTime.now().add(
+                      //               const Duration(days: 365),
+                      //             ),
+                      //             initialDateRange:
+                      //                 controller.tempStartDate != null &&
+                      //                     controller.tempEndDate != null
+                      //                 ? DateTimeRange(
+                      //                     start: controller.tempStartDate!,
+                      //                     end: controller.tempEndDate!,
+                      //                   )
+                      //                 : null,
+                      //             builder: (context, child) => Theme(
+                      //               data: ThemeData.light().copyWith(
+                      //                 colorScheme: const ColorScheme.light(
+                      //                   primary: AppColors.primary,
+                      //                 ),
+                      //               ),
+                      //               child: child!,
+                      //             ),
+                      //           );
+                      //           if (picked != null) {
+                      //             final daysDifference = picked.end
+                      //                 .difference(picked.start)
+                      //                 .inDays;
+                      //             if (daysDifference > 7) {
+                      //               ScaffoldMessenger.of(ctx).showSnackBar(
+                      //                 const SnackBar(
+                      //                   content: Text(
+                      //                     'Date range cannot exceed 7 days',
+                      //                   ),
+                      //                   backgroundColor: Colors.red,
+                      //                 ),
+                      //               );
+                      //             } else {
+                      //               controller.tempStartDate = picked.start;
+                      //               controller.tempEndDate = picked.end;
 
-                                    setState(() {});
-                                  }
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.05),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: AppColors.primary.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.date_range,
-                                      color: AppColors.primary,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        controller.tempStartDate == null
-                                            ? "Select Date Range"
-                                            : "${_formatDate(controller.tempStartDate!)} → ${_formatDate(controller.tempEndDate!)}",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color:
-                                              controller.tempStartDate == null
-                                              ? Colors.grey[600]
-                                              : Colors.black87,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    if (controller.tempStartDate != null)
-                                      InkWell(
-                                        onTap: () {
-                                          controller.tempStartDate = null;
-                                          controller.tempEndDate = null;
-                                          setState(() {});
-                                        },
-                                        child: const Icon(
-                                          Icons.clear,
-                                          size: 20,
-                                          color: Colors.redAccent,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      //               setState(() {});
+                      //             }
+                      //           }
+                      //         },
+                      //         child: Container(
+                      //           padding: const EdgeInsets.symmetric(
+                      //             vertical: 14,
+                      //             horizontal: 12,
+                      //           ),
+                      //           decoration: BoxDecoration(
+                      //             color: AppColors.primary.withOpacity(0.05),
+                      //             borderRadius: BorderRadius.circular(8),
+                      //             border: Border.all(
+                      //               color: AppColors.primary.withOpacity(0.3),
+                      //             ),
+                      //           ),
+                      //           child: Row(
+                      //             children: [
+                      //               const Icon(
+                      //                 Icons.date_range,
+                      //                 color: AppColors.primary,
+                      //               ),
+                      //               const SizedBox(width: 12),
+                      //               Expanded(
+                      //                 child: Text(
+                      //                   controller.tempStartDate == null
+                      //                       ? "Select Date Range"
+                      //                       : "${_formatDate(controller.tempStartDate!)} → ${_formatDate(controller.tempEndDate!)}",
+                      //                   style: TextStyle(
+                      //                     fontSize: 14,
+                      //                     color:
+                      //                         controller.tempStartDate == null
+                      //                         ? Colors.grey[600]
+                      //                         : Colors.black87,
+                      //                     fontWeight: FontWeight.w500,
+                      //                   ),
+                      //                 ),
+                      //               ),
+                      //               if (controller.tempStartDate != null)
+                      //                 InkWell(
+                      //                   onTap: () {
+                      //                     controller.tempStartDate = null;
+                      //                     controller.tempEndDate = null;
+                      //                     setState(() {});
+                      //                   },
+                      //                   child: const Icon(
+                      //                     Icons.clear,
+                      //                     size: 20,
+                      //                     color: Colors.redAccent,
+                      //                   ),
+                      //                 ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                       const SizedBox(height: 12),
                     ],
                   ),
