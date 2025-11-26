@@ -45,7 +45,7 @@ class ForgotPasswordController extends GetxController {
 
       AppSnackbarStyles.showSuccess(
         title: "Success",
-        message: "Verification code sent to your email",
+        message: "Email verified successfully",
       );
       currentStep.value = 2; // Move to reset password step
     }

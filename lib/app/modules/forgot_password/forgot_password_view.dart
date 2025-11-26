@@ -79,7 +79,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               ),
               SizedBox(height: ResponsiveHelper.spacing(12)),
               ResponsiveHelper.safeText(
-                'Enter your registered email address to receive password reset instructions.',
+                'Enter your registered email address',
                 style: AppStyle.bodyRegularPoppinsGrey.responsive.copyWith(
                   fontSize: 14,
                 ),
@@ -112,7 +112,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                   onPressed: controller.verifyEmail,
                   style: AppButtonStyles.elevatedLargeBlack(),
                   child: ResponsiveHelper.safeText(
-                    'Send Reset Link',
+                    'Verify',
                     style: AppStyle.buttonTextPoppinsWhite.responsive,
                   ),
                 ),
@@ -149,11 +149,13 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               ),
               SizedBox(height: ResponsiveHelper.spacing(12)),
               ResponsiveHelper.safeText(
+                maxLines: 2,
+
                 'Your new password must be different from previous passwords.',
                 style: AppStyle.bodyRegularPoppinsGrey.responsive.copyWith(
                   fontSize: 14,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.start,
               ),
               SizedBox(height: ResponsiveHelper.spacing(40)),
 
