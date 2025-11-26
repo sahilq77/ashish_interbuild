@@ -441,23 +441,19 @@ class UpdateProgressReportController extends GetxController {
         Uri.parse(Networkutility.updateDailyProgressReport),
       );
 
-      // Add headers
+      // Add auth header
       if (AppUtility.authToken != null && AppUtility.authToken!.isNotEmpty) {
         request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
       }
 
-      // Add form fields
-      // request.fields['project_id'] = dprController.projectId.toString();
-      // request.fields['filter_package'] = dprController.packageId.toString();
-
-      // Add selected rows data with images
+      // Build rows and files
       for (int i = 0; i < selectedIndices.length; i++) {
-        final index = selectedIndices.elementAt(i);
-        final item = filteredMeasurementSheets[i];
+        final int rowIndex = selectedIndices.elementAt(i); // Actual index in l
+        final item = filteredMeasurementSheets[rowIndex];
 
         final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
-        final msQty = item.getField('MS QTY')?.toString() ?? '0';
 
+        // Text fields for this row
         request.fields['ms_rows[$i][project_id]'] = dprController.projectId
             .toString();
         request.fields['ms_rows[$i][system_id]'] = systemId.value
@@ -472,41 +468,36 @@ class UpdateProgressReportController extends GetxController {
         request.fields['ms_rows[$i][executed_qty]'] =
             item.getField('MS QTY')?.toString() ?? '0';
 
-        // Add images for this row
-        if (rowImages[index] != null) {
-          for (int j = 0; j < rowImages[index]!.length; j++) {
-            final image = rowImages[index]![j];
+        // Add multiple images for this row → goes into one array: attachments[]
+        if (rowImages[rowIndex] != null && rowImages[rowIndex]!.isNotEmpty) {
+          for (int j = 0; j < rowImages[rowIndex]!.length; j++) {
+            final XFile imageFile = rowImages[rowIndex]![j];
+
             final multipartFile = await http.MultipartFile.fromPath(
-              'ms_rows[$i][attachment][]',
-              image.path,
-              filename: path.basename(image.path),
+              'ms_rows[$i][attachments][]', // EXACT MATCH with Postman
+              imageFile.path,
+              filename: path.basename(imageFile.path),
             );
+
             request.files.add(multipartFile);
           }
         }
       }
 
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-      // ===== ADD THIS BLOCK TO LOG THE FULL REQUEST BODY =====
-      log('=== MULTIPART REQUEST DETAILS ===');
-      // Log all text fields
-      log('Fields:');
-      request.fields.forEach((key, value) {
-        log('  $key: $value');
-      });
-
-      log('Files:');
+      // === DEBUG: Log full request ===
+      log('=== MULTIPART REQUEST ===');
+      request.fields.forEach((k, v) => log('Field → $k: $v'));
       for (var file in request.files) {
-        final fileName = file.filename ?? 'unknown_filename';
-        final fieldName = file.field;
-        final length = file.length; // content length in bytes
-        log('  Field: $fieldName => File: $fileName (${length} bytes)');
+        log('File → ${file.field}: ${file.filename} (${file.length} bytes)');
       }
-      log('=====================================');
-      log('Update DPR Response: $responseBody');
+      log('========================');
 
-      if (response.statusCode == 200) {
+      final streamedResponse = await request.send();
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      log('Response ($streamedResponse.statusCode): $responseBody');
+
+      if (streamedResponse.statusCode == 200) {
         final jsonResponse = json.decode(responseBody);
         if (jsonResponse['status'] == true) {
           AppSnackbarStyles.showSuccess(
@@ -514,28 +505,28 @@ class UpdateProgressReportController extends GetxController {
             message: jsonResponse['message'] ?? 'DPR updated successfully',
           );
 
-          // Clear selections and refresh data
+          // Reset UI
           selectedIndices.clear();
           rowImages.clear();
           isMultiSelectMode.value = false;
           await fetchDprList(reset: true, context: Get.context!);
         } else {
           AppSnackbarStyles.showError(
-            title: 'Error',
-            message: jsonResponse['message'] ?? 'Failed to update DPR',
+            title: 'Failed',
+            message: jsonResponse['message'] ?? 'Update failed',
           );
         }
       } else {
         AppSnackbarStyles.showError(
-          title: 'Error',
-          message: 'Server error: ${response.statusCode}',
+          title: 'Server Error',
+          message: 'HTTP ${streamedResponse.statusCode}',
         );
       }
-    } catch (e) {
-      log('Update DPR Error: $e');
+    } catch (e, s) {
+      log('Update DPR Exception: $e\n$s');
       AppSnackbarStyles.showError(
         title: 'Error',
-        message: 'Failed to update DPR: $e',
+        message: 'Failed to update: $e',
       );
     } finally {
       isLoadingu.value = false;
