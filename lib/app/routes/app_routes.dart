@@ -3,6 +3,7 @@ import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_bin
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_binding.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/weekly_period/weekly_period_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_location_binding.dart';
@@ -396,7 +397,7 @@ class AppRoutes {
     GetPage(
       name: accScreenList,
       page: () => const AccScreenView(),
-      bindings: [AccBinding(), ZoneBinding()],
+      bindings: [AccBinding(), ZoneBinding(), ProjectNameDropdownBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(

@@ -6,13 +6,13 @@ import 'package:ashishinterbuild/app/data/models/acc/get_acc_list_response.dart'
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AccController extends GetxController {
-  final zoneController = Get.find<ZoneController>();
   final RxList<AccItem> wfuList = <AccItem>[].obs;
   final RxList<AccItem> filteredMeasurementSheets = <AccItem>[].obs;
   final RxBool isLoading = true.obs;
@@ -35,6 +35,7 @@ class AccController extends GetxController {
 
   // FILTERS
   final RxString selectedZone = ''.obs;
+  final RxString selectedProject = ''.obs;
   final RxString selectedStartDate = ''.obs; // YYYY-MM-DD
   final RxString selectedEndDate = ''.obs; // YYYY-MM-DD
 
@@ -48,7 +49,7 @@ class AccController extends GetxController {
     frontSecondaryDisplayColumns: [],
     buttonDisplayColumn: [],
   ).obs;
-
+  final projectdController = Get.find<ProjectNameDropdownController>();
   @override
   void onInit() {
     super.onInit();
@@ -61,8 +62,9 @@ class AccController extends GetxController {
     log("ACC LIST → projectId=${projectId.value} packageId=${packageId.value}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
-        zoneController.fetchZones(context: Get.context!);
+        // zoneController.fetchZones(context: Get.context!);
         fetchWFUList(reset: true, context: Get.context!);
+        projectdController.fetchProjects(context: Get.context!);
       }
     });
   }
@@ -76,9 +78,9 @@ class AccController extends GetxController {
 
   String _buildQueryParams({bool includePagination = true}) {
     final parts = <String>[
-      'project_id=${26}',
+      'project_id=${selectedProject.value}',
       'filter_package=${packageId.value == 0 ? "" : packageId.value}',
-      'received_date =${''}',
+      'received_date=${''}',
       // 'filter_revised_end_date=${selectedEndDate.value}',
     ];
 

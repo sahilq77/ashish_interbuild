@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart' show AppRoutes;
@@ -477,7 +478,9 @@ class _AccScreenViewState extends State<AccScreenView> {
           child:
               value.contains(("jpg")) ||
                   value.contains(("jpeg")) ||
-                  value.contains(("png"))
+                  value.contains(("png")) ||
+                  value.contains(("xlsx")) ||
+                  value.contains(("pdf"))
               ? Padding(
                   padding: EdgeInsets.only(left: ResponsiveHelper.spacing(5)),
                   child: Wrap(
@@ -587,11 +590,11 @@ class _AccScreenViewState extends State<AccScreenView> {
 
   void _showFilterDialog(BuildContext context) {
     final AccController controller = Get.put(AccController());
-    final zoneController = Get.find<ZoneController>();
+    final projectdController = Get.find<ProjectNameDropdownController>();
 
-    String? tempZone = controller.selectedZone.value.isEmpty
+    String? tempProject = controller.selectedProject.value.isEmpty
         ? null
-        : controller.selectedZone.value;
+        : controller.selectedProject.value;
 
     // Initialize temp dates
     controller.tempStartDate = controller.selectedStartDate.value.isNotEmpty
@@ -638,11 +641,11 @@ class _AccScreenViewState extends State<AccScreenView> {
                   child: Column(
                     children: [
                       _filterDropdownWithIcon(
-                        label: 'Zone',
-                        items: zoneController.zoneNames,
-                        selected: tempZone,
-                        onChanged: (v) => setState(() => tempZone = v),
-                        icon: Icons.location_on,
+                        label: 'Project Name',
+                        items: projectdController.projectNames,
+                        selected: tempProject,
+                        onChanged: (v) => setState(() => tempProject = v),
+                        icon: Icons.abc,
                       ),
                       const SizedBox(height: 16),
                       // DATE RANGE PICKER
@@ -707,6 +710,7 @@ class _AccScreenViewState extends State<AccScreenView> {
                                   } else {
                                     controller.tempStartDate = picked.start;
                                     controller.tempEndDate = picked.end;
+
                                     setState(() {});
                                   }
                                 }
@@ -795,7 +799,9 @@ class _AccScreenViewState extends State<AccScreenView> {
                       child: ElevatedButton(
                         style: AppButtonStyles.elevatedMediumBlack(),
                         onPressed: () {
-                          controller.selectedZone.value = tempZone ?? '';
+                          controller.selectedProject.value = projectdController
+                              .getProjectIdByName(tempProject ?? '')
+                              .toString();
                           if (controller.tempStartDate != null &&
                               controller.tempEndDate != null) {
                             controller.selectedStartDate.value =

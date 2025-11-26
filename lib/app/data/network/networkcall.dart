@@ -20,6 +20,7 @@ import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_edit_pboq
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/measurement_sheet/get_pboq_measurmentsheet_response.dart';
 import 'package:ashishinterbuild/app/data/models/profile/get_profile_response.dart';
+import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_dropdown_response.dart';
 import 'package:ashishinterbuild/app/data/models/project_name/get_project_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_response.dart';
 import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_inspection_update_list_response.dart';
@@ -339,6 +340,9 @@ class Networkcall {
           case 31:
             final getaccList = getAccListResponseFromJson(response.body);
             return [getaccList];
+          case 32:
+            final getProjectsDropdown = getProjectDropdownResponseFromJson(str);
+            return getProjectsDropdown;
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');

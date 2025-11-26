@@ -95,6 +95,9 @@ class Networkutility {
   //<======================= ACC MODULE ============================>
   static String getACCList = "${baseUrl + "acc/list"}";
   static int getACCListApi = 31;
+
+  static String getProjectNameDropdown = "${baseUrl + "projects"}";
+  static int getProjectNameDropdownApi = 32;
 }
 
 
