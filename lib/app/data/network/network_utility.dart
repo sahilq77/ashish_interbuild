@@ -90,8 +90,7 @@ class Networkutility {
   static int getWFUDetailListApi = 29;
 
   static String wfuUpdate = "${baseUrl + "wf/update"}";
-  static int wfuUpdateApi = 20;
-  
+  static int wfuUpdateApi = 30;
 }
 
 
