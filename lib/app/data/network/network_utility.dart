@@ -91,6 +91,10 @@ class Networkutility {
 
   static String wfuUpdate = "${baseUrl + "wf/update"}";
   static int wfuUpdateApi = 30;
+
+  //<======================= ACC MODULE ============================>
+  static String getACCList = "${baseUrl + "acc/list"}";
+  static int getACCListApi = 31;
 }
 
 

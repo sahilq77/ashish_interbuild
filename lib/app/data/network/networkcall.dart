@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:ashishinterbuild/app/data/models/acc/get_acc_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
@@ -335,7 +336,9 @@ class Networkcall {
             final getWFUdetailList =
                 getUpdateWorkFrontUpdateListResponseFromJson(response.body);
             return [getWFUdetailList];
-
+          case 31:
+            final getaccList = getAccListResponseFromJson(response.body);
+            return [getaccList];
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');
