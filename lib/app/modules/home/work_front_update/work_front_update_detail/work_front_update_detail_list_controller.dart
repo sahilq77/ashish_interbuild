@@ -422,7 +422,7 @@ class WorkFrontUpdateDetailListController extends GetxController {
     if (selectedIndices.isEmpty) {
       AppSnackbarStyles.showError(
         title: 'Error',
-        message: 'Please select items to update',
+        message: 'Please select at least one item to update',
       );
       return;
     }
@@ -434,100 +434,108 @@ class WorkFrontUpdateDetailListController extends GetxController {
         Uri.parse(Networkutility.wfuUpdate),
       );
 
-      // Add headers
+      // Only add Authorization header (DO NOT set Content-Type)
       if (AppUtility.authToken != null && AppUtility.authToken!.isNotEmpty) {
         request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
       }
 
-      // Add form fields
-      // request.fields['project_id'] = wfuController.projectId.toString();
-      // request.fields['filter_package'] = wfuController.packageId.toString();
+      // Let http package auto-set Content-Type with correct boundary
+      // DO NOT add: request.headers['Content-Type'] = ...
 
-      // Add selected rows data with images
       for (int i = 0; i < selectedIndices.length; i++) {
-        final index = selectedIndices.elementAt(i);
-        final item = filteredMeasurementSheets[i];
+        final int rowIndex = selectedIndices.elementAt(
+          i,
+        ); // Actual index in list
+        final item = filteredMeasurementSheets[rowIndex];
 
-        final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
-        final msQty = item.getField('MS Qty')?.toString() ?? '0';
+        final String msId =
+            item.getField('measurement_sheet_id')?.toString() ?? '0';
+        final String executedQty =
+            item.getField('MS Qty')?.toString() ?? '0.00';
 
+        // Form fields - must match Postman exactly
         request.fields['ms_rows[$i][project_id]'] = wfuController.projectId
             .toString();
+        request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
+        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
         request.fields['ms_rows[$i][system_id]'] = systemId.value
             .replaceAll(RegExp(r'<[^>]*>'), '')
             .trim();
-        request.fields['ms_rows[$i][source_table]'] = sourceName.value;
-        request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
-        request.fields['ms_rows[$i][progress_status]'] = '1';
         request.fields['ms_rows[$i][received_date]'] = DateFormat(
           'yyyy-MM-dd',
         ).format(DateTime.now());
-        request.fields['ms_rows[$i][executed_qty]'] = "$msQty";
+        request.fields['ms_rows[$i][progress_status]'] = '1';
+        request.fields['ms_rows[$i][executed_qty]'] = executedQty;
 
-        // Add images for this row
-        if (rowImages[index] != null) {
-          for (int j = 0; j < rowImages[index]!.length; j++) {
-            final image = rowImages[index]![j];
+        // Attach images for this row (if any)
+        if (rowImages[rowIndex] != null && rowImages[rowIndex]!.isNotEmpty) {
+          for (int j = 0; j < rowImages[rowIndex]!.length; j++) {
+            final XFile imageFile = rowImages[rowIndex]![j];
+
             final multipartFile = await http.MultipartFile.fromPath(
-              'ms_rows[$i][attachment][]',
-              image.path,
-              filename: path.basename(image.path),
+              'ms_rows[$i][attachments][]', // EXACT MATCH with Postman
+              imageFile.path,
+              filename: path.basename(imageFile.path),
             );
+
             request.files.add(multipartFile);
           }
         }
       }
 
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-      // ===== ADD THIS BLOCK TO LOG THE FULL REQUEST BODY =====
-      log('=== MULTIPART REQUEST DETAILS ===');
-      // Log all text fields
-      log('Fields:');
+      // LOG FOR DEBUGGING (Keep during testing)
+      log('=== BATCH UPDATE REQUEST ===');
       request.fields.forEach((key, value) {
-        log('  $key: $value');
+        log('Field → $key: $value');
       });
-
-      log('Files:');
       for (var file in request.files) {
-        final fileName = file.filename ?? 'unknown_filename';
-        final fieldName = file.field;
-        final length = file.length; // content length in bytes
-        log('  Field: $fieldName => File: $fileName (${length} bytes)');
+        log('File → ${file.field}: ${file.filename} (${file.length} bytes)');
       }
-      log('=====================================');
-      log('Update DPR Response: $responseBody');
+      log('============================');
 
-      if (response.statusCode == 200) {
+      // Send request
+      final streamedResponse = await request.send();
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      log('Response Status: ${streamedResponse.statusCode}');
+      log('Response Body: $responseBody');
+
+      if (streamedResponse.statusCode == 200) {
         final jsonResponse = json.decode(responseBody);
-        if (jsonResponse['status'] == true) {
+
+        if (jsonResponse['status'] == true ||
+            jsonResponse['status'] == 'true') {
           AppSnackbarStyles.showSuccess(
             title: 'Success',
-            message: jsonResponse['message'] ?? 'DPR updated successfully',
+            message:
+                jsonResponse['message'] ?? 'Work front updated successfully!',
           );
 
-          // Clear selections and refresh data
+          // Reset everything
           selectedIndices.clear();
           rowImages.clear();
           isMultiSelectMode.value = false;
+
+          // Refresh list
           await fetchDprList(reset: true, context: Get.context!);
         } else {
           AppSnackbarStyles.showError(
-            title: 'Error',
-            message: jsonResponse['message'] ?? 'Failed to update DPR',
+            title: 'Failed',
+            message: jsonResponse['message'] ?? 'Update failed',
           );
         }
       } else {
         AppSnackbarStyles.showError(
-          title: 'Error',
-          message: 'Server error: ${response.statusCode}',
+          title: 'Server Error',
+          message:
+              'Status: ${streamedResponse.statusCode}\nResponse: $responseBody',
         );
       }
-    } catch (e) {
-      log('Update DPR Error: $e');
+    } catch (e, stackTrace) {
+      log('Batch Update Exception: $e', error: e, stackTrace: stackTrace);
       AppSnackbarStyles.showError(
         title: 'Error',
-        message: 'Failed to update DPR: $e',
+        message: 'Failed to update: $e',
       );
     } finally {
       isLoadingu.value = false;
