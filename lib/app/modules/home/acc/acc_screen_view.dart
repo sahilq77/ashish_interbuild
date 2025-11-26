@@ -799,9 +799,7 @@ class _AccScreenViewState extends State<AccScreenView> {
                       child: ElevatedButton(
                         style: AppButtonStyles.elevatedMediumBlack(),
                         onPressed: () {
-                          controller.selectedProject.value = projectdController
-                              .getProjectIdByName(tempProject ?? '')
-                              .toString();
+                          controller.selectedProject.value = tempProject ?? "";
                           if (controller.tempStartDate != null &&
                               controller.tempEndDate != null) {
                             controller.selectedStartDate.value =

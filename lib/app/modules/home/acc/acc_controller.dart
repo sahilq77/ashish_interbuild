@@ -77,8 +77,11 @@ class AccController extends GetxController {
   }
 
   String _buildQueryParams({bool includePagination = true}) {
+    final String proId =
+        projectdController.getProjectIdByName(selectedProject.value ?? '') ??
+        "";
     final parts = <String>[
-      'project_id=${selectedProject.value}',
+      'project_id=${proId}',
       'filter_package=${packageId.value == 0 ? "" : packageId.value}',
       'received_date=${''}',
       // 'filter_revised_end_date=${selectedEndDate.value}',
@@ -272,7 +275,7 @@ class AccController extends GetxController {
 
   void clearFilters() {
     selectedPackageFilter.value = null;
-    selectedZone.value = '';
+    selectedProject.value = '';
     selectedStartDate.value = '';
     selectedEndDate.value = '';
     tempStartDate = null;
