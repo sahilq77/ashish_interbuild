@@ -6,6 +6,7 @@ import 'package:ashishinterbuild/app/data/models/acc/get_acc_list_response.dart'
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -36,6 +37,7 @@ class AccController extends GetxController {
   // FILTERS
   final RxString selectedZone = ''.obs;
   final RxString selectedProject = ''.obs;
+  final RxString selectedPackage = ''.obs;
   final RxString selectedStartDate = ''.obs; // YYYY-MM-DD
   final RxString selectedEndDate = ''.obs; // YYYY-MM-DD
 
@@ -50,6 +52,7 @@ class AccController extends GetxController {
     buttonDisplayColumn: [],
   ).obs;
   final projectdController = Get.find<ProjectNameDropdownController>();
+  final packageController = Get.find<PackageNameController>();
   @override
   void onInit() {
     super.onInit();
@@ -65,6 +68,7 @@ class AccController extends GetxController {
         // zoneController.fetchZones(context: Get.context!);
         fetchWFUList(reset: true, context: Get.context!);
         projectdController.fetchProjects(context: Get.context!);
+        packageController.fetchPackages(context: Get.context!);
       }
     });
   }
@@ -80,9 +84,11 @@ class AccController extends GetxController {
     final String proId =
         projectdController.getProjectIdByName(selectedProject.value ?? '') ??
         "";
+    final String packageId =
+        packageController.getPackageIdByName(selectedPackage.value ?? '') ?? "";
     final parts = <String>[
       'project_id=${proId}',
-      'filter_package=${packageId.value == 0 ? "" : packageId.value}',
+      'filter_package=${packageId}',
       'received_date=${''}',
       // 'filter_revised_end_date=${selectedEndDate.value}',
     ];
@@ -276,6 +282,7 @@ class AccController extends GetxController {
   void clearFilters() {
     selectedPackageFilter.value = null;
     selectedProject.value = '';
+    selectedPackage.value = '';
     selectedStartDate.value = '';
     selectedEndDate.value = '';
     tempStartDate = null;

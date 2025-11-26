@@ -28,7 +28,7 @@ class GetPackageNameResponse {
   factory GetPackageNameResponse.fromJson(Map<String, dynamic> json) =>
       GetPackageNameResponse(
         status: json["status"],
-        error: json["error"],
+        error: json["error"] ?? "",
         message: json["message"],
         data: List<PackageData>.from(
           json["data"].map((x) => PackageData.fromJson(x)),
@@ -61,12 +61,12 @@ class PackageData {
   });
 
   factory PackageData.fromJson(Map<String, dynamic> json) => PackageData(
-    packageId: json["package_id"],
-    packageName: json["package_name"],
-    projectId: json["project_id"],
-    projectCode: json["project_code"],
-    projectName: json["project_name"],
-    packageValue: json["package_value"],
+    packageId: json["package_id"] ?? "",
+    packageName: json["package_name"] ?? "",
+    projectId: json["project_id"] ?? "",
+    projectCode: json["project_code"] ?? "",
+    projectName: json["project_name"] ?? "",
+    packageValue: json["package_value"] ?? "",
   );
 
   Map<String, dynamic> toJson() => {

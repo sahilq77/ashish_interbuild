@@ -48,7 +48,7 @@ class PackageNameController extends GetxController {
                 Networkutility.getPackagesListApi,
 
                 projectId == 0
-                    ? Networkutility.getPackagesList + "?project_id="
+                    ? Networkutility.getPackagesList
                     : Networkutility.getPackagesList + "?project_id=$projectId",
                 context,
               )

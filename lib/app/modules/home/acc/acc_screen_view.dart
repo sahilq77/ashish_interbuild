@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart';
@@ -591,10 +592,13 @@ class _AccScreenViewState extends State<AccScreenView> {
   void _showFilterDialog(BuildContext context) {
     final AccController controller = Get.put(AccController());
     final projectdController = Get.find<ProjectNameDropdownController>();
-
+    final packageNameController = Get.find<PackageNameController>();
     String? tempProject = controller.selectedProject.value.isEmpty
         ? null
         : controller.selectedProject.value;
+    String? tempPackage = controller.selectedPackage.value.isEmpty
+        ? null
+        : controller.selectedPackage.value;
 
     // Initialize temp dates
     controller.tempStartDate = controller.selectedStartDate.value.isNotEmpty
@@ -645,6 +649,14 @@ class _AccScreenViewState extends State<AccScreenView> {
                         items: projectdController.projectNames,
                         selected: tempProject,
                         onChanged: (v) => setState(() => tempProject = v),
+                        icon: Icons.abc,
+                      ),
+                      const SizedBox(height: 16),
+                      _filterDropdownWithIcon(
+                        label: 'Package Name',
+                        items: packageNameController.packageNames,
+                        selected: tempPackage,
+                        onChanged: (v) => setState(() => tempPackage = v),
                         icon: Icons.abc,
                       ),
                       const SizedBox(height: 16),
@@ -800,6 +812,7 @@ class _AccScreenViewState extends State<AccScreenView> {
                         style: AppButtonStyles.elevatedMediumBlack(),
                         onPressed: () {
                           controller.selectedProject.value = tempProject ?? "";
+                          controller.selectedPackage.value = tempPackage ?? "";
                           if (controller.tempStartDate != null &&
                               controller.tempEndDate != null) {
                             controller.selectedStartDate.value =

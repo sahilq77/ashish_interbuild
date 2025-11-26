@@ -397,7 +397,12 @@ class AppRoutes {
     GetPage(
       name: accScreenList,
       page: () => const AccScreenView(),
-      bindings: [AccBinding(), ZoneBinding(), ProjectNameDropdownBinding()],
+      bindings: [
+        AccBinding(),
+        ZoneBinding(),
+        ProjectNameDropdownBinding(),
+        PackageNameBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
     GetPage(
