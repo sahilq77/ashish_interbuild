@@ -1,34 +1,50 @@
+import 'dart:io';
+
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart' show AppRoutes;
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
+import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:path_provider/path_provider.dart';
 
-class AccScreenView extends StatelessWidget {
+class AccScreenView extends StatefulWidget {
   const AccScreenView({super.key});
 
+  @override
+  State<AccScreenView> createState() => _AccScreenViewState();
+}
+
+class _AccScreenViewState extends State<AccScreenView> {
   @override
   Widget build(BuildContext context) {
     final AccController controller = Get.put(AccController());
     ResponsiveHelper.init(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: _buildAppBar(),
       body: RefreshIndicator(
         onRefresh: controller.refreshData,
+        color: AppColors.primary,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: ResponsiveHelper.padding(16),
+              padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
               child: Text(
-                "Skyline Towers -> Awaited Clearance From Client",
+                "Home ➔ Acc List",
                 style: AppStyle.bodySmallPoppinsPrimary,
               ),
             ),
@@ -48,157 +64,225 @@ class AccScreenView extends StatelessWidget {
               child: Obx(
                 () => controller.isLoading.value
                     ? _buildShimmerEffect(context)
+                    : controller.errorMessage.value.isNotEmpty
+                    ? Center(
+                        child: Text(
+                          controller.errorMessage.value,
+                          style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                        ),
+                      )
+                    : controller.filteredMeasurementSheets.isEmpty
+                    ? const Center(child: Text('No data found'))
                     : ListView.builder(
                         padding: ResponsiveHelper.padding(16),
-                        itemCount: controller.accList.length,
+                        itemCount:
+                            controller.filteredMeasurementSheets.length +
+                            (controller.hasMoreData.value ||
+                                    controller.isLoadingMore.value
+                                ? 1
+                                : 1),
                         itemBuilder: (context, index) {
-                          final issue = controller.accList[index];
+                          if (index >=
+                              controller.filteredMeasurementSheets.length) {
+                            if (controller.hasMoreData.value &&
+                                !controller.isLoadingMore.value) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                controller.loadMore(context);
+                              });
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: controller.hasMoreData.value
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                        'No more data',
+                                        style: TextStyle(
+                                          color: AppColors.grey,
+                                          fontSize:
+                                              ResponsiveHelper.getResponsiveFontSize(
+                                                14,
+                                              ),
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          }
+
+                          final sheet =
+                              controller.filteredMeasurementSheets[index];
                           return GestureDetector(
                             onTap: () => controller.toggleExpanded(index),
-                            child: Card(
-                              margin: EdgeInsets.only(
-                                bottom: ResponsiveHelper.screenHeight * 0.02,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white, Colors.grey.shade50],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
+                            child: Obx(() {
+                              final isExpanded =
+                                  controller.expandedIndex.value == index;
+                              return Card(
+                                margin: EdgeInsets.only(
+                                  bottom: ResponsiveHelper.screenHeight * 0.02,
                                 ),
-                                child: Obx(
-                                  () => Padding(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.white,
+                                        Colors.grey.shade50,
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
                                     padding: ResponsiveHelper.padding(16),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
                                       children: [
-                                        // _buildDetailRow(
-                                        //   "Sr.No",
-                                        //   issue.srNo.toString(),
-                                        // ),
-                                        // SizedBox(
-                                        //   height:
-                                        //       ResponsiveHelper.screenHeight *
-                                        //       0.002,
-                                        // ),
-                                        _buildDetailRow(
-                                          "ACC Category",
-                                          issue.accCategory,
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              ResponsiveHelper.screenHeight *
-                                              0.002,
-                                        ),
-                                        _buildDetailRow("Role", issue.role),
+                                        if (controller
+                                            .getFrontDisplayColumns()
+                                            .isNotEmpty)
+                                          ...controller
+                                              .getFrontDisplayColumns()
+                                              .take(1)
+                                              .map((col) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                              .toList(),
 
-                                        if (controller.expandedIndex.value ==
-                                            index) ...[
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Package Name",
-                                            issue.packageName,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Key Delay Events",
-                                            issue.keyDelayEvents ? 'Yes' : 'No',
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Priority",
-                                            issue.priority,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Issue Open Date",
-                                            issue.issueOpenDate.toString(),
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Overdue",
-                                            issue.overdue.toString(),
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow("Delay", issue.delay),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Issue Close Date",
-                                            issue.issueCloseDate?.toString() ??
-                                                "-",
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Brief Detail",
-                                            issue.briefDetail,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Affected Milestone",
-                                            issue.affectedMilestone,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Attachment",
-                                            issue.attachment,
-                                          ),
-                                          SizedBox(
-                                            height:
-                                                ResponsiveHelper.screenHeight *
-                                                0.002,
-                                          ),
-                                          _buildDetailRow(
-                                            "Status Update",
-                                            issue.statusUpdate,
-                                          ),
-                                        ],
+                                        if (isExpanded &&
+                                            controller
+                                                .appColumnDetails
+                                                .value
+                                                .columns
+                                                .isNotEmpty)
+                                          ...controller
+                                              .appColumnDetails
+                                              .value
+                                              .columns
+                                              .where(
+                                                (col) => !controller
+                                                    .getFrontDisplayColumns()
+                                                    .contains(col),
+                                              )
+                                              .map(
+                                                (col) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 6,
+                                                      ),
+                                                  child: _buildDetailRow(
+                                                    col,
+                                                    controller.getFieldValue(
+                                                      sheet,
+                                                      col,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+
                                         SizedBox(
                                           height:
                                               ResponsiveHelper.screenHeight *
                                               0.01,
+                                        ),
+                                        Row(
+                                          children: [
+                                            if (controller
+                                                .getFrontSecondaryDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller
+                                                  .getFrontSecondaryDisplayColumns()
+                                                  .map((col) {
+                                                    return Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              bottom: 6,
+                                                            ),
+                                                        child: Text(
+                                                          "$col: ${controller.getFieldValue(sheet, col)}",
+                                                          style: AppStyle
+                                                              .labelPrimaryPoppinsBlack
+                                                              .responsive
+                                                              .copyWith(
+                                                                fontSize: 13,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  })
+                                                  .toList(),
+                                            const SizedBox(width: 8),
+                                            if (controller
+                                                .getButtonDisplayColumns()
+                                                .isNotEmpty)
+                                              ...controller.getButtonDisplayColumns().map((
+                                                col,
+                                              ) {
+                                                return Expanded(
+                                                  child: OutlinedButton(
+                                                    style:
+                                                        AppButtonStyles.outlinedExtraSmallPrimary(),
+                                                    onPressed: () {
+                                                      Get.toNamed(
+                                                        AppRoutes
+                                                            .workFrontUpdateDetailList,
+                                                        arguments: {
+                                                          "selected_source":
+                                                              controller
+                                                                  .getFieldValue(
+                                                                    sheet,
+                                                                    "Source",
+                                                                  ),
+                                                          "selected_system_id":
+                                                              controller
+                                                                  .getFieldValue(
+                                                                    sheet,
+                                                                    "System ID",
+                                                                  ),
+                                                          "uom": controller
+                                                              .getFieldValue(
+                                                                sheet,
+                                                                "UOM",
+                                                              ),
+                                                          "packageName": controller
+                                                              .getFieldValue(
+                                                                sheet,
+                                                                "Package Name",
+                                                              ),
+                                                          "pboqName": controller
+                                                              .getFieldValue(
+                                                                sheet,
+                                                                "PBOQ",
+                                                              ),
+                                                        },
+                                                      );
+                                                    },
+                                                    child: Text(
+                                                      "$col: ${controller.getFieldValue(sheet, col)}",
+                                                      style: AppStyle
+                                                          .labelPrimaryPoppinsBlack
+                                                          .responsive
+                                                          .copyWith(
+                                                            fontSize: 10,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                          ],
                                         ),
                                         Row(
                                           children: [
@@ -266,8 +350,8 @@ class AccScreenView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           );
                         },
                       ),
@@ -279,259 +363,11 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
-  // ────── SORT BUTTON (UNCHANGED) ──────
-  Widget _buildSortButton(AccController controller) {
-    return Obx(
-      () => Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.grey),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: IconButton(
-          icon: Icon(
-            controller.isAscending.value
-                ? Icons.arrow_upward
-                : Icons.arrow_downward,
-            color: AppColors.primary,
-          ),
-          onPressed: controller.toggleSorting,
-          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-          constraints: const BoxConstraints(),
-        ),
-      ),
-    );
+  // Helper: Format Date
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }
 
-  // ────── FILTER BUTTON (UNCHANGED) ──────
-  Widget _buildFilterButton(BuildContext context, AccController controller) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.filter_list, color: AppColors.primary),
-        onPressed: () => _showFilterDialog(context, controller),
-        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
-        constraints: const BoxConstraints(),
-      ),
-    );
-  }
-
-  // ────── FILTER DIALOG (UPDATED WITH 6 DROPDOWNS) ──────
-  void _showFilterDialog(BuildContext context, AccController controller) {
-    String? tempPackage = controller.selectedPackageFilter.value;
-    String? tempCategory = controller.selectedCategoryFilter.value;
-    String? tempPriority = controller.selectedPriorityFilter.value;
-    String? tempMilestone = controller.selectedMilestoneFilter.value;
-    String? tempRole = controller.selectedRoleFilter.value;
-    String? tempKeyDelay = controller.selectedKeyDelayFilter.value;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                Container(
-                  width: double.infinity,
-                  padding: ResponsiveHelper.paddingSymmetric(
-                    vertical: 20,
-                    horizontal: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(ResponsiveHelper.spacing(20)),
-                    ),
-                  ),
-                  child: Text(
-                    'Filter ACC',
-                    style: AppStyle.heading1PoppinsWhite.responsive,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // 1. Package Name
-                _filterDropdown(
-                  label: 'Package Name',
-                  items: controller.packageNames,
-                  selected: tempPackage,
-                  onChanged: (v) => setState(() => tempPackage = v),
-                  icon: Icons.business,
-                ),
-
-                // 2. Category
-                _filterDropdown(
-                  label: 'Category',
-                  items: controller.categoryNames,
-                  selected: tempCategory,
-                  onChanged: (v) => setState(() => tempCategory = v),
-                  icon: Icons.category,
-                ),
-
-                // 3. Priority
-                _filterDropdown(
-                  label: 'Priority',
-                  items: controller.priorityNames,
-                  selected: tempPriority,
-                  onChanged: (v) => setState(() => tempPriority = v),
-                  icon: Icons.flag,
-                ),
-
-                // 4. Affected Milestone
-                _filterDropdown(
-                  label: 'Affected Milestone',
-                  items: controller.milestoneNames,
-                  selected: tempMilestone,
-                  onChanged: (v) => setState(() => tempMilestone = v),
-                  icon: Icons.military_tech,
-                ),
-
-                // 5. Role
-                _filterDropdown(
-                  label: 'Role',
-                  items: controller.roleNames,
-                  selected: tempRole,
-                  onChanged: (v) => setState(() => tempRole = v),
-                  icon: Icons.person,
-                ),
-
-                // 6. Key Delay Events
-                _filterDropdown(
-                  label: 'Key Delay Events',
-                  items: controller.keyDelayOptions,
-                  selected: tempKeyDelay,
-                  onChanged: (v) => setState(() => tempKeyDelay = v),
-                  icon: Icons.event,
-                ),
-
-                // Buttons
-                Padding(
-                  padding: ResponsiveHelper.paddingSymmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: ResponsiveHelper.paddingSymmetric(
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                ResponsiveHelper.spacing(10),
-                              ),
-                            ),
-                          ),
-                          onPressed: () {
-                            controller.clearFilters();
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            'Clear',
-                            style: AppStyle.labelPrimaryPoppinsBlack.responsive,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: ResponsiveHelper.spacing(16)),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: ResponsiveHelper.paddingSymmetric(
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                ResponsiveHelper.spacing(10),
-                              ),
-                            ),
-                          ),
-                          onPressed: () {
-                            controller.selectedPackageFilter.value =
-                                tempPackage;
-                            controller.selectedCategoryFilter.value =
-                                tempCategory;
-                            controller.selectedPriorityFilter.value =
-                                tempPriority;
-                            controller.selectedMilestoneFilter.value =
-                                tempMilestone;
-                            controller.selectedRoleFilter.value = tempRole;
-                            controller.selectedKeyDelayFilter.value =
-                                tempKeyDelay;
-                            controller.applyFilters();
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            'Apply',
-                            style: AppStyle.labelPrimaryPoppinsWhite.responsive,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ────── REUSABLE DROPDOWN (ADDED) ──────
-  Widget _filterDropdown({
-    required String label,
-    required List<String> items,
-    required String? selected,
-    required ValueChanged<String?> onChanged,
-    required IconData icon,
-  }) {
-    return Padding(
-      padding: ResponsiveHelper.paddingSymmetric(horizontal: 16, vertical: 6),
-      child: DropdownSearch<String>(
-        popupProps: const PopupProps.menu(
-          showSearchBox: true,
-          searchFieldProps: TextFieldProps(
-            decoration: InputDecoration(
-              labelText: 'Search',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.search, color: AppColors.primary),
-            ),
-          ),
-        ),
-        items: items,
-        dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(
-            labelText: label,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-              borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(8)),
-            ),
-            prefixIcon: Icon(icon, color: AppColors.primary),
-          ),
-        ),
-        onChanged: onChanged,
-        selectedItem: selected,
-      ),
-    );
-  }
-
-  // ────── SEARCH FIELD (UNCHANGED) ──────
   TextFormField _buildSearchField(AccController controller) {
     return TextFormField(
       controller: controller.searchController,
@@ -544,15 +380,14 @@ class AccScreenView extends StatelessWidget {
           vertical: 12,
         ),
       ),
-      onChanged: controller.searchIssues,
+      onChanged: controller.searchSurveys,
     );
   }
 
-  // ────── SHIMMER (UNCHANGED) ──────
   Widget _buildShimmerEffect(BuildContext context) {
     return ListView.builder(
       padding: ResponsiveHelper.padding(16),
-      itemCount: 5,
+      itemCount: 5, // Show 5 shimmer cards
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -565,6 +400,9 @@ class AccScreenView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
+                border: Border(
+                  left: BorderSide(color: AppColors.primary, width: 5),
+                ),
               ),
               child: Padding(
                 padding: ResponsiveHelper.padding(16),
@@ -573,8 +411,33 @@ class AccScreenView extends StatelessWidget {
                     _buildShimmerRow(),
                     SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
                     _buildShimmerRow(),
+                    SizedBox(height: ResponsiveHelper.screenHeight * 0.002),
+                    _buildShimmerRow(),
                     SizedBox(height: ResponsiveHelper.screenHeight * 0.01),
                     Divider(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: ResponsiveHelper.screenWidth * 0.05),
+                        Expanded(
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -597,7 +460,6 @@ class AccScreenView extends StatelessWidget {
     );
   }
 
-  // ────── DETAIL ROW (UNCHANGED) ──────
   Widget _buildDetailRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,31 +468,59 @@ class AccScreenView extends StatelessWidget {
           width: 130,
           child: Text(
             label,
-            style: AppStyle.reportCardTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
+            style: AppStyle.reportCardTitle.responsive.copyWith(fontSize: 13),
           ),
         ),
         SizedBox(width: 8),
-        Text(
-          ': ',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppStyle.reportCardSubTitle,
-        ),
+        Text(': ', style: AppStyle.reportCardSubTitle),
         Expanded(
-          child: Text(
-            value,
-            style: AppStyle.reportCardSubTitle.responsive.copyWith(
-              fontSize: ResponsiveHelper.getResponsiveFontSize(13),
-            ),
-          ),
+          child:
+              value.contains(("jpg")) ||
+                  value.contains(("jpeg")) ||
+                  value.contains(("png"))
+              ? Padding(
+                  padding: EdgeInsets.only(left: ResponsiveHelper.spacing(5)),
+                  child: Wrap(
+                    spacing: ResponsiveHelper.spacing(
+                      5,
+                    ), // horizontal space between icons
+                    runSpacing: ResponsiveHelper.spacing(
+                      5,
+                    ), // vertical space between lines
+                    alignment: WrapAlignment
+                        .start, // same as your centerStart behavior
+                    children: List.generate(1, (index) {
+                      final fileName =
+                          value +
+                          DateTime.now()
+                              .toString()
+                              .split('/')
+                              .last
+                              .split('?')
+                              .first;
+                      return GestureDetector(
+                        onTap: () async {
+                          await _downloadImage(value, fileName);
+                          print("Download ${value}");
+                        },
+                        child: Chip(
+                          label: Icon(Icons.download, color: AppColors.primary),
+                        ),
+                      );
+                    }),
+                  ),
+                )
+              : Text(
+                  value,
+                  style: AppStyle.reportCardSubTitle.responsive.copyWith(
+                    fontSize: ResponsiveHelper.getResponsiveFontSize(13),
+                  ),
+                ),
         ),
       ],
     );
   }
 
-  // ────── APP BAR (UNCHANGED) ──────
   AppBar _buildAppBar() {
     return AppBar(
       iconTheme: const IconThemeData(color: Colors.black),
@@ -676,6 +566,446 @@ class AccScreenView extends StatelessWidget {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0),
         child: Divider(color: Colors.grey.withOpacity(0.5), height: 0),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context, AccController controller) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.filter_list, color: AppColors.primary),
+        onPressed: () => _showFilterDialog(context),
+        padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  void _showFilterDialog(BuildContext context) {
+    final AccController controller = Get.put(AccController());
+    final zoneController = Get.find<ZoneController>();
+
+    String? tempZone = controller.selectedZone.value.isEmpty
+        ? null
+        : controller.selectedZone.value;
+
+    // Initialize temp dates
+    controller.tempStartDate = controller.selectedStartDate.value.isNotEmpty
+        ? DateTime.tryParse(controller.selectedStartDate.value)
+        : null;
+    controller.tempEndDate = controller.selectedEndDate.value.isNotEmpty
+        ? DateTime.tryParse(controller.selectedEndDate.value)
+        : null;
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveHelper.spacing(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: ResponsiveHelper.paddingSymmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.defaultBlack,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(ResponsiveHelper.spacing(20)),
+                  ),
+                ),
+                child: Text(
+                  'Filters',
+                  style: AppStyle.heading1PoppinsWhite.responsive,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: ResponsiveHelper.paddingSymmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    children: [
+                      _filterDropdownWithIcon(
+                        label: 'Zone',
+                        items: zoneController.zoneNames,
+                        selected: tempZone,
+                        onChanged: (v) => setState(() => tempZone = v),
+                        icon: Icons.location_on,
+                      ),
+                      const SizedBox(height: 16),
+                      // DATE RANGE PICKER
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.grey.withOpacity(0.5),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Date Range",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            InkWell(
+                              onTap: () async {
+                                final picked = await showDateRangePicker(
+                                  context: ctx,
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365),
+                                  ),
+                                  initialDateRange:
+                                      controller.tempStartDate != null &&
+                                          controller.tempEndDate != null
+                                      ? DateTimeRange(
+                                          start: controller.tempStartDate!,
+                                          end: controller.tempEndDate!,
+                                        )
+                                      : null,
+                                  builder: (context, child) => Theme(
+                                    data: ThemeData.light().copyWith(
+                                      colorScheme: const ColorScheme.light(
+                                        primary: AppColors.primary,
+                                      ),
+                                    ),
+                                    child: child!,
+                                  ),
+                                );
+                                if (picked != null) {
+                                  final daysDifference = picked.end
+                                      .difference(picked.start)
+                                      .inDays;
+                                  if (daysDifference > 7) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Date range cannot exceed 7 days',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else {
+                                    controller.tempStartDate = picked.start;
+                                    controller.tempEndDate = picked.end;
+                                    setState(() {});
+                                  }
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.date_range,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        controller.tempStartDate == null
+                                            ? "Select Date Range"
+                                            : "${_formatDate(controller.tempStartDate!)} → ${_formatDate(controller.tempEndDate!)}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color:
+                                              controller.tempStartDate == null
+                                              ? Colors.grey[600]
+                                              : Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    if (controller.tempStartDate != null)
+                                      InkWell(
+                                        onTap: () {
+                                          controller.tempStartDate = null;
+                                          controller.tempEndDate = null;
+                                          setState(() {});
+                                        },
+                                        child: const Icon(
+                                          Icons.clear,
+                                          size: 20,
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: AppButtonStyles.outlinedMediumBlack(),
+                        onPressed: () {
+                          controller.clearFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Clear',
+                          style: AppStyle.labelPrimaryPoppinsBlack.responsive,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveHelper.spacing(16)),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: AppButtonStyles.elevatedMediumBlack(),
+                        onPressed: () {
+                          controller.selectedZone.value = tempZone ?? '';
+                          if (controller.tempStartDate != null &&
+                              controller.tempEndDate != null) {
+                            controller.selectedStartDate.value =
+                                "${controller.tempStartDate!.year}-${controller.tempStartDate!.month.toString().padLeft(2, '0')}-${controller.tempStartDate!.day.toString().padLeft(2, '0')}";
+                            controller.selectedEndDate.value =
+                                "${controller.tempEndDate!.year}-${controller.tempEndDate!.month.toString().padLeft(2, '0')}-${controller.tempEndDate!.day.toString().padLeft(2, '0')}";
+                          } else {
+                            controller.selectedStartDate.value = '';
+                            controller.selectedEndDate.value = '';
+                          }
+                          controller.fetchWFUList(
+                            context: context,
+                            reset: true,
+                          );
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Apply',
+                          style: AppStyle.labelPrimaryPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _filterDropdownWithIcon({
+    required String label,
+    required List<String> items,
+    required String? selected,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+  }) {
+    final List<String> fullList = ['', ...items];
+    return Padding(
+      padding: ResponsiveHelper.paddingSymmetric(vertical: 6),
+      child: DropdownSearch<String>(
+        popupProps: const PopupProps.menu(
+          showSearchBox: true,
+          showSelectedItems: true,
+        ),
+        items: fullList,
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+          ),
+        ),
+        onChanged: onChanged,
+        selectedItem: selected ?? '',
+        itemAsString: (s) => s.isEmpty ? 'All' : s,
+      ),
+    );
+  }
+
+  Future<bool> _requestImageDownloadPermission() async {
+    if (!Platform.isAndroid) return true;
+
+    final deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+
+    Permission permission;
+    if (androidInfo.version.sdkInt >= 33) {
+      // Android 13+ → Use Photos permission for images
+      permission = Permission.photos;
+    } else {
+      // Older Android → Use storage
+      permission = Permission.storage;
+    }
+
+    var status = await permission.status;
+
+    if (status.isDenied) {
+      status = await permission.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      // Fluttertoast.showToast(
+      //   msg: "Please allow photos/storage access in Settings → Apps → Your App",
+      //   toastLength: Toast.LENGTH_LONG,
+      // );
+      await openAppSettings();
+      return false;
+    }
+
+    return status.isGranted;
+  }
+
+  Future<void> _downloadImage(String url, String originalFileName) async {
+    try {
+      // Request permission
+      if (!await _requestImageDownloadPermission()) {
+        AppSnackbarStyles.showError(
+          title: "Permission Denied",
+          message: "Cannot download image without storage permission",
+        );
+        return;
+      }
+
+      // Get directory (preferably Downloads)
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.existsSync()) {
+          directory = await getExternalStorageDirectory();
+        }
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
+        AppSnackbarStyles.showError(
+          title: "Error",
+          message: "Cannot access storage",
+        );
+        return;
+      }
+
+      // Create a clean and unique filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final dateFormatted = DateFormat(
+        'yyyyMMdd_HHmmss',
+      ).format(DateTime.now());
+
+      // Extract extension safely
+      String extension = '.jpg'; // default
+      final uri = Uri.tryParse(url);
+      if (uri != null && uri.pathSegments.isNotEmpty) {
+        final lastSegment = uri.pathSegments.last;
+        final dotIndex = lastSegment.lastIndexOf('.');
+        if (dotIndex != -1 && dotIndex < lastSegment.length - 1) {
+          extension = lastSegment.substring(dotIndex); // includes the dot
+          if (![
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+          ].contains(extension.toLowerCase())) {
+            extension = '.jpg'; // fallback
+          }
+        }
+      }
+
+      // Final filename: IMG_20251122_153045_123.jpg
+      final fileName = 'IMG_${dateFormatted}_$timestamp$extension';
+      final savePath = "${directory.path}/$fileName";
+
+      final dio = Dio();
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            final progress = (received / total * 100).toStringAsFixed(0);
+            Fluttertoast.showToast(
+              msg: "Downloading: $progress%",
+              toastLength: Toast.LENGTH_SHORT,
+            );
+          }
+        },
+      );
+
+      final file = File(savePath);
+      if (await file.exists() && await file.length() > 0) {
+        AppSnackbarStyles.showSuccess(
+          title: "Success",
+          message: "Image saved as $fileName",
+        );
+      } else {
+        throw Exception("File is empty or not created");
+      }
+    } catch (e) {
+      debugPrint("Download error: $e");
+      AppSnackbarStyles.showError(
+        title: "Failed",
+        message: "Could not download image",
+      );
+    }
+  }
+
+  Widget _buildSortButton(AccController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          icon: Icon(
+            controller.isAscending.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            color: AppColors.primary,
+          ),
+          onPressed: controller.toggleSorting,
+          padding: EdgeInsets.all(ResponsiveHelper.spacing(8)),
+          constraints: const BoxConstraints(),
+        ),
       ),
     );
   }

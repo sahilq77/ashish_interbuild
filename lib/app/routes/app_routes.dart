@@ -154,7 +154,7 @@ class AppRoutes {
       '/work-front-update-detail-list';
 
   static const String workFrontUpdateDashboard = '/work-front-update-dashboard';
-    static const String forgotPassword = '/forgot-password';
+  static const String forgotPassword = '/forgot-password';
 
   // ──────────────────────────────────────────────────────────────
   //  Inside your AppRoutes class (replace the whole `routes` list)
@@ -396,7 +396,7 @@ class AppRoutes {
     GetPage(
       name: accScreenList,
       page: () => const AccScreenView(),
-      binding: AccBinding(),
+      bindings: [AccBinding(), ZoneBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
@@ -508,14 +508,13 @@ class AppRoutes {
       transition: Transition.rightToLeft,
     ),
 
-//====================>FORGOT PASSWORD<=====================
+    //====================>FORGOT PASSWORD<=====================
     GetPage(
       name: forgotPassword,
       page: () => const ForgotPasswordView(),
-      bindings:[ForgotPasswordBinding()] ,
+      bindings: [ForgotPasswordBinding()],
       transition: Transition.rightToLeft,
     ),
-    
   ];
 }
 

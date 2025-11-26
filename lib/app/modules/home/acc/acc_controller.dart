@@ -1,246 +1,299 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:ashishinterbuild/app/data/models/acc/acc_model.dart';
+import 'package:ashishinterbuild/app/data/models/acc/get_acc_list_response.dart';
+import 'package:ashishinterbuild/app/data/network/exceptions.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AccController extends GetxController {
-  var isLoading = true.obs;
-  var accList = <AccModel>[].obs;
-  final searchController = TextEditingController();
-  var expandedIndex = (-1).obs;
+  final zoneController = Get.find<ZoneController>();
+  final RxList<AccItem> wfuList = <AccItem>[].obs;
+  final RxList<AccItem> filteredMeasurementSheets = <AccItem>[].obs;
+  final RxBool isLoading = true.obs;
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasMoreData = true.obs;
+  final RxString errorMessage = ''.obs;
+  final RxInt expandedIndex = (-1).obs;
+  final TextEditingController searchController = TextEditingController();
+  final RxInt start = 0.obs;
+  final int length = 10;
+  final RxString _search = ''.obs;
+  final RxString _orderBy = ''.obs;
+  final RxBool isAscending = true.obs;
+  final RxnString selectedPackageFilter = RxnString(null);
+  Timer? _debounce;
+  RxInt projectId = 0.obs;
+  RxInt packageId = 0.obs;
+  final RxList<String> frontDisplayColumns = <String>[].obs;
+  final RxList<String> buttonDisplayColumns = <String>[].obs;
 
-  // ────── FILTERS ──────
-  var selectedCategoryFilter = Rxn<String>();
-  var selectedRoleFilter = Rxn<String>();
+  // FILTERS
+  final RxString selectedZone = ''.obs;
+  final RxString selectedStartDate = ''.obs; // YYYY-MM-DD
+  final RxString selectedEndDate = ''.obs; // YYYY-MM-DD
 
-  // ────── NEW FILTERS (ADDED) ──────
-  var selectedPackageFilter = Rxn<String>();
-  var selectedPriorityFilter = Rxn<String>();
-  var selectedMilestoneFilter = Rxn<String>();
-  var selectedKeyDelayFilter = Rxn<String>(); // "Yes" / "No"
+  // Temporary for dialog (not applied until "Apply")
+  DateTime? tempStartDate;
+  DateTime? tempEndDate;
 
-  // ────── ORIGINAL LIST ──────
-  var _originalList = <AccModel>[].obs;
-
-  // ────── SORTING ──────
-  var isAscending = true.obs;
-  var sortBy = 'Sr.No'.obs;
+  final Rx<AppColumnDetails> appColumnDetails = AppColumnDetails(
+    columns: [],
+    frontDisplayColumns: [],
+    frontSecondaryDisplayColumns: [],
+    buttonDisplayColumn: [],
+  ).obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchAcc();
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      projectId.value = args["project_id"] ?? 0;
+      packageId.value = args["package_id"] ?? 0;
+    }
+
+    log("ACC LIST → projectId=${projectId.value} packageId=${packageId.value}");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        zoneController.fetchZones(context: Get.context!);
+        fetchWFUList(reset: true, context: Get.context!);
+      }
+    });
   }
 
-  // ────────────────────── FETCH DATA ──────────────────────
-  Future<void> fetchAcc() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
+  @override
+  void onClose() {
+    searchController.dispose();
+    _debounce?.cancel();
+    super.onClose();
+  }
 
-    var data = [
-      {
-        'Sr.No': 1,
-        'PckageName': 'Silver',
-        'ACC Category': 'Design Approval',
-        'Brief Detail about Issue': 'Tetting',
-        'Affected Milestone': 'Milestone One1',
-        'Key Delay Events': 'Yes',
-        'Priority': 'Low',
-        'Issue Open Date': '19-10-2025',
-        'overdue': 0,
-        'Delay': '-',
-        'Issue close Date': '-',
-        'Role': 'Production PMS PC',
-        'Attachment': 'No Document',
-        'Status Update': 'Pending',
-      },
-      {
-        'Sr.No': 2,
-        'PckageName': 'Platinum',
-        'ACC Category': 'Material Supply',
-        'Brief Detail about Issue': 'Steel delayed',
-        'Affected Milestone': 'Milestone Two',
-        'Key Delay Events': 'No',
-        'Priority': 'High',
-        'Issue Open Date': '15-10-2025',
-        'overdue': 5,
-        'Delay': '5 days',
-        'Issue close Date': '-',
-        'Role': 'Vendor',
-        'Attachment': 'Yes',
-        'Status Update': 'In Progress',
-      },
-      {
-        'Sr.No': 3,
-        'PckageName': 'Gold',
-        'ACC Category': 'Design Approval',
-        'Brief Detail about Issue': 'Drawing revision',
-        'Affected Milestone': 'Milestone One1',
-        'Key Delay Events': 'Yes',
-        'Priority': 'Medium',
-        'Issue Open Date': '10-10-2025',
-        'overdue': 10,
-        'Delay': '10 days',
-        'Issue close Date': '20-10-2025',
-        'Role': 'Architect',
-        'Attachment': 'Yes',
-        'Status Update': 'Closed',
-      },
+  String _buildQueryParams({bool includePagination = true}) {
+    final parts = <String>[
+      'project_id=${26}',
+      'filter_package=${packageId.value == 0 ? "" : packageId.value}',
+      'received_date =${''}',
+      // 'filter_revised_end_date=${selectedEndDate.value}',
     ];
 
-    final List<AccModel> list = data.map((e) => AccModel.fromMap(e)).toList();
-    _originalList.assignAll(list);
-    accList.assignAll(list);
-    isLoading.value = false;
+    if (selectedZone.value.isNotEmpty) {
+      parts.add('filter_zone=${Uri.encodeComponent(selectedZone.value)}');
+    }
 
-    _applySort();
+    if (_search.value.isNotEmpty) {
+      parts.add('search=${Uri.encodeComponent(_search.value)}');
+    }
+
+    parts.add('order_by=${_orderBy.value}');
+    parts.add('order_dir=${isAscending.value ? "asc" : "desc"}');
+
+    if (includePagination) {
+      parts.add('start=${start.value}');
+      parts.add('length=$length');
+    }
+
+    return parts.isNotEmpty ? '?${parts.join('&')}' : '';
   }
 
-  // ────────────────────── SORTING HELPERS ──────────────────────
-  void toggleSorting() {
-    isAscending.value = !isAscending.value;
-    _applySort();
-  }
-
-  void setSortBy(String field) {
-    if (sortBy.value == field) {
-      toggleSorting();
+  Future<void> fetchWFUList({
+    required BuildContext context,
+    bool reset = false,
+    bool isPagination = false,
+  }) async {
+    if (reset) {
+      start.value = 0;
+      wfuList.clear();
+      hasMoreData.value = true;
+    }
+    if (!hasMoreData.value && !reset) return;
+    if (isPagination) {
+      isLoadingMore.value = true;
     } else {
-      sortBy.value = field;
-      isAscending.value = true;
-      _applySort();
+      isLoading.value = true;
     }
-  }
-
-  void _applySort() {
-    final List<AccModel> temp = List.from(accList);
-
-    temp.sort((a, b) {
-      int compare = 0;
-
-      switch (sortBy.value) {
-        case 'Sr.No':
-          compare = a.srNo.compareTo(b.srNo);
-          break;
-        case 'ACC Category':
-          compare = a.accCategory.compareTo(b.accCategory);
-          break;
-        case 'Priority':
-          const order = {'High': 0, 'Medium': 1, 'Low': 2};
-          int aVal = order[a.priority] ?? 3;
-          int bVal = order[b.priority] ?? 3;
-          compare = aVal.compareTo(bVal);
-          break;
-        case 'Issue Open Date':
-          compare = _parseDate(a.issueOpenDate).compareTo(_parseDate(b.issueOpenDate));
-          break;
-        case 'overdue':
-          compare = a.overdue.compareTo(b.overdue);
-          break;
-        default:
-          compare = a.srNo.compareTo(b.srNo);
-      }
-
-      return isAscending.value ? compare : -compare;
-    });
-
-    accList.assignAll(temp);
-  }
-
-  DateTime _parseDate(String dateStr) {
+    errorMessage.value = '';
     try {
-      final parts = dateStr.split('-');
-      return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+      final String query = _buildQueryParams(includePagination: true);
+      final String endpoint = Networkutility.getACCList + query;
+      final responseList = await Networkcall().getMethod(
+        Networkutility.getACCListApi,
+        endpoint,
+        context,
+      );
+      final response = responseList?.first as GetAccListResponse?;
+
+      if (response != null && response.status) {
+        final data = response.data.data;
+        if (frontDisplayColumns.isEmpty) {
+          frontDisplayColumns.assignAll(
+            response.data.appColumnDetails.frontDisplayColumns,
+          );
+          buttonDisplayColumns.assignAll(
+            response.data.appColumnDetails.buttonDisplayColumn,
+          );
+          appColumnDetails.value = response.data.appColumnDetails;
+        }
+        if (data.isEmpty) {
+          hasMoreData.value = false;
+          if (reset || start.value == 0) {
+            _showError('No data available');
+          }
+        } else {
+          if (reset) {
+            wfuList.assignAll(data);
+          } else {
+            wfuList.addAll(data);
+          }
+          _applyClientFilters();
+          start.value += length;
+
+          if (data.length < length) {
+            hasMoreData.value = false;
+          }
+        }
+      } else {
+        if (reset || start.value == 0) {
+          _showError(response?.message ?? 'No data');
+        } else {
+          hasMoreData.value = false;
+        }
+      }
+    } on NoInternetException catch (e) {
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
+    } on TimeoutException catch (e) {
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
+    } on HttpException catch (e) {
+      if (reset || start.value == 0) {
+        _showError('${e.message} (Code: ${e.statusCode})');
+      }
+      hasMoreData.value = false;
+    } on ParseException catch (e) {
+      if (reset || start.value == 0) {
+        _showError(e.message);
+      }
+      hasMoreData.value = false;
     } catch (e) {
-      return DateTime(1970);
+      if (reset || start.value == 0) {
+        _showError('Unexpected error: $e');
+      }
+      hasMoreData.value = false;
+    } finally {
+      isLoading.value = false;
+      isLoadingMore.value = false;
     }
   }
 
-  // ────────────────────── DROPDOWN LISTS (ADDED) ──────────────────────
-  List<String> get packageNames =>
-      _originalList.map((e) => e.packageName).toSet().toList()..sort();
+  void _showError(String msg) {
+    errorMessage.value = msg;
+    AppSnackbarStyles.showError(title: 'Error', message: msg);
+  }
 
-  List<String> get categoryNames =>
-      _originalList.map((e) => e.accCategory).toSet().toList()..sort();
+  Future<void> refreshData() async {
+    searchController.clear();
+    _search.value = '';
+    _orderBy.value = '';
+    isAscending.value = true;
+    selectedPackageFilter.value = null;
+    selectedZone.value = '';
+    selectedStartDate.value = '';
+    selectedEndDate.value = '';
+    tempStartDate = null;
+    tempEndDate = null;
+    start.value = 0;
+    hasMoreData.value = true;
+    filteredMeasurementSheets.clear();
+    await fetchWFUList(reset: true, context: Get.context!);
+  }
 
-  List<String> get priorityNames =>
-      _originalList.map((e) => e.priority).toSet().toList()..sort();
+  void loadMore(BuildContext context) {
+    if (!isLoadingMore.value && hasMoreData.value) {
+      fetchWFUList(context: context, isPagination: true);
+    }
+  }
 
-  List<String> get milestoneNames =>
-      _originalList.map((e) => e.affectedMilestone).toSet().toList()..sort();
+  void toggleExpanded(int index) {
+    if (expandedIndex.value == index) {
+      expandedIndex.value = -1;
+    } else {
+      expandedIndex.value = index;
+    }
+  }
 
-  List<String> get roleNames =>
-      _originalList.map((e) => e.role).toSet().toList()..sort();
+  List<String> getPackageNames() {
+    return wfuList.map((e) => e.getField('Package Name')).toSet().toList();
+  }
 
-  List<String> get keyDelayOptions => ['Yes', 'No'];
+  String getFieldValue(AccItem item, String columnName) {
+    return item.getField(columnName).replaceAll(RegExp(r'<[^>]*>'), '').trim();
+  }
 
-  // ────────────────────── FILTER HELPERS (UPDATED) ──────────────────────
+  List<String> getFrontDisplayColumns() {
+    return appColumnDetails.value.frontDisplayColumns.toSet().toList();
+  }
+
+  List<String> getFrontSecondaryDisplayColumns() {
+    return appColumnDetails.value.frontSecondaryDisplayColumns.toSet().toList();
+  }
+
+  List<String> getButtonDisplayColumns() {
+    return appColumnDetails.value.buttonDisplayColumn.toSet().toList();
+  }
+
   void applyFilters() {
-    final cat = selectedCategoryFilter.value;
-    final role = selectedRoleFilter.value;
-    final pkg = selectedPackageFilter.value;
-    final pri = selectedPriorityFilter.value;
-    final mile = selectedMilestoneFilter.value;
-    final key = selectedKeyDelayFilter.value;
+    _applyClientFilters();
+  }
 
-    final filtered = _originalList.where((issue) {
-      final catOk = cat == null || issue.accCategory == cat;
-      final roleOk = role == null || issue.role == role;
-      final pkgOk = pkg == null || issue.packageName == pkg;
-      final priOk = pri == null || issue.priority == pri;
-      final mileOk = mile == null || issue.affectedMilestone == mile;
-      final keyOk = key == null ||
-          (key == 'Yes' ? issue.keyDelayEvents : !issue.keyDelayEvents);
-      return catOk && roleOk && pkgOk && priOk && mileOk && keyOk;
-    }).toList();
-
-    accList.assignAll(filtered);
-    _applySort();
+  void _applyClientFilters() {
+    var list = wfuList.toList();
+    if (selectedPackageFilter.value != null &&
+        selectedPackageFilter.value!.isNotEmpty) {
+      list = list
+          .where(
+            (e) => e.getField('Package Name') == selectedPackageFilter.value,
+          )
+          .toList();
+    }
+    filteredMeasurementSheets.assignAll(list);
   }
 
   void clearFilters() {
-    selectedCategoryFilter.value = null;
-    selectedRoleFilter.value = null;
     selectedPackageFilter.value = null;
-    selectedPriorityFilter.value = null;
-    selectedMilestoneFilter.value = null;
-    selectedKeyDelayFilter.value = null;
-
-    accList.assignAll(_originalList);
-    _applySort();
+    selectedZone.value = '';
+    selectedStartDate.value = '';
+    selectedEndDate.value = '';
+    tempStartDate = null;
+    tempEndDate = null;
+    searchController.clear();
+    _search.value = '';
+    fetchWFUList(context: Get.context!, reset: true);
   }
 
-  // ────────────────────── SEARCH (UNCHANGED) ──────────────────────
-  void searchIssues(String query) {
-    final base = (selectedCategoryFilter.value != null ||
-            selectedRoleFilter.value != null ||
-            selectedPackageFilter.value != null ||
-            selectedPriorityFilter.value != null ||
-            selectedMilestoneFilter.value != null ||
-            selectedKeyDelayFilter.value != null)
-        ? _originalList
-        : _originalList;
-
-    List<AccModel> result = base;
-
-    if (query.isNotEmpty) {
-      result = result.where((issue) {
-        return issue.accCategory.toLowerCase().contains(query.toLowerCase()) ||
-            issue.briefDetail.toLowerCase().contains(query.toLowerCase()) ||
-            issue.affectedMilestone.toLowerCase().contains(query.toLowerCase()) ||
-            issue.packageName.toLowerCase().contains(query.toLowerCase()) ||
-            issue.role.toLowerCase().contains(query.toLowerCase()) ||
-            issue.priority.toLowerCase().contains(query.toLowerCase());
-      }).toList();
-    }
-
-    accList.assignAll(result);
-    _applySort();
+  void toggleSorting() {
+    isAscending.value = !isAscending.value;
+    _orderBy.value = isAscending.value ? 'desc' : 'asc';
+    fetchWFUList(reset: true, context: Get.context!);
   }
 
-  // ────────────────────── REFRESH ──────────────────────
-  Future<void> refreshData() async => await fetchAcc();
-
-  void toggleExpanded(int index) {
-    expandedIndex.value = expandedIndex.value == index ? -1 : index;
+  void searchSurveys(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      final trimmed = query.trim();
+      if (_search.value != trimmed) {
+        _search.value = trimmed;
+        fetchWFUList(reset: true, context: Get.context!);
+      }
+    });
   }
 }

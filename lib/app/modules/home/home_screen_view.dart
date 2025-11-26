@@ -341,7 +341,7 @@ class _HomeViewState extends State<HomeView> {
     ),
     GridItem(
       title: 'Access and Manage (ACC)',
-      route: AppRoutes.accProjects,
+      route: AppRoutes.accScreenList,
       gradientColor: Color.fromARGB(255, 253, 135, 0),
       icon: AppImages.accIcon,
     ),
