@@ -136,11 +136,13 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildAttachmentField(
-                label: 'Attachment',
-                fileName: controller.attachmentFileName.value,
-                onAttachmentPicked: controller.pickAttachment,
-                hint: 'Choose File',
+              Obx(
+                () => _buildAttachmentField(
+                  label: 'Attachment',
+                  fileName: controller.attachmentFileName.value,
+                  onAttachmentPicked: controller.pickAttachment,
+                  hint: 'Choose File',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
@@ -279,6 +281,8 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
     required Function() onAttachmentPicked,
     required String hint,
   }) {
+    print(fileName);
+    TextEditingController fcontroller = TextEditingController(text: fileName);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -288,7 +292,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
           onTap: onAttachmentPicked,
           child: AbsorbPointer(
             child: TextFormField(
-              initialValue: fileName,
+              controller: fcontroller,
               decoration: InputDecoration(
                 hintText: hint,
                 suffixIcon: const Icon(Icons.attach_file),
