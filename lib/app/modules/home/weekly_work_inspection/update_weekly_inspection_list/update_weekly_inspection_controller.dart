@@ -64,6 +64,13 @@ class UpdateWeeklyInspectionController extends GetxController {
   final RxBool isMultiSelectMode = false.obs;
   final RxSet<int> selectedIndices = <int>{}.obs;
   final RxMap<int, List<XFile>> rowImages = <int, List<XFile>>{}.obs;
+
+  // ADDED: Checkbox states for Update & Pending
+  final RxMap<int, bool> rowUpdateChecked =
+      <int, bool>{}.obs; // true = Update checked
+  final RxMap<int, bool> rowPendingChecked =
+      <int, bool>{}.obs; // true = Pending checked
+
   final ImagePicker _picker = ImagePicker();
 
   RxString startDate = "".obs;
@@ -86,8 +93,8 @@ class UpdateWeeklyInspectionController extends GetxController {
       'filter_package=${wiController.packageId.value == 0 ? "" : wiController.packageId.value}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
-      'filter_inspection_from_date=${'2025-11-24'}',
-      'filter_inspection_to_date=${'2025-11-30'}',
+      'filter_inspection_from_date=${'2025-11-17'}',
+      'filter_inspection_to_date=${'2025-11-23'}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
@@ -152,7 +159,6 @@ class UpdateWeeklyInspectionController extends GetxController {
           responseList?.first as GetUpdateWeeklyInspectionListResponse?;
 
       if (response != null && response.status == true) {
-        // FIXED: Correctly get the list of items
         final List<WIRItem> items = response.data.data;
         log("Items $items");
         if (frontDisplayColumns.isEmpty) {
@@ -287,6 +293,8 @@ class UpdateWeeklyInspectionController extends GetxController {
     if (!isMultiSelectMode.value) {
       selectedIndices.clear();
       rowImages.clear();
+      rowUpdateChecked.clear(); // Clear Update checkbox states
+      rowPendingChecked.clear(); // Clear Pending checkbox states
     }
   }
 
@@ -381,61 +389,66 @@ class UpdateWeeklyInspectionController extends GetxController {
         Uri.parse(Networkutility.updateWIR),
       );
 
-      // Add auth header
       if (AppUtility.authToken?.isNotEmpty == true) {
         request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
       }
 
       final now = DateTime.now();
       final formattedDate = DateFormat('yyyy-MM-dd').format(now);
-      final weekNo = getWeekNumber(now).toString(); // You'll need this helper
+      final weekNo = getWeekNumber(now).toString();
       final year = now.year.toString();
 
       for (int i = 0; i < selectedIndices.length; i++) {
-        final index = selectedIndices.elementAt(i);
-        final item = filteredWirItems[index];
+        final int rowIndex = selectedIndices.elementAt(i); // Actual index in l
+        final item = filteredWirItems[rowIndex];
 
         final msId = item.getField('measurement_sheet_id')?.toString() ?? '0';
-        final executedQty = item.getField('MS QTY')?.toString() ?? '0';
+        final executedQty = item.getField('executed_qty')?.toString() ?? '0';
+        final insFromDate =
+            item.getField('inspection_from_date')?.toString() ?? '0';
+        final insToDate =
+            item.getField('inspection_to_date')?.toString() ?? '0';
+        final doprFromDate = item.getField('dpr_from_date')?.toString() ?? '0';
+        final doprToDate = item.getField('dpr_to_date')?.toString() ?? '0';
 
-        // Ensure systemId is clean integer!
         final cleanSystemId = systemId.value
             .replaceAll(RegExp(r'<[^>]*>'), '')
             .trim()
-            .replaceAll(RegExp(r'[^0-9]'), ''); // Extra safety
+            .replaceAll(RegExp(r'[^0-9]'), '');
 
         request.fields['ms_rows[$i][project_id]'] = wiController.projectId
             .toString();
         request.fields['ms_rows[$i][measurement_sheet_id]'] = msId;
-        request.fields['ms_rows[$i][progress_status]'] = '1';
-        request.fields['ms_rows[$i][pending_status]'] =
-            '0'; // or appropriate value
+
+        // UPDATED: Use checkbox states
+        final bool isUpdate = rowUpdateChecked[rowIndex] ?? false;
+        final bool isPending = rowPendingChecked[rowIndex] ?? false;
+
+        request.fields['ms_rows[$i][progress_status]'] = isUpdate ? '1' : '0';
+        request.fields['ms_rows[$i][pending_status]'] = isPending ? '1' : '0';
+
         request.fields['ms_rows[$i][executed_qty]'] = executedQty;
-        request.fields['ms_rows[$i][dpr_pending_qty]'] =
-            '0'; // adjust logic if needed
-
-        request.fields['ms_rows[$i][dpr_date]'] = formattedDate;
-        request.fields['ms_rows[$i][dpr_from_date]'] = formattedDate;
-        request.fields['ms_rows[$i][dpr_to_date]'] = formattedDate;
-
-        // Optional: inspection dates (set if needed)
-        // request.fields['ms_rows[$i][inspection_from_date]'] = formattedDate;
-        // request.fields['ms_rows[$i][inspection_to_date]'] = formattedDate;
-
-        request.fields['ms_rows[$i][week_no]'] = weekNo;
+        // request.fields['ms_rows[$i][dpr_pending_qty]'] = '0';
+        request.fields['ms_rows[$i][inspection_from_date]'] = "2025-11-24";
+        request.fields['ms_rows[$i][inspection_to_date]'] = "2025-11-30";
+        request.fields['ms_rows[$i][dpr_from_date]'] = doprFromDate;
+        request.fields['ms_rows[$i][dpr_to_date]'] = doprToDate;
+        request.fields['ms_rows[$i][week_no]'] = "W-48";
         request.fields['ms_rows[$i][year]'] = year;
         request.fields['ms_rows[$i][system_id]'] = cleanSystemId;
         request.fields['ms_rows[$i][source_table]'] = sourceName.value;
 
-        // Handle file attachments per row
-        if (rowImages[index] != null && rowImages[index]!.isNotEmpty) {
-          for (int j = 0; j < rowImages[index]!.length; j++) {
-            final file = rowImages[index]![j];
+        // Attach images for this row (if any)
+        if (rowImages[rowIndex] != null && rowImages[rowIndex]!.isNotEmpty) {
+          for (int j = 0; j < rowImages[rowIndex]!.length; j++) {
+            final XFile imageFile = rowImages[rowIndex]![j];
+
             final multipartFile = await http.MultipartFile.fromPath(
-              'ms_rows[$i][attachment][]', // Correct syntax for array of files per row
-              file.path,
-              filename: path.basename(file.path),
+              'ms_rows[$i][attachments][]', // EXACT MATCH with Postman
+              imageFile.path,
+              filename: path.basename(imageFile.path),
             );
+
             request.files.add(multipartFile);
           }
         }
@@ -444,7 +457,24 @@ class UpdateWeeklyInspectionController extends GetxController {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
       log('Batch WIR Update Response: $responseBody');
+      // ===== ADD THIS BLOCK TO LOG THE FULL REQUEST BODY =====
+      log('=== MULTIPART REQUEST DETAILS ===');
+      // Log all text fields
+      log('Fields:');
+      request.fields.forEach((key, value) {
+        log('  $key: $value');
+      });
 
+      // Log all files (with original filename and field name)
+      log('Files:');
+      for (var file in request.files) {
+        final fileName = file.filename ?? 'unknown_filename';
+        final fieldName = file.field;
+        final length = file.length; // content length in bytes
+        log('  Field: $fieldName => File: $fileName (${length} bytes)');
+      }
+      log('=====================================');
+      // =======================================================
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(responseBody);
         if (jsonResponse['status'] == true) {
@@ -457,6 +487,8 @@ class UpdateWeeklyInspectionController extends GetxController {
 
           selectedIndices.clear();
           rowImages.clear();
+          rowUpdateChecked.clear();
+          rowPendingChecked.clear();
           toggleMultiSelectMode(off: true);
           await fetchWirList(reset: true, context: Get.context!);
         } else {
@@ -482,7 +514,6 @@ class UpdateWeeklyInspectionController extends GetxController {
     }
   }
 
-  // Helper: Get ISO week number
   int getWeekNumber(DateTime date) {
     int dayOfYear = int.parse(DateFormat('D').format(date));
     int woy = ((dayOfYear - date.weekday + 10) / 7).floor();

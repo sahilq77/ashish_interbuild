@@ -232,7 +232,7 @@ class _UpdateWeeklyInspectionListState
                                 if (controller.isMultiSelectMode.value &&
                                     controller.getFieldValue(
                                           sheet,
-                                          "execution_status",
+                                          "inspection_disabled",
                                         ) ==
                                         "0") {
                                   controller.toggleItemSelection(index);
@@ -245,7 +245,7 @@ class _UpdateWeeklyInspectionListState
                               onLongPress: () {
                                 if (controller.getFieldValue(
                                       sheet,
-                                      "execution_status",
+                                      "inspection_disabled",
                                     ) ==
                                     "0") {
                                   controller.startMultiSelect(index);
@@ -473,18 +473,41 @@ class _UpdateWeeklyInspectionListState
                                                     Row(
                                                       children: [
                                                         Transform.scale(
-                                                          scale: 1,
+                                                          scale: 1.1,
                                                           child: Checkbox(
-                                                            value: false,
-                                                            onChanged: (val) {
-                                                              controller
-                                                                  .toggleItemSelection(
-                                                                    index,
-                                                                  );
-                                                            },
+                                                            value:
+                                                                controller
+                                                                        .rowUpdateChecked[index] ??
+                                                                    controller.getFieldValue(
+                                                                          sheet,
+                                                                          "progress_status",
+                                                                        ) ==
+                                                                        "1"
+                                                                ? true
+                                                                : false,
                                                             activeColor:
-                                                                AppColors
-                                                                    .primary,
+                                                                AppColors.blue,
+                                                            onChanged:
+                                                                controller.getFieldValue(
+                                                                      sheet,
+                                                                      "inspection_disabled",
+                                                                    ) ==
+                                                                    "0"
+                                                                ? (val) {
+                                                                    controller
+                                                                            .rowUpdateChecked[index] =
+                                                                        val ??
+                                                                        false;
+                                                                    if (val ==
+                                                                        true)
+                                                                      controller
+                                                                              .rowPendingChecked[index] =
+                                                                          false;
+                                                                    controller
+                                                                        .rowUpdateChecked
+                                                                        .refresh();
+                                                                  }
+                                                                : null,
                                                           ),
                                                         ),
                                                         Text(
@@ -501,18 +524,41 @@ class _UpdateWeeklyInspectionListState
                                                     Row(
                                                       children: [
                                                         Transform.scale(
-                                                          scale: 1,
+                                                          scale: 1.1,
                                                           child: Checkbox(
-                                                            value: true,
-                                                            onChanged: (val) {
-                                                              controller
-                                                                  .toggleItemSelection(
-                                                                    index,
-                                                                  );
-                                                            },
+                                                            value:
+                                                                controller
+                                                                        .rowPendingChecked[index] ??
+                                                                    controller.getFieldValue(
+                                                                          sheet,
+                                                                          "pending_status",
+                                                                        ) ==
+                                                                        "1"
+                                                                ? true
+                                                                : false,
                                                             activeColor:
-                                                                AppColors
-                                                                    .primary,
+                                                                AppColors.blue,
+                                                            onChanged:
+                                                                controller.getFieldValue(
+                                                                      sheet,
+                                                                      "inspection_disabled",
+                                                                    ) ==
+                                                                    "0"
+                                                                ? (val) {
+                                                                    controller
+                                                                            .rowPendingChecked[index] =
+                                                                        val ??
+                                                                        false;
+                                                                    if (val ==
+                                                                        true)
+                                                                      controller
+                                                                              .rowUpdateChecked[index] =
+                                                                          false;
+                                                                    controller
+                                                                        .rowPendingChecked
+                                                                        .refresh();
+                                                                  }
+                                                                : null,
                                                           ),
                                                         ),
                                                         Text(
@@ -758,6 +804,7 @@ class _UpdateWeeklyInspectionListState
                     style: AppButtonStyles.elevatedSmallBlack(),
                     onPressed: () {
                       controller.batchUpdateSelectedWIRs();
+                      Navigator.pop(context);
                     },
                     child: Text(
                       'Confirm',
