@@ -1,6 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/milestone/milestone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,14 +14,16 @@ import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class EditAccController extends GetxController {
- 
+   final RxString selectedPackage = ''.obs;
 
-   final RxString package = ''.obs;
-  final RxList<String> packages = <String>['BlueNile Cafe Package', 'Alpha Package'].obs;
+  final RxString selectedProject = ''.obs;
+  // final RxList<String> packages = <String>[
+  //   'BlueNile Cafe Package',
+  //   'Alpha Package',
+  // ].obs;
   final RxString accCategory = ''.obs;
   final RxList<String> accCategories = <String>['Amit', 'Ganesh', 'Sumit'].obs;
-  var attachmentFile = Rxn<PlatformFile>();
-  final RxString attachmentFileName = 'No file chosen'.obs;
+
   final RxString priority = ''.obs;
   final RxList<String> priorities = <String>[
     'Critical',
@@ -43,20 +50,47 @@ class EditAccController extends GetxController {
 
   final RxString role = ''.obs;
   final RxList<String> roles = <String>['Doer 1', 'Doer 2', 'Doer 3'].obs;
+  var attachmentFile = Rxn<PlatformFile>();
+  final RxString attachmentFileName = 'No file chosen'.obs;
 
-  
+  final projectdController = Get.find<ProjectNameDropdownController>();
+  final packageNameController = Get.find<PackageNameController>();
+  final accCategoryController = Get.find<AccCategoryController>();
+  final doerRoleController = Get.find<DoerRoleController>();
+  final milestoneController = Get.find<MilestoneController>();
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        // zoneController.fetchZones(context: Get.context!);
+        projectdController.fetchProjects(context: Get.context!);
+        accCategoryController.fetchAccCategories(context: Get.context!);
+        doerRoleController.fetchDoerRoles(context: Get.context!);
+        milestoneController.fetchMilestones(context: Get.context!);
+      }
+    });
   }
 
   void onAccCategoryChanged(String? value) {
     accCategory.value = value ?? '';
   }
-void onPackageChanged(String? value) {
-    package.value = value ?? '';
+
+  void onProjectChanged(String? value) async {
+    selectedProject.value = value ?? "";
+    final projectId = projectdController.getProjectIdByName(value ?? "");
+    await packageNameController.fetchPackages(
+      context: Get.context!,
+      forceFetch: true,
+      projectId: int.parse(projectId!),
+    );
   }
+
+  void onPackageChanged(String? value) {
+    selectedPackage.value = value ?? '';
+  }
+
   void onPriorityChanged(String? value) {
     priority.value = value ?? '';
   }
@@ -84,6 +118,7 @@ void onPackageChanged(String? value) {
   Future<void> pickAttachment() async {
     await pickFile('attachment', allowMultiple: false);
   }
+
   void submitForm() {
     if (accCategory.value.isEmpty ||
         affectedMilestone.value.isEmpty ||
@@ -114,7 +149,8 @@ void onPackageChanged(String? value) {
     role.value = '';
     attachmentFileName.value = 'No file chosen';
   }
-    Future<bool> _requestStoragePermission() async {
+
+  Future<bool> _requestStoragePermission() async {
     log('Checking storage permissions');
     bool granted = false;
 

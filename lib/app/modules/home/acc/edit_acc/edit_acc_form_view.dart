@@ -1,3 +1,8 @@
+import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/milestone/milestone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/edit_acc/edit_acc_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
@@ -8,9 +13,19 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class EditAccFormView extends StatelessWidget {
+class EditAccFormView extends StatefulWidget {
   const EditAccFormView({super.key});
 
+  @override
+  State<EditAccFormView> createState() => _EditAccFormViewState();
+}
+
+class _EditAccFormViewState extends State<EditAccFormView> {
+  final projectdController = Get.find<ProjectNameDropdownController>();
+  final packageNameController = Get.find<PackageNameController>();
+  final accCategoryController = Get.find<AccCategoryController>();
+  final doerRoleController = Get.find<DoerRoleController>();
+  final milestoneController = Get.find<MilestoneController>();
   @override
   Widget build(BuildContext context) {
     final EditAccController controller = Get.put(EditAccController());
@@ -25,30 +40,47 @@ class EditAccFormView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDropdownField(
-                label: 'Package Name*',
-                value: controller.package.value,
-                items: controller.packages,
-                onChanged: controller.onPackageChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select an Package'
-                    : null,
-                hint: 'Select Package',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Project *',
+                  value: controller.selectedProject.value,
+                  items: projectdController.projectNames,
+                  onChanged: controller.onProjectChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select an Project'
+                      : null,
+                  hint: 'Select Project',
+                ),
+              ),
+              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Package *',
+                  value: controller.selectedPackage.value,
+                  items: packageNameController.packageNames,
+                  onChanged: controller.onPackageChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select an Package'
+                      : null,
+                  hint: 'Select Package',
+                ),
+              ),
+              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              Obx(
+                () => _buildDropdownField(
+                  label: 'ACC Category *',
+                  value: controller.accCategory.value,
+                  items: accCategoryController.accCategoryNames,
+                  onChanged: controller.onAccCategoryChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select an ACC category'
+                      : null,
+                  hint: 'Select Category',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
-                label: 'ACC Category *',
-                value: controller.accCategory.value,
-                items: controller.accCategories,
-                onChanged: controller.onAccCategoryChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select an ACC category'
-                    : null,
-                hint: 'Select Category',
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Priority *',
+                label: 'Priority',
                 value: controller.priority.value,
                 items: controller.priorities,
                 onChanged: controller.onPriorityChanged,
@@ -56,22 +88,24 @@ class EditAccFormView extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
-                label: 'Key Delay Events *',
+                label: 'Key Delay Events',
                 value: controller.keyDelayEvents.value,
                 items: controller.keyDelayOptions,
                 onChanged: controller.onKeyDelayEventsChanged,
                 hint: 'Yes',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Affected Milestone *',
-                value: controller.affectedMilestone.value,
-                items: controller.milestones,
-                onChanged: controller.onAffectedMilestoneChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select an affected milestone'
-                    : null,
-                hint: 'Select Milestone',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Affected Milestone *',
+                  value: controller.affectedMilestone.value,
+                  items: milestoneController.milestoneNames,
+                  onChanged: controller.onAffectedMilestoneChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select an affected milestone'
+                      : null,
+                  hint: 'Select Milestone',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildTextFormField(
@@ -85,21 +119,23 @@ class EditAccFormView extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDateField(
-                label: 'Issue Since Date *',
+                label: 'Issue Open Date *',
                 selectedDate: controller.issueOpenDate.value,
                 onDateChanged: controller.onIssueOpenDateChanged,
                 hint: 'Enter Date',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Role *',
-                value: controller.role.value,
-                items: controller.roles,
-                onChanged: controller.onRoleChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a role'
-                    : null,
-                hint: 'Select Doer',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Role *',
+                  value: controller.role.value,
+                  items: doerRoleController.doerRoleNames,
+                  onChanged: controller.onRoleChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select a role'
+                      : null,
+                  hint: 'Select Doer',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               Obx(
