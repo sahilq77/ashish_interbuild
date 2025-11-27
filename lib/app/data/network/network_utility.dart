@@ -99,8 +99,11 @@ class Networkutility {
   static String getProjectNameDropdown = "${baseUrl + "projects"}";
   static int getProjectNameDropdownApi = 32;
 
-   static String deleteAcc = "${baseUrl + "acc/delete"}";
+  static String deleteAcc = "${baseUrl + "acc/delete"}";
   static int deleteAccApi = 33;
+
+  static String getAccCategory = "${baseUrl + "acc-category"}";
+  static int getAccCategoryApi = 34;
 }
 
 

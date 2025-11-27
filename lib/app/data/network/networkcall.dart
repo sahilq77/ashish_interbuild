@@ -8,6 +8,7 @@ import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_plannin
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_update_dpr_list_response.dart';
+import 'package:ashishinterbuild/app/data/models/global_model/acc_category/get_acc_category_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/week_periods/get_week_periods_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
@@ -148,8 +149,7 @@ class Networkcall {
             final deleteMS = getAddDeductionResponseFromJson(str);
             return deleteMS;
 
-
-         case 33:
+          case 33:
             final str = "[${response.body}]";
             final deleteACC = getDeleteMeasurmentResponseFromJson(str);
             return deleteACC;
@@ -349,6 +349,10 @@ class Networkcall {
           case 32:
             final getProjectsDropdown = getProjectDropdownResponseFromJson(str);
             return getProjectsDropdown;
+          case 34:
+            final getAccCategory = getAccCategoryResponseFromJson(str);
+            return getAccCategory;
+
           default:
             log("Invalid request code: $requestCode");
             throw ParseException('Unhandled request code: $requestCode');

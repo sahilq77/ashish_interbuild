@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class AddAccIssueFormController extends GetxController {
 
   final projectdController = Get.find<ProjectNameDropdownController>();
   final packageNameController = Get.find<PackageNameController>();
+  final accCategoryController = Get.find<AccCategoryController>();
 
   @override
   void onInit() {
@@ -53,6 +55,7 @@ class AddAccIssueFormController extends GetxController {
       if (Get.context != null) {
         // zoneController.fetchZones(context: Get.context!);
         projectdController.fetchProjects(context: Get.context!);
+        accCategoryController.fetchAccCategories(context: Get.context!);
       }
     });
   }
