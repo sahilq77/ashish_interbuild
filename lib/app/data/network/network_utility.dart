@@ -107,6 +107,11 @@ class Networkutility {
 
   static String getDoerRole = "${baseUrl + "doer-roles"}";
   static int getDoerRoleApi = 35;
+
+  static String getMilestones = "${baseUrl + "milestones"}";
+  static int getMilestonesApi = 36;
+
+  
 }
 
 
