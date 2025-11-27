@@ -1,3 +1,5 @@
+import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -7,8 +9,16 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddAccIssueFormView extends StatelessWidget {
+class AddAccIssueFormView extends StatefulWidget {
   const AddAccIssueFormView({super.key});
+
+  @override
+  State<AddAccIssueFormView> createState() => _AddAccIssueFormViewState();
+}
+
+class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
+  final projectdController = Get.find<ProjectNameDropdownController>();
+  final packageNameController = Get.find<PackageNameController>();
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +36,30 @@ class AddAccIssueFormView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDropdownField(
-                label: 'Package *',
-                value: controller.package.value,
-                items: controller.packages,
-                onChanged: controller.onPackageChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select an Package'
-                    : null,
-                hint: 'Select Package',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Project *',
+                  value: controller.selectedProject.value,
+                  items: projectdController.projectNames,
+                  onChanged: controller.onProjectChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select an Project'
+                      : null,
+                  hint: 'Select Project',
+                ),
+              ),
+              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Package *',
+                  value: controller.selectedPackage.value,
+                  items: packageNameController.packageNames,
+                  onChanged: controller.onPackageChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select an Package'
+                      : null,
+                  hint: 'Select Package',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
@@ -156,7 +181,10 @@ class AddAccIssueFormView extends StatelessWidget {
               ),
             ),
           ),
-          popupProps: const PopupProps.menu(showSearchBox: true),
+          popupProps: const PopupProps.menu(
+            showSearchBox: true,
+            showSelectedItems: true,
+          ),
         ),
       ],
     );

@@ -240,39 +240,39 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                     style:
                                                         AppButtonStyles.outlinedExtraSmallPrimary(),
                                                     onPressed: () {
-                                                      Get.toNamed(
-                                                        AppRoutes
-                                                            .workFrontUpdateDetailList,
-                                                        arguments: {
-                                                          "selected_source":
-                                                              controller
-                                                                  .getFieldValue(
-                                                                    sheet,
-                                                                    "Source",
-                                                                  ),
-                                                          "selected_system_id":
-                                                              controller
-                                                                  .getFieldValue(
-                                                                    sheet,
-                                                                    "System ID",
-                                                                  ),
-                                                          "uom": controller
-                                                              .getFieldValue(
-                                                                sheet,
-                                                                "UOM",
-                                                              ),
-                                                          "packageName": controller
-                                                              .getFieldValue(
-                                                                sheet,
-                                                                "Package Name",
-                                                              ),
-                                                          "pboqName": controller
-                                                              .getFieldValue(
-                                                                sheet,
-                                                                "PBOQ",
-                                                              ),
-                                                        },
-                                                      );
+                                                      // Get.toNamed(
+                                                      //   AppRoutes
+                                                      //       .workFrontUpdateDetailList,
+                                                      //   arguments: {
+                                                      //     "selected_source":
+                                                      //         controller
+                                                      //             .getFieldValue(
+                                                      //               sheet,
+                                                      //               "Source",
+                                                      //             ),
+                                                      //     "selected_system_id":
+                                                      //         controller
+                                                      //             .getFieldValue(
+                                                      //               sheet,
+                                                      //               "System ID",
+                                                      //             ),
+                                                      //     "uom": controller
+                                                      //         .getFieldValue(
+                                                      //           sheet,
+                                                      //           "UOM",
+                                                      //         ),
+                                                      //     "packageName": controller
+                                                      //         .getFieldValue(
+                                                      //           sheet,
+                                                      //           "Package Name",
+                                                      //         ),
+                                                      //     "pboqName": controller
+                                                      //         .getFieldValue(
+                                                      //           sheet,
+                                                      //           "PBOQ",
+                                                      //         ),
+                                                      //   },
+                                                      // );
                                                     },
                                                     child: Text(
                                                       "$col: ${controller.getFieldValue(sheet, col)}",
@@ -738,7 +738,7 @@ class _AccScreenViewState extends State<AccScreenView> {
                       ),
                       const SizedBox(height: 16),
                       _filterDropdownWithIcon(
-                        label: 'Priority',
+                        label: 'Package',
                         items: packageNameController.packageNames,
                         selected: tempPackage,
                         onChanged: (v) => setState(() => tempPackage = v),
