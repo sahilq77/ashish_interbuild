@@ -422,7 +422,7 @@ class AppRoutes {
     GetPage(
       name: updateAccForm,
       page: () => const UpdateAccFormView(),
-      binding: UpdateAccFormBinding(),
+      bindings: [UpdateAccFormBinding(), DoerRoleBinding()],
       transition: Transition.rightToLeft,
     ),
     GetPage(

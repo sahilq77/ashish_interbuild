@@ -1,11 +1,17 @@
+import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class UpdateAccFormController extends GetxController {
   final RxString priority = 'Low'.obs;
-  final RxList<String> priorities = <String>['Low', 'Medium', 'High', 'Critical'].obs;
+  final RxList<String> priorities = <String>[
+    'Low',
+    'Medium',
+    'High',
+    'Critical',
+  ].obs;
 
-  final RxString role = 'Production PMS PC'.obs;
-  final RxList<String> roles = <String>['Production PMS PC', 'Doer 1', 'Doer 2'].obs;
+  final RxString role = ''.obs;
 
   final Rx<DateTime> issueOpenSinceDate = DateTime(2025, 10, 19).obs;
   final Rx<DateTime> issueCloseDate = DateTime.now().obs;
@@ -13,10 +19,18 @@ class UpdateAccFormController extends GetxController {
   final RxString attachmentFileName = 'No file chosen'.obs;
 
   final RxString remark = ''.obs;
+  final doerRoleController = Get.find<DoerRoleController>();
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        // zoneController.fetchZones(context: Get.context!);
+
+        doerRoleController.fetchDoerRoles(context: Get.context!);
+      }
+    });
   }
 
   void onPriorityChanged(String? value) {

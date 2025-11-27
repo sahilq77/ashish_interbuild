@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -7,9 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'update_acc_form_controller.dart';
 
-class UpdateAccFormView extends StatelessWidget {
+class UpdateAccFormView extends StatefulWidget {
   const UpdateAccFormView({super.key});
 
+  @override
+  State<UpdateAccFormView> createState() => _UpdateAccFormViewState();
+}
+
+class _UpdateAccFormViewState extends State<UpdateAccFormView> {
+  final doerRoleController = Get.find<DoerRoleController>();
   @override
   Widget build(BuildContext context) {
     final UpdateAccFormController controller = Get.put(
@@ -38,15 +45,17 @@ class UpdateAccFormView extends StatelessWidget {
                 hint: 'Select Priority',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Role *',
-                value: controller.role.value,
-                items: controller.roles,
-                onChanged: controller.onRoleChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a role'
-                    : null,
-                hint: 'Select Role',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Role *',
+                  value: controller.role.value,
+                  items: doerRoleController.doerRoleNames,
+                  onChanged: controller.onRoleChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select a role'
+                      : null,
+                  hint: 'Select Doer',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDateField(
