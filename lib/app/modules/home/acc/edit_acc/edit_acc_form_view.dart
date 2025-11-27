@@ -102,11 +102,13 @@ class EditAccFormView extends StatelessWidget {
                 hint: 'Select Doer',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildAttachmentField(
-                label: 'Attachment  (View)',
-                fileName: controller.attachmentFileName.value,
-                onAttachmentPicked: controller.pickAttachment,
-                hint: 'Choose File',
+              Obx(
+                () => _buildAttachmentField(
+                  label: 'Attachment',
+                  fileName: controller.attachmentFileName.value,
+                  onAttachmentPicked: controller.pickAttachment,
+                  hint: 'Choose File',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
@@ -242,6 +244,8 @@ class EditAccFormView extends StatelessWidget {
     required Function() onAttachmentPicked,
     required String hint,
   }) {
+    print(fileName);
+    TextEditingController fcontroller = TextEditingController(text: fileName);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,7 +255,7 @@ class EditAccFormView extends StatelessWidget {
           onTap: onAttachmentPicked,
           child: AbsorbPointer(
             child: TextFormField(
-              initialValue: fileName,
+              controller: fcontroller,
               decoration: InputDecoration(
                 hintText: hint,
                 suffixIcon: const Icon(Icons.attach_file),
