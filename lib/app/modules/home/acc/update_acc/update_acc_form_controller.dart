@@ -1,17 +1,26 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
+import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class UpdateAccFormController extends GetxController {
   final RxString priority = 'Low'.obs;
+  var attachmentFile = Rxn<PlatformFile>();
   final RxList<String> priorities = <String>[
     'Low',
     'Medium',
     'High',
     'Critical',
   ].obs;
-
+RxBool issueStatus = false.obs;
   final RxString role = ''.obs;
+
 
   final Rx<DateTime> issueOpenSinceDate = DateTime(2025, 10, 19).obs;
   final Rx<DateTime> issueCloseDate = DateTime.now().obs;
@@ -48,10 +57,11 @@ class UpdateAccFormController extends GetxController {
   void onIssueCloseDateChanged(DateTime date) {
     issueCloseDate.value = date;
   }
-
-  void pickAttachment() {
-    // Simulate file picking (replace with actual file picker logic)
-    attachmentFileName.value = 'Selected File.pdf'; // Dummy file name
+ void issueStatusChanged(bool? value) {
+    issueStatus.value = value ??false;
+  }
+  Future<void> pickAttachment() async {
+    await pickFile('attachment', allowMultiple: false);
   }
 
   void onRemarkChanged(String value) {
@@ -79,5 +89,124 @@ class UpdateAccFormController extends GetxController {
     issueCloseDate.value = DateTime.now();
     attachmentFileName.value = 'No file chosen';
     remark.value = '';
+  }
+
+   Future<bool> _requestStoragePermission() async {
+    log('Checking storage permissions');
+    bool granted = false;
+
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      final sdkVersion = androidInfo.version.sdkInt;
+      log('Android SDK version: $sdkVersion');
+
+      if (sdkVersion >= 33) {
+        var status = await Permission.photos.status;
+        if (!status.isGranted) {
+          log('Requesting photos permission');
+          status = await Permission.photos.request();
+        }
+        granted = status.isGranted;
+        log('Photos permission ${granted ? "granted" : "denied"}');
+
+        if (!granted) {
+          status = await Permission.manageExternalStorage.status;
+          if (!status.isGranted) {
+            log('Requesting MANAGE_EXTERNAL_STORAGE permission');
+            granted = await Permission.manageExternalStorage
+                .request()
+                .isGranted;
+            if (!granted) {
+              log('MANAGE_EXTERNAL_STORAGE denied, prompting system settings');
+              Get.snackbar(
+                'Permission Required',
+                'Please enable "All Files Access" in system settings to pick files.',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: AppColors.redColor,
+                colorText: Colors.white,
+                mainButton: TextButton(
+                  onPressed: () {
+                    log('Opening system settings for MANAGE_EXTERNAL_STORAGE');
+                    openAppSettings();
+                  },
+                  child: const Text(
+                    'Open Settings',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            } else {
+              log('MANAGE_EXTERNAL_STORAGE granted');
+              granted = true;
+            }
+          } else {
+            log('MANAGE_EXTERNAL_STORAGE already granted');
+            granted = true;
+          }
+        }
+      } else {
+        var status = await Permission.storage.status;
+        if (!status.isGranted) {
+          log('Requesting storage permission');
+          status = await Permission.storage.request();
+        }
+        granted = status.isGranted;
+        log('Storage permission ${granted ? "granted" : "denied"}');
+      }
+    } else if (Platform.isIOS) {
+      var status = await Permission.photos.status;
+      if (!status.isGranted) {
+        log('Requesting photos permission');
+        status = await Permission.photos.request();
+      }
+      granted = status.isGranted;
+      log('Photos permission ${granted ? "granted" : "denied"}');
+    }
+
+    if (!granted) {
+      log('All permissions denied');
+      Get.snackbar(
+        'Permission Denied',
+        'Storage access is required to pick files.',
+        backgroundColor: AppColors.redColor,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+    return granted;
+  }
+
+  Future<void> pickFile(String field, {bool allowMultiple = true}) async {
+    try {
+      log('Picking file for field: $field, allowMultiple: $allowMultiple');
+      if (!await _requestStoragePermission()) {
+        log('File picking aborted due to permission denial');
+        return;
+      }
+
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+        allowMultiple: allowMultiple,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        log('Files picked: ${result.files.map((f) => f.name).toList()}');
+        attachmentFile.value = result.files.first;
+        attachmentFileName.value = result.files.first.name;
+        update();
+      } else {
+        log('No file selected for field: $field');
+      }
+    } catch (e, stackTrace) {
+      log('Error picking file for $field: $e', stackTrace: stackTrace);
+      Get.snackbar(
+        'Error',
+        'Failed to pick file: $e',
+        backgroundColor: AppColors.redColor,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 }

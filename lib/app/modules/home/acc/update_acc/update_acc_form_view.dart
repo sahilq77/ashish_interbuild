@@ -65,18 +65,38 @@ class _UpdateAccFormViewState extends State<UpdateAccFormView> {
                 hint: 'Enter Date',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDateField(
-                label: 'Issue Close Date *',
-                selectedDate: controller.issueCloseDate.value,
-                onDateChanged: controller.onIssueCloseDateChanged,
-                hint: 'Enter Date',
+              Row(
+                children: [
+                  Obx(
+                    () => Transform.scale(
+                      scale: 1.1,
+                      child: Checkbox(
+                        value: controller.issueStatus.value,
+                        activeColor: AppColors.blue,
+                        onChanged: controller.issueStatusChanged,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "Issue Close Status *",
+                    style: AppStyle.reportCardRowCount.responsive,
+                  ),
+                ],
               ),
+              // _buildDateField(
+              //   label: 'Issue Close Date *',
+              //   selectedDate: controller.issueCloseDate.value,
+              //   onDateChanged: controller.onIssueCloseDateChanged,
+              //   hint: 'Enter Date',
+              // ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildAttachmentField(
-                label: 'Attachment',
-                fileName: controller.attachmentFileName.value,
-                onAttachmentPicked: controller.pickAttachment,
-                hint: 'Choose File',
+              Obx(
+                () => _buildAttachmentField(
+                  label: 'Attachment',
+                  fileName: controller.attachmentFileName.value,
+                  onAttachmentPicked: controller.pickAttachment,
+                  hint: 'Choose File',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildTextFormField(
@@ -217,6 +237,8 @@ class _UpdateAccFormViewState extends State<UpdateAccFormView> {
     required Function() onAttachmentPicked,
     required String hint,
   }) {
+    print(fileName);
+    TextEditingController fcontroller = TextEditingController(text: fileName);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +248,7 @@ class _UpdateAccFormViewState extends State<UpdateAccFormView> {
           onTap: onAttachmentPicked,
           child: AbsorbPointer(
             child: TextFormField(
-              initialValue: fileName,
+              controller: fcontroller,
               decoration: InputDecoration(
                 hintText: hint,
                 suffixIcon: const Icon(Icons.attach_file),
