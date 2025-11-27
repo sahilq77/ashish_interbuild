@@ -144,7 +144,7 @@ class ProjectNameController extends GetxController {
         }
       } else {
         hasMoreData.value = false;
-        errorMessage.value = 'Empty response';
+        errorMessage.value = 'No Data';
         AppSnackbarStyles.showError(
           title: 'Error',
           message: errorMessage.value,

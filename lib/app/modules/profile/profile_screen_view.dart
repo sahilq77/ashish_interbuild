@@ -48,13 +48,16 @@ class ProfileScreenView extends StatelessWidget {
                         'No user data available',
                         style: AppStyle.bodyRegularPoppinsGrey,
                       ),
-                      const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: () => controller.fetchUserProfile(
-                          context: context,
-                          isRefresh: true,
+
+                      Padding(
+                        padding: ResponsiveHelper.padding(16.0),
+                        child: OutlinedButton(
+                          onPressed: () => controller.fetchUserProfile(
+                            context: context,
+                            isRefresh: true,
+                          ),
+                          child: const Text('Retry'),
                         ),
-                        child: const Text('Retry'),
                       ),
                     ],
                   ),

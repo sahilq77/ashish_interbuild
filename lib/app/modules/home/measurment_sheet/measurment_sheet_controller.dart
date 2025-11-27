@@ -173,7 +173,7 @@ class MeasurementSheetController extends GetxController {
       } else {
         // Only show error and clear data if this is the first page
         if (reset || start.value == 0) {
-          _showError('Empty response');
+          _showError('No Data');
         } else {
           hasMoreData.value = false;
         }

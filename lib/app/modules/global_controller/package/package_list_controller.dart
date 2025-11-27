@@ -12,8 +12,10 @@ import 'package:get/get.dart';
 
 class PackageListController extends GetxController {
   // ── UI State ─────────────────────────────────────────────────────
-  final RxList<PackageData> packages = <PackageData>[].obs;      // internal full list
-  final RxList<PackageData> filteredPackages = <PackageData>[].obs; // shown in UI
+  final RxList<PackageData> packages =
+      <PackageData>[].obs; // internal full list
+  final RxList<PackageData> filteredPackages =
+      <PackageData>[].obs; // shown in UI
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMoreData = true.obs;
@@ -22,13 +24,13 @@ class PackageListController extends GetxController {
 
   // ── Pagination ───────────────────────────────────────────────────
   final RxInt offset = 0.obs;
-  final int limit = 20;                     // <-- match your API
+  final int limit = 20; // <-- match your API
   RxInt projectId = 0.obs;
 
   // ── API Params (search + sort) ───────────────────────────────────
   final RxString _currentKeyword = ''.obs;
-  final RxString _currentOrderBy = ''.obs;   // '' = no order, 'asc' or 'desc'
-  final RxBool isAscending = true.obs;      // UI only (icon)
+  final RxString _currentOrderBy = ''.obs; // '' = no order, 'asc' or 'desc'
+  final RxBool isAscending = true.obs; // UI only (icon)
 
   // ── Debounce ─────────────────────────────────────────────────────
   Timer? _searchDebounce;
@@ -116,11 +118,13 @@ class PackageListController extends GetxController {
 
       log('API → $endpoint');
 
-      final response = await Networkcall().getMethod(
-            Networkutility.getPackagesListApi,
-            endpoint,
-            context,
-          ) as List<GetPackageNameResponse>?;
+      final response =
+          await Networkcall().getMethod(
+                Networkutility.getPackagesListApi,
+                endpoint,
+                context,
+              )
+              as List<GetPackageNameResponse>?;
 
       // ---- SUCCESS --------------------------------------------------------
       if (response != null && response.isNotEmpty) {
@@ -158,7 +162,9 @@ class PackageListController extends GetxController {
 
           offset.value += limit;
 
-          log('Fetched ${newPackages.length} packages | Total: ${packages.length}');
+          log(
+            'Fetched ${newPackages.length} packages | Total: ${packages.length}',
+          );
         } else {
           // ---- API status:false -------------------------------------------
           hasMoreData.value = false;
@@ -169,9 +175,9 @@ class PackageListController extends GetxController {
           );
         }
       } else {
-        // ---- Empty response -----------------------------------------------
+        // ---- No Data -----------------------------------------------
         hasMoreData.value = false;
-        errorMessage.value = 'Empty response';
+        errorMessage.value = 'No Data';
         AppSnackbarStyles.showError(
           title: 'Error',
           message: errorMessage.value,
@@ -187,7 +193,10 @@ class PackageListController extends GetxController {
       AppSnackbarStyles.showError(title: 'Timeout', message: e.message);
     } on HttpException catch (e) {
       errorMessage.value = '${e.message} (Code: ${e.statusCode})';
-      AppSnackbarStyles.showError(title: 'HTTP Error', message: errorMessage.value);
+      AppSnackbarStyles.showError(
+        title: 'HTTP Error',
+        message: errorMessage.value,
+      );
     } on ParseException catch (e) {
       errorMessage.value = e.message;
       AppSnackbarStyles.showError(title: 'Parse Error', message: e.message);
