@@ -9,6 +9,7 @@ import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashb
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_update_dpr_list_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/acc_category/get_acc_category_response.dart';
+import 'package:ashishinterbuild/app/data/models/global_model/doer_role/get_door_role_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/pboq/get_pboq_name_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/week_periods/get_week_periods_response.dart';
 import 'package:ashishinterbuild/app/data/models/global_model/zone/get_zone_locations_response.dart';
@@ -352,6 +353,11 @@ class Networkcall {
           case 34:
             final getAccCategory = getAccCategoryResponseFromJson(str);
             return getAccCategory;
+          case 35:
+            final getDoerRole = getDoerRoleResponseFromJson(str);
+            return getDoerRole;
+
+            
 
           default:
             log("Invalid request code: $requestCode");

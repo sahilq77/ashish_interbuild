@@ -1,6 +1,7 @@
 import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_view.dart';
 import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_binding.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_binding.dart';
@@ -414,6 +415,7 @@ class AppRoutes {
         ProjectNameDropdownBinding(),
         PackageNameBinding(),
         AccCategoryBinding(),
+        DoerRoleBinding(),
       ],
       transition: Transition.rightToLeft,
     ),

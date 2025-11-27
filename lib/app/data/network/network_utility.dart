@@ -104,6 +104,9 @@ class Networkutility {
 
   static String getAccCategory = "${baseUrl + "acc-category"}";
   static int getAccCategoryApi = 34;
+
+  static String getDoerRole = "${baseUrl + "doer-roles"}";
+  static int getDoerRoleApi = 35;
 }
 
 

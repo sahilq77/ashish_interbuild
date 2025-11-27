@@ -1,4 +1,5 @@
 import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_controller.dart';
@@ -21,6 +22,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
   final projectdController = Get.find<ProjectNameDropdownController>();
   final packageNameController = Get.find<PackageNameController>();
   final accCategoryController = Get.find<AccCategoryController>();
+  final doerRoleController = Get.find<DoerRoleController>();
 
   @override
   Widget build(BuildContext context) {
@@ -121,15 +123,17 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
                 hint: 'Enter Date',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Role *',
-                value: controller.role.value,
-                items: controller.roles,
-                onChanged: controller.onRoleChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a role'
-                    : null,
-                hint: 'Select Doer',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Role *',
+                  value: controller.role.value,
+                  items: doerRoleController.doerRoleNames,
+                  onChanged: controller.onRoleChanged,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please select a role'
+                      : null,
+                  hint: 'Select Doer',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildAttachmentField(
