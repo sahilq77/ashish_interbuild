@@ -2,6 +2,7 @@ import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_vie
 import 'package:ashishinterbuild/app/modules/forgot_password/forgot_password_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_binding.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/milestone/milestone_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_list_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_binding.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_binding.dart';
@@ -416,6 +417,7 @@ class AppRoutes {
         PackageNameBinding(),
         AccCategoryBinding(),
         DoerRoleBinding(),
+        MilestoneBinding(),
       ],
       transition: Transition.rightToLeft,
     ),
@@ -428,7 +430,14 @@ class AppRoutes {
     GetPage(
       name: editAccForm,
       page: () => const EditAccFormView(),
-      binding: EditAccBinding(),
+      bindings: [
+        EditAccBinding(),
+        ProjectNameDropdownBinding(),
+        PackageNameBinding(),
+        AccCategoryBinding(),
+        DoerRoleBinding(),
+        MilestoneBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
 
