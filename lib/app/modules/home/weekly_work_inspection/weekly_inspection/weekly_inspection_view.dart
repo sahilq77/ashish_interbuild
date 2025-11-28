@@ -358,15 +358,11 @@ class _WeeklyInspectionViewState extends State<WeeklyInspectionView> {
                                                                   "PBOQ",
                                                                 ),
                                                             "fromDate": controller
-                                                                .getFieldValue(
-                                                                  sheet,
-                                                                  "Attachments",
-                                                                ),
+                                                                .filterInspectionFromDate
+                                                                .value,
                                                             "toDate": controller
-                                                                .getFieldValue(
-                                                                  sheet,
-                                                                  "Attachments",
-                                                                ),
+                                                                .filterInspectionToDate
+                                                                .value,
                                                           },
                                                         );
                                                       },

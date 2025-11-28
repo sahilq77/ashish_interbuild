@@ -328,7 +328,11 @@ class AppRoutes {
     GetPage(
       name: updateWeeklyInspection,
       page: () => const UpdateWeeklyInspectionList(),
-      bindings: [UpdateWeeklyInspectionBinding(), WeeklyInspectionBinding()],
+      bindings: [
+        UpdateWeeklyInspectionBinding(),
+        WeeklyInspectionBinding(),
+        WeeklyPeriodBinding(),
+      ],
       transition: Transition.rightToLeft,
     ),
 

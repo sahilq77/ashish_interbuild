@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:ashishinterbuild/app/modules/global_controller/pboq/pboq_name_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/weekly_period/weekly_period_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/update_weekly_inspection_list/update_weekly_inspection_controller.dart';
@@ -38,6 +39,7 @@ class _UpdateWeeklyInspectionListState
   final UpdateWeeklyInspectionController controller = Get.put(
     UpdateWeeklyInspectionController(),
   );
+  final WeeklyPeriodController weeklypController = Get.find();
 
   final zoneController = Get.put(ZoneController());
   final zoneLocationController = Get.put(ZoneLocationController());
@@ -50,23 +52,23 @@ class _UpdateWeeklyInspectionListState
       controller.sourceName.value = args["selected_source"] ?? "";
       controller.systemId.value = args["selected_system_id"] ?? "";
       controller.uom.value = args["uom"] ?? "";
-      controller.startDate.value = args["fromDate"] ?? "";
-      controller.endDate.value = args["toDate"] ?? "";
+      // controller.startDate.value = args["fromDate"] ?? "";
+      // controller.endDate.value = args["toDate"] ?? "";
       controller.packageName.value = args["packageName"] ?? "";
       controller.pboqName.value = args["pboqName"] ?? "";
     }
-
-    // Set default values if still 0
+    controller.setCurrentWeekDates();
 
     log(
       "Weekly Inspection → Source=${controller.sourceName.value} System Id=${controller.systemId.value}  fromDate=${controller.startDate.value} toDate=${controller.endDate.value}",
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
+        controller.generateYearList(Get.context!);
         controller.fetchWirList(reset: true, context: Get.context!);
-        // zoneController.fetchZones(context: Get.context!);
-        // zoneLocationController.fetchZoneLocations(context: Get.context!);
-        // pboqController.fetchPboqs(context: context);
+        controller.autoSelectCurrentWeek();
+        zoneController.fetchZones(context: Get.context!);
+        zoneLocationController.fetchZoneLocations(context: Get.context!);
       }
     });
   }
@@ -171,21 +173,100 @@ class _UpdateWeeklyInspectionListState
                   ],
                 ),
               ),
+              Padding(
+                padding: ResponsiveHelper.paddingSymmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: ResponsiveHelper.screenWidth * 0.300,
+                      child: Obx(
+                        () => _buildDropdownField(
+                          label: 'Year',
+                          value: controller.selectedYear.value,
+                          items: controller.yearList,
+                          onChanged: (v) {
+                            controller.selectedYear.value = v ?? '';
+                            weeklypController.selectedPeriodVal.value = "";
+                            weeklypController.periodLabels.clear();
+                            weeklypController.fetchPeriods(
+                              context: context,
+                              forceFetch: true,
+                              year: int.parse(controller.selectedYear.value),
+                            );
+                          },
+                          hint: 'Year',
+                          enabled: true,
+                          errorText: "",
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(width: ResponsiveHelper.spacing(5)),
+                    Expanded(
+                      child: Obx(
+                        () => _buildDropdownField(
+                          label: 'Week',
+                          value: weeklypController.selectedPeriodVal.value,
+                          items: weeklypController.periodLabels,
+                          onChanged: (v) {
+                            log("${weeklypController.selectedPeriodVal.value}");
+                            if (v != null) {
+                              final selectedPeriod = weeklypController
+                                  .periodsList
+                                  .firstWhere(
+                                    (p) => p.label == v,
+                                    orElse: () =>
+                                        weeklypController.periodsList.first,
+                                  );
+                              controller.filterInspectionFromDate.value =
+                                  DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(selectedPeriod.weekFromDate);
+                              controller.filterInspectionToDate.value =
+                                  DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(selectedPeriod.weekToDate);
+                              controller.fetchWirList(
+                                reset: true,
+                                context: context,
+                              );
+                            }
+                          },
+                          hint: 'Week',
+                          enabled: true,
+                          errorText: "",
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // Expanded to make ListView take remaining space
               Expanded(
                 child: Obx(
                   () => controller.isLoading.value
                       ? _buildShimmerEffect(context)
                       : controller.errorMessage.value.isNotEmpty
-                      ? Center(
-                          child: Text(
-                            controller.errorMessage.value,
-                            style: AppStyle.bodyBoldPoppinsBlack.responsive,
-                            textAlign: TextAlign.center,
+                      ? SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: Center(
+                              child: Text(
+                                controller.errorMessage.value,
+                                style: AppStyle.bodyBoldPoppinsBlack.responsive,
+                              ),
+                            ),
                           ),
                         )
                       : controller.filteredWirItems.isEmpty
-                      ? const Center(child: Text('No data found'))
+                      ? SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: const Center(child: Text('No data found')),
+                          ),
+                        )
                       : ListView.builder(
                           padding: ResponsiveHelper.padding(16),
                           itemCount:
@@ -1307,6 +1388,50 @@ class _UpdateWeeklyInspectionListState
     );
   }
 
+  // Dropdown Field
+  Widget _buildDropdownField({
+    required String label,
+    required String value,
+    required List<String> items,
+    required Function(String?)? onChanged,
+    required String hint,
+    bool enabled = true,
+    String? errorText, // Add this
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppStyle.reportCardRowCount.responsive),
+        const SizedBox(height: 8),
+        DropdownSearch<String>(
+          selectedItem: value.isNotEmpty ? value : null,
+          items: items,
+          onChanged: onChanged,
+          enabled: enabled,
+          dropdownDecoratorProps: DropDownDecoratorProps(
+            dropdownSearchDecoration: InputDecoration(
+              hintText: hint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              filled: !enabled,
+              fillColor: !enabled ? Colors.grey[200] : null,
+              errorText: errorText, // Show error
+            ),
+          ),
+          popupProps: const PopupProps.menu(
+            showSearchBox: true,
+            showSelectedItems: true,
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showFilterDialog(BuildContext context) {
     final controller = Get.find<UpdateWeeklyInspectionController>();
     final zoneController = Get.find<ZoneController>();
@@ -1376,91 +1501,91 @@ class _UpdateWeeklyInspectionListState
                         icon: Icons.place,
                       ),
                       const SizedBox(height: 12),
-                      _filterDropdownWithIcon(
-                        label: 'PBOQ',
-                        items: pboqController.pboqNames,
-                        selected: controller.selectedPboq.value.isEmpty
-                            ? null
-                            : controller.selectedPboq.value,
-                        onChanged: (v) =>
-                            controller.selectedPboq.value = v ?? '',
-                        icon: Icons.list_alt,
-                      ),
+                      // _filterDropdownWithIcon(
+                      //   label: 'PBOQ',
+                      //   items: pboqController.pboqNames,
+                      //   selected: controller.selectedPboq.value.isEmpty
+                      //       ? null
+                      //       : controller.selectedPboq.value,
+                      //   onChanged: (v) =>
+                      //       controller.selectedPboq.value = v ?? '',
+                      //   icon: Icons.list_alt,
+                      // ),
 
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.grey.withOpacity(0.5),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Date",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            GestureDetector(
-                              onTap: () async {
-                                final date = await showDatePicker(
-                                  context: context,
-                                  initialDate: tempDate ?? DateTime.now(),
-                                  firstDate: DateTime(2015),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (date != null) {
-                                  setState(() => tempDate = date);
-                                }
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.05),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: AppColors.primary.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      color: AppColors.primary,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      tempDate != null
-                                          ? DateFormat(
-                                              'dd/MM/yyyy',
-                                            ).format(tempDate!)
-                                          : 'Select Date',
-                                      style: TextStyle(
-                                        color: tempDate != null
-                                            ? AppColors.defaultBlack
-                                            : AppColors.grey,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // const SizedBox(height: 12),
+                      // Container(
+                      //   width: double.infinity,
+                      //   padding: const EdgeInsets.all(12),
+                      //   decoration: BoxDecoration(
+                      //     border: Border.all(
+                      //       color: AppColors.grey.withOpacity(0.5),
+                      //     ),
+                      //     borderRadius: BorderRadius.circular(12),
+                      //   ),
+                      //   child: Column(
+                      //     crossAxisAlignment: CrossAxisAlignment.start,
+                      //     children: [
+                      //       const Text(
+                      //         "Date",
+                      //         style: TextStyle(
+                      //           fontWeight: FontWeight.w600,
+                      //           fontSize: 14,
+                      //         ),
+                      //       ),
+                      //       const SizedBox(height: 10),
+                      //       GestureDetector(
+                      //         onTap: () async {
+                      //           final date = await showDatePicker(
+                      //             context: context,
+                      //             initialDate: tempDate ?? DateTime.now(),
+                      //             firstDate: DateTime(2015),
+                      //             lastDate: DateTime.now(),
+                      //           );
+                      //           if (date != null) {
+                      //             setState(() => tempDate = date);
+                      //           }
+                      //         },
+                      //         child: Container(
+                      //           width: double.infinity,
+                      //           padding: const EdgeInsets.symmetric(
+                      //             vertical: 14,
+                      //             horizontal: 12,
+                      //           ),
+                      //           decoration: BoxDecoration(
+                      //             color: AppColors.primary.withOpacity(0.05),
+                      //             borderRadius: BorderRadius.circular(8),
+                      //             border: Border.all(
+                      //               color: AppColors.primary.withOpacity(0.3),
+                      //             ),
+                      //           ),
+                      //           child: Row(
+                      //             children: [
+                      //               Icon(
+                      //                 Icons.calendar_today,
+                      //                 color: AppColors.primary,
+                      //                 size: 20,
+                      //               ),
+                      //               const SizedBox(width: 8),
+                      //               Text(
+                      //                 tempDate != null
+                      //                     ? DateFormat(
+                      //                         'dd/MM/yyyy',
+                      //                       ).format(tempDate!)
+                      //                     : 'Select Date',
+                      //                 style: TextStyle(
+                      //                   color: tempDate != null
+                      //                       ? AppColors.defaultBlack
+                      //                       : AppColors.grey,
+                      //                   fontSize: 14,
+                      //                 ),
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

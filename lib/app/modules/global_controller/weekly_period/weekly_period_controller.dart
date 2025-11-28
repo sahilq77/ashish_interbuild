@@ -3,7 +3,7 @@ import 'package:ashishinterbuild/app/data/models/global_model/week_periods/get_w
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
-import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart'; // Add this import
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,7 +23,6 @@ class WeeklyPeriodController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Optionally auto-fetch on init if needed
   }
 
   /// Fetch the list of weekly periods from the server
@@ -43,10 +42,8 @@ class WeeklyPeriodController extends GetxController {
 
       final response =
           await Networkcall().getMethod(
-                Networkutility
-                    .getWeekPeriodsApi, // Make sure this constant exists
-                Networkutility.getWeekPeriods +
-                    "?year=$year", // Update this URL constant too
+                Networkutility.getWeekPeriodsApi,
+                Networkutility.getWeekPeriods + "?year=$year",
                 context,
               )
               as List<GetWeeklyPeriodsResponse>?;
@@ -61,83 +58,80 @@ class WeeklyPeriodController extends GetxController {
           log(
             'Weekly Periods Loaded: ${periodsList.map((p) => "${p.label}: ${p.weekCode}").toList()}',
           );
-          
+
           // Auto-select period if is_selected is "1"
-          final selectedPeriod = periodsList.firstWhereOrNull((p) => p.isSelected == "1");
+          final selectedPeriod = periodsList.firstWhereOrNull(
+            (p) => p.isSelected == "1",
+          );
           if (selectedPeriod != null) {
             selectedPeriodVal.value = selectedPeriod.label;
             log('Auto-selected period: ${selectedPeriod.label}');
+
+            // Optional: Show success snackbar when data loads successfully
+            // AppSnackbarStyles.showSuccess(
+            //   title: "Success",
+            //   message: "Weekly periods loaded successfully",
+            // );
           }
         } else {
           errorMessage.value = response[0].message ?? "Failed to load periods";
-          Get.snackbar(
-            'Error',
-            response[0].message ?? "Unknown error",
-            backgroundColor: AppColors.redColor,
-            colorText: Colors.white,
+
+          AppSnackbarStyles.showError(
+            title: "Error",
+            message: response[0].message ?? "Failed to load weekly periods",
           );
         }
       } else {
         errorMessage.value = 'No data received from server';
-        Get.snackbar(
-          'No Data',
-          'No weekly periods found',
-          backgroundColor: AppColors.redColor,
-          colorText: Colors.white,
+
+        AppSnackbarStyles.showWarning(
+          title: "No Data",
+          message: "No weekly periods found for the selected year",
         );
       }
     } on NoInternetException catch (e) {
       errorMessage.value = e.message;
-      Get.snackbar(
-        'No Internet',
-        e.message,
-        backgroundColor: AppColors.redColor,
-        colorText: Colors.white,
-      );
+
+      AppSnackbarStyles.showError(title: "No Internet", message: e.message);
     } on TimeoutException catch (e) {
       errorMessage.value = e.message;
-      Get.snackbar(
-        'Timeout',
-        e.message,
-        backgroundColor: AppColors.redColor,
-        colorText: Colors.white,
+
+      AppSnackbarStyles.showError(
+        title: "Request Timeout",
+        message: "The server took too long to respond",
       );
     } on HttpException catch (e) {
       errorMessage.value = '${e.message} (Code: ${e.statusCode})';
-      Get.snackbar(
-        'Error',
-        '${e.message} (Code: ${e.statusCode})',
-        backgroundColor: AppColors.redColor,
-        colorText: Colors.white,
+
+      AppSnackbarStyles.showError(
+        title: "Server Error",
+        message: '${e.message} (Code: ${e.statusCode})',
       );
     } on ParseException catch (e) {
       errorMessage.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        backgroundColor: AppColors.redColor,
-        colorText: Colors.white,
+
+      AppSnackbarStyles.showError(
+        title: "Data Error",
+        message: "Failed to process server response",
       );
     } catch (e, stackTrace) {
       errorMessage.value = 'Unexpected error: $e';
       log('Fetch WeeklyPeriods Exception: $e\nStack: $stackTrace');
-      Get.snackbar(
-        'Error',
-        'Something went wrong',
-        backgroundColor: AppColors.redColor,
-        colorText: Colors.white,
+
+      AppSnackbarStyles.showError(
+        title: "Something Went Wrong",
+        message: "Please try again later",
       );
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Returns a unique list of week codes as strings
+  // Rest of your helper methods remain unchanged...
   List<String> getPeriodCodes() {
     return periodsList.map((p) => p.weekCode.toString()).toSet().toList();
   }
 
-  /// Find period label by week code
   String getPeriodLabelByCode(String weekCode) {
     return periodsList
             .firstWhereOrNull((p) => p.weekCode.toString() == weekCode)
@@ -145,7 +139,6 @@ class WeeklyPeriodController extends GetxController {
         weekCode;
   }
 
-  /// Find week code by period label
   String? getPeriodCodeByLabel(String label) {
     return periodsList
         .firstWhereOrNull((p) => p.label == label)
@@ -153,14 +146,12 @@ class WeeklyPeriodController extends GetxController {
         .toString();
   }
 
-  /// Optional: Get WeeklyPeriod object by code
   WeeklyPeriod? getPeriodByCode(String weekCode) {
     return periodsList.firstWhereOrNull(
       (p) => p.weekCode.toString() == weekCode,
     );
   }
 
-  /// Get the currently selected period (where is_selected == "1")
   WeeklyPeriod? getSelectedPeriod() {
     return periodsList.firstWhereOrNull((p) => p.isSelected == "1");
   }

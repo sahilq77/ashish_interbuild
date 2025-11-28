@@ -6,6 +6,7 @@ import 'package:ashishinterbuild/app/data/models/weekly_inspection/get_weekly_in
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/weekly_period/weekly_period_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -37,10 +38,14 @@ class UpdateWeeklyInspectionController extends GetxController {
   final RxBool isAscending = true.obs;
   final RxnString selectedPackageFilter = RxnString(null);
   Timer? _debounce;
+  RxString filterInspectionFromDate = ''.obs;
+  RxString filterInspectionToDate = ''.obs;
 
   RxString sourceName = "".obs;
   RxString systemId = "".obs;
   RxString uom = "".obs;
+  RxString selectedYear = ''.obs;
+  RxList<String> yearList = <String>[].obs;
 
   final RxList<String> frontDisplayColumns = <String>[].obs;
   final RxList<String> buttonDisplayColumns = <String>[].obs;
@@ -75,12 +80,59 @@ class UpdateWeeklyInspectionController extends GetxController {
 
   RxString startDate = "".obs;
   RxString endDate = "".obs;
-
+  final WeeklyPeriodController weeklypController = Get.find();
   @override
   void onClose() {
     searchController.dispose();
     _debounce?.cancel();
     super.onClose();
+  }
+
+  void setCurrentWeekDates() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+    filterInspectionFromDate.value = DateFormat(
+      'yyyy-MM-dd',
+    ).format(startOfWeek);
+    filterInspectionToDate.value = DateFormat('yyyy-MM-dd').format(endOfWeek);
+  }
+
+  void autoSelectCurrentWeek() {
+    final today = DateTime.now();
+    final periods = weeklypController.periodsList;
+
+    for (var period in periods) {
+      if (today.isAfter(
+            period.weekFromDate.subtract(const Duration(days: 1)),
+          ) &&
+          today.isBefore(period.weekToDate.add(const Duration(days: 1)))) {
+        weeklypController.selectedPeriodVal.value = period.label;
+        filterInspectionFromDate.value = DateFormat(
+          'yyyy-MM-dd',
+        ).format(period.weekFromDate);
+        filterInspectionToDate.value = DateFormat(
+          'yyyy-MM-dd',
+        ).format(period.weekToDate);
+        break;
+      }
+    }
+  }
+
+  void generateYearList(BuildContext context) async {
+    final currentYear = DateTime.now().year;
+    yearList.clear();
+    for (int i = 0; i < 5; i++) {
+      yearList.add((currentYear - i).toString());
+    }
+
+    selectedYear.value = currentYear.toString();
+    await weeklypController.fetchPeriods(
+      context: Get.context!,
+      forceFetch: true,
+      year: int.parse(selectedYear.value),
+    );
   }
 
   String _buildQueryParams({bool includePagination = true}) {
@@ -93,8 +145,8 @@ class UpdateWeeklyInspectionController extends GetxController {
       'filter_package=${wiController.packageId.value == 0 ? "" : wiController.packageId.value}',
       'selected_source=${sourceName.value}',
       'selected_system_id=${systemId.value}',
-      'filter_inspection_from_date=${'2025-11-17'}',
-      'filter_inspection_to_date=${'2025-11-23'}',
+      'filter_inspection_from_date=${filterInspectionFromDate.value}',
+      'filter_inspection_to_date=${filterInspectionToDate.value}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
@@ -232,6 +284,16 @@ class UpdateWeeklyInspectionController extends GetxController {
     hasMoreData.value = true;
     filteredWirItems.clear();
     toggleMultiSelectMode(off: true);
+    setCurrentWeekDates();
+    generateYearList(Get.context!);
+    autoSelectCurrentWeek();
+    weeklypController.selectedPeriodVal.value = '';
+    weeklypController.periodLabels.clear();
+    await weeklypController.fetchPeriods(
+      context: Get.context!,
+      forceFetch: true,
+      year: int.parse(selectedYear.value),
+    );
     await fetchWirList(reset: true, context: Get.context!);
   }
 
@@ -397,6 +459,9 @@ class UpdateWeeklyInspectionController extends GetxController {
       final formattedDate = DateFormat('yyyy-MM-dd').format(now);
       final weekNo = getWeekNumber(now).toString();
       final year = now.year.toString();
+      final String weekCode = weeklypController
+          .getPeriodByCode(weeklypController.selectedPeriodVal.value ?? "")
+          .toString();
 
       for (int i = 0; i < selectedIndices.length; i++) {
         final int rowIndex = selectedIndices.elementAt(i); // Actual index in l
@@ -426,14 +491,15 @@ class UpdateWeeklyInspectionController extends GetxController {
 
         request.fields['ms_rows[$i][progress_status]'] = isUpdate ? '1' : '0';
         request.fields['ms_rows[$i][pending_status]'] = isPending ? '1' : '0';
-
         request.fields['ms_rows[$i][executed_qty]'] = executedQty;
         // request.fields['ms_rows[$i][dpr_pending_qty]'] = '0';
-        request.fields['ms_rows[$i][inspection_from_date]'] = "2025-11-24";
-        request.fields['ms_rows[$i][inspection_to_date]'] = "2025-11-30";
+        request.fields['ms_rows[$i][inspection_from_date]'] =
+            filterInspectionFromDate.value;
+        request.fields['ms_rows[$i][inspection_to_date]'] =
+            filterInspectionToDate.value;
         request.fields['ms_rows[$i][dpr_from_date]'] = doprFromDate;
         request.fields['ms_rows[$i][dpr_to_date]'] = doprToDate;
-        request.fields['ms_rows[$i][week_no]'] = "W-48";
+        request.fields['ms_rows[$i][week_no]'] = weekCode;
         request.fields['ms_rows[$i][year]'] = year;
         request.fields['ms_rows[$i][system_id]'] = cleanSystemId;
         request.fields['ms_rows[$i][source_table]'] = sourceName.value;
