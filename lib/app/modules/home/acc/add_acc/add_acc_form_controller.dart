@@ -15,45 +15,31 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../utils/app_colors.dart';
 
+class AccFieldSet {
+  var selectedProject = ''.obs;
+  var selectedPackage = ''.obs;
+  var accCategory = ''.obs;
+  var priority = ''.obs;
+  var keyDelayEvents = ''.obs;
+  var affectedMilestone = ''.obs;
+  var briefDetails = ''.obs;
+  var issueOpenDate = DateTime.now().obs;
+  var role = ''.obs;
+  var attachmentFile = Rxn<PlatformFile>();
+  var attachmentFileName = 'No file chosen'.obs;
+}
+
 class AddAccIssueFormController extends GetxController {
-  final RxString selectedPackage = ''.obs;
-
-  final RxString selectedProject = ''.obs;
-  // final RxList<String> packages = <String>[
-  //   'BlueNile Cafe Package',
-  //   'Alpha Package',
-  // ].obs;
-  final RxString accCategory = ''.obs;
- 
-
-  final RxString priority = ''.obs;
   final RxList<String> priorities = <String>[
     'Critical',
     'High',
     'Medium',
     'Low',
   ].obs;
-  final RxString category = ''.obs;
-  final RxList<String> categories = <String>['Milestone', 'Milestone-1'].obs;
-
-  final RxString keyDelayEvents = ''.obs;
   final RxList<String> keyDelayOptions = <String>['Yes', 'No'].obs;
-
-  final RxString affectedMilestone = ''.obs;
-  final RxList<String> milestones = <String>[
-    'Milestone 1',
-    'Milestone 2',
-    'Milestone 3',
-  ].obs;
-
-  final RxString briefDetails = ''.obs;
-
-  final Rx<DateTime> issueOpenDate = DateTime.now().obs;
-
-  final RxString role = ''.obs;
-  final RxList<String> roles = <String>['Doer 1', 'Doer 2', 'Doer 3'].obs;
-  var attachmentFile = Rxn<PlatformFile>();
-  final RxString attachmentFileName = 'No file chosen'.obs;
+  
+  // Dynamic field sets
+  var fieldSets = <AccFieldSet>[].obs;
 
   final projectdController = Get.find<ProjectNameDropdownController>();
   final packageNameController = Get.find<PackageNameController>();
@@ -64,9 +50,11 @@ class AddAccIssueFormController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Initialize first field set
+    fieldSets.add(AccFieldSet());
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context != null) {
-        // zoneController.fetchZones(context: Get.context!);
         projectdController.fetchProjects(context: Get.context!);
         accCategoryController.fetchAccCategories(context: Get.context!);
         doerRoleController.fetchDoerRoles(context: Get.context!);
@@ -75,81 +63,111 @@ class AddAccIssueFormController extends GetxController {
     });
   }
 
-  void onAccCategoryChanged(String? value) {
-    accCategory.value = value ?? '';
+  void onAccCategoryChanged(int index, String? value) {
+    fieldSets[index].accCategory.value = value ?? '';
   }
 
-  void onProjectChanged(String? value) async {
-    selectedProject.value = value ?? "";
+  void onProjectChanged(int index, String? value) async {
+    fieldSets[index].selectedProject.value = value ?? "";
+    fieldSets[index].selectedPackage.value = '';
     final projectId = projectdController.getProjectIdByName(value ?? "");
-    await packageNameController.fetchPackages(
-      context: Get.context!,
-      forceFetch: true,
-      projectId: int.parse(projectId!),
-    );
+    if (projectId != null) {
+      await packageNameController.fetchPackages(
+        context: Get.context!,
+        forceFetch: true,
+        projectId: int.parse(projectId),
+      );
+    }
   }
 
-  void onPackageChanged(String? value) {
-    selectedPackage.value = value ?? '';
+  void onPackageChanged(int index, String? value) {
+    fieldSets[index].selectedPackage.value = value ?? '';
   }
 
-  void onPriorityChanged(String? value) {
-    priority.value = value ?? '';
+  void onPriorityChanged(int index, String? value) {
+    fieldSets[index].priority.value = value ?? '';
   }
 
-  void onKeyDelayEventsChanged(String? value) {
-    keyDelayEvents.value = value ?? '';
+  void onKeyDelayEventsChanged(int index, String? value) {
+    fieldSets[index].keyDelayEvents.value = value ?? '';
   }
 
-  void onAffectedMilestoneChanged(String? value) {
-    affectedMilestone.value = value ?? '';
+  void onAffectedMilestoneChanged(int index, String? value) {
+    fieldSets[index].affectedMilestone.value = value ?? '';
   }
 
-  void onBriefDetailsChanged(String value) {
-    briefDetails.value = value;
+  void onBriefDetailsChanged(int index, String value) {
+    fieldSets[index].briefDetails.value = value;
   }
 
-  void onIssueOpenDateChanged(DateTime date) {
-    issueOpenDate.value = date;
+  void onIssueOpenDateChanged(int index, DateTime date) {
+    fieldSets[index].issueOpenDate.value = date;
   }
 
-  void onRoleChanged(String? value) {
-    role.value = value ?? '';
+  void onRoleChanged(int index, String? value) {
+    fieldSets[index].role.value = value ?? '';
   }
 
-  Future<void> pickAttachment() async {
-    await pickFile('attachment', allowMultiple: false);
+  Future<void> pickAttachment(int index) async {
+    await pickFile(index, allowMultiple: false);
+  }
+  
+  // Add new row
+  void addFieldSet() {
+    fieldSets.add(AccFieldSet());
+  }
+  
+  // Remove row
+  void removeFieldSet(int index) {
+    if (fieldSets.length > 1) {
+      fieldSets.removeAt(index);
+    } else {
+      // Clear first row instead of deleting
+      final fs = fieldSets[0];
+      fs.selectedProject.value = '';
+      fs.selectedPackage.value = '';
+      fs.accCategory.value = '';
+      fs.priority.value = '';
+      fs.keyDelayEvents.value = '';
+      fs.affectedMilestone.value = '';
+      fs.briefDetails.value = '';
+      fs.issueOpenDate.value = DateTime.now();
+      fs.role.value = '';
+      fs.attachmentFile.value = null;
+      fs.attachmentFileName.value = 'No file chosen';
+    }
   }
 
   void submitForm() {
-    if (accCategory.value.isEmpty ||
-        affectedMilestone.value.isEmpty ||
-        briefDetails.value.isEmpty ||
-        issueOpenDate.value == null ||
-        role.value.isEmpty) {
-      Get.snackbar('Error', 'Please fill all required fields');
-      return;
+    for (int i = 0; i < fieldSets.length; i++) {
+      final fs = fieldSets[i];
+      if (fs.accCategory.value.isEmpty ||
+          fs.affectedMilestone.value.isEmpty ||
+          fs.briefDetails.value.isEmpty ||
+          fs.role.value.isEmpty) {
+        Get.snackbar('Error', 'Please fill all required fields for row ${i + 1}');
+        return;
+      }
     }
-    print('ACC Category: $accCategory');
-    print('Priority: $priority');
-    print('Key Delay Events: $keyDelayEvents');
-    print('Affected Milestone: $affectedMilestone');
-    print('Brief Details: $briefDetails');
-    print('Issue Open Date: $issueOpenDate');
-    print('Role: $role');
-    print('Attachment: $attachmentFileName');
+    
+    for (int i = 0; i < fieldSets.length; i++) {
+      final fs = fieldSets[i];
+      print('Row ${i + 1}:');
+      print('ACC Category: ${fs.accCategory.value}');
+      print('Priority: ${fs.priority.value}');
+      print('Key Delay Events: ${fs.keyDelayEvents.value}');
+      print('Affected Milestone: ${fs.affectedMilestone.value}');
+      print('Brief Details: ${fs.briefDetails.value}');
+      print('Issue Open Date: ${fs.issueOpenDate.value}');
+      print('Role: ${fs.role.value}');
+      print('Attachment: ${fs.attachmentFileName.value}');
+    }
     Get.snackbar('Success', 'Form Submitted');
   }
 
   Future<void> onRefresh() async {
-    accCategory.value = '';
-    priority.value = '';
-    keyDelayEvents.value = '';
-    affectedMilestone.value = '';
-    briefDetails.value = '';
-    issueOpenDate.value = DateTime.now();
-    role.value = '';
-    attachmentFileName.value = 'No file chosen';
+    fieldSets.clear();
+    fieldSets.add(AccFieldSet());
   }
 
   Future<bool> _requestStoragePermission() async {
@@ -237,9 +255,9 @@ class AddAccIssueFormController extends GetxController {
     return granted;
   }
 
-  Future<void> pickFile(String field, {bool allowMultiple = true}) async {
+  Future<void> pickFile(int index, {bool allowMultiple = true}) async {
     try {
-      log('Picking file for field: $field, allowMultiple: $allowMultiple');
+      log('Picking file for row: $index, allowMultiple: $allowMultiple');
       if (!await _requestStoragePermission()) {
         log('File picking aborted due to permission denial');
         return;
@@ -253,14 +271,14 @@ class AddAccIssueFormController extends GetxController {
 
       if (result != null && result.files.isNotEmpty) {
         log('Files picked: ${result.files.map((f) => f.name).toList()}');
-        attachmentFile.value = result.files.first;
-        attachmentFileName.value = result.files.first.name;
+        fieldSets[index].attachmentFile.value = result.files.first;
+        fieldSets[index].attachmentFileName.value = result.files.first.name;
         update();
       } else {
-        log('No file selected for field: $field');
+        log('No file selected for row: $index');
       }
     } catch (e, stackTrace) {
-      log('Error picking file for $field: $e', stackTrace: stackTrace);
+      log('Error picking file for row $index: $e', stackTrace: stackTrace);
       Get.snackbar(
         'Error',
         'Failed to pick file: $e',
