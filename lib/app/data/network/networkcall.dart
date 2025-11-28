@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:ashishinterbuild/app/data/models/acc/get_acc_list_response.dart';
+import 'package:ashishinterbuild/app/data/models/acc/get_update_submit_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_add_pboq_measurment_response.dart';
 import 'package:ashishinterbuild/app/data/models/add_pboq_measurment/get_planning_status_response.dart';
 import 'package:ashishinterbuild/app/data/models/daily_progress_report/get_dashboard_response.dart';
@@ -39,6 +40,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../routes/app_routes.dart';
+import 'package:path/path.dart' as p;
 
 class Networkcall {
   final ConnectivityService _connectivityService =
@@ -395,6 +397,125 @@ class Networkcall {
       return null;
     } catch (e) {
       log("GET → $url \nUnexpected: $e");
+      return null;
+    }
+  }
+
+  Future<List<Object?>?> postFormDataMethod(
+    int requestCode,
+    String url,
+    Map<String, String> formData,
+    Map<String, File> fileMap,
+    BuildContext context,
+  ) async {
+    try {
+      final isConnected = await _connectivityService.checkConnectivity();
+      if (!isConnected) {
+        await _navigateToNoInternet();
+        return null;
+      }
+
+      final stopwatch = Stopwatch()..start();
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.headers['Content-Type'] = 'multipart/form-data';
+      if (AppUtility.authToken?.isNotEmpty == true) {
+        request.headers['Authorization'] = 'Bearer ${AppUtility.authToken}';
+      }
+
+      // Add form data fields and log them
+      final fieldLogs = <String>[];
+      formData.forEach((key, value) {
+        request.fields[key] = value;
+        fieldLogs.add('$key: $value');
+      });
+
+      // Add image files with custom keys and log them
+      final fileLogs = <String>[];
+      for (var entry in fileMap.entries) {
+        final key = entry.key;
+        final file = entry.value;
+        if (file.existsSync()) {
+          final filename = p.basename(
+            file.path,
+          ); // Use path.basename for clean filename
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              key,
+              file.path,
+              filename: filename,
+            ),
+          );
+          fileLogs.add('$key: ${file.path}');
+        } else {
+          log('File does not exist: ${file.path}');
+        }
+      }
+
+      var streamedResponse = await request.send().timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Request timed out. Please try again.');
+        },
+      );
+
+      var response = await http.Response.fromStream(streamedResponse);
+      stopwatch.stop();
+      final responseTimeMs = stopwatch.elapsedMilliseconds;
+      _handleSlowInternet(responseTimeMs);
+
+      var data = response.body;
+      if (response.statusCode == 200) {
+        log(
+          "url: $url \nForm Fields: [${fieldLogs.join(', ')}] \nFile Fields: [${fileLogs.join(', ')}] \nResponse: $data",
+        );
+        String str = "[${response.body}]";
+
+        switch (requestCode) {
+          case 38:
+            final updateACC = getUpdateSubmitResponseFromJson(str);
+            return updateACC;
+
+          default:
+            log("Invalid request code: $requestCode");
+            throw ParseException('Unhandled request code: $requestCode');
+        }
+      } else if (response.statusCode == 401) {
+        await AppUtility.clearUserInfo();
+        Get.offAllNamed(AppRoutes.login);
+        log("GET → $url \nStatus: ${response.statusCode} \nResponse: $data");
+      } else {
+        log(
+          "url: $url \nForm Fields: [${fieldLogs.join(', ')}] \nFile Fields: [${fileLogs.join(', ')}] \nResponse: $data",
+        );
+        throw HttpException(
+          'Server error: ${response.statusCode}',
+          response.statusCode,
+        );
+      }
+    } on NoInternetException catch (e) {
+      log("url: $url \nForm Fields: [] \nFile Fields: [] \nResponse: $e");
+      await _navigateToNoInternet();
+      return null;
+    } on TimeoutException catch (e) {
+      log("url: $url \nForm Fields: [] \nFile Fields: [] \nResponse: $e");
+      Get.snackbar(
+        'Request Timed Out',
+        'The server took too long to respond. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      return null;
+    } on HttpException catch (e) {
+      log("url: $url \nForm Fields: [] \nFile Fields: [] \nResponse: $e");
+      return null;
+    } on SocketException catch (e) {
+      log("url: $url \nForm Fields: [] \nFile Fields: [] \nResponse: $e");
+      await _navigateToNoInternet();
+      return null;
+    } catch (e) {
+      log("url: $url \nForm Fields: [] \nFile Fields: [] \nResponse: $e");
       return null;
     }
   }

@@ -106,14 +106,23 @@ class _UpdateAccFormViewState extends State<UpdateAccFormView> {
                 hint: 'Enter Remark',
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
-              ElevatedButton(
-                onPressed: controller.submitForm,
+              Obx(() => ElevatedButton(
+                onPressed: controller.isLoading.value ? null : controller.submitForm,
                 style: AppButtonStyles.elevatedLargeBlack(),
-                child: Text(
-                  'Update',
-                  style: AppStyle.buttonTextPoppinsWhite.responsive,
-                ),
-              ),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        'Update',
+                        style: AppStyle.buttonTextPoppinsWhite.responsive,
+                      ),
+              )),
             ],
           ),
         ),

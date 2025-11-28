@@ -39,7 +39,7 @@ class UpdateAccFormController extends GetxController {
   final doerRoleController = Get.find<DoerRoleController>();
   RxString accID = ''.obs;
   RxString projectID = ''.obs;
-
+  
   @override
   void onInit() {
     super.onInit();
@@ -214,22 +214,18 @@ class UpdateAccFormController extends GetxController {
   Future<void> submitForm() async {
     isLoading.value = true;
     try {
-      final String doerId =
-          doerRoleController.getDoerRoleIdByName(role.value) ?? "";
-
+      final String doerId = doerRoleController.getDoerRoleIdByName(role.value) ?? "";
+      
       final Map<String, String> formData = {
         'acc_id': accID.value,
         'project_id': projectID.value,
         'priority': priority.value,
         'doers': doerId,
-        'open_since': issueOpenSinceDate.value
-            .toIso8601String()
-            .split('T')
-            .first,
+        'open_since': issueOpenSinceDate.value.toIso8601String().split('T').first,
         'close_date_status': issueStatus.value ? '1' : '0',
         if (remark.value.trim().isNotEmpty) 'remark': remark.value.trim(),
       };
-
+      
       final Map<String, File> fileMap = {};
       if (attachmentFile.value != null && attachmentFile.value!.path != null) {
         final file = File(attachmentFile.value!.path!);
@@ -239,7 +235,7 @@ class UpdateAccFormController extends GetxController {
       }
 
       List<Object?>? list = await Networkcall().postFormDataMethod(
-        Networkutility.updateAccApi,
+        37,
         Networkutility.updateAcc,
         formData,
         fileMap,
@@ -247,13 +243,14 @@ class UpdateAccFormController extends GetxController {
       );
 
       if (list != null && list.isNotEmpty) {
-        List<GetUpdateSubmitResponse> response =
-            getUpdateSubmitResponseFromJson(jsonEncode(list));
+        List<GetUpdateSubmitResponse> response = getUpdateSubmitResponseFromJson(
+          jsonEncode(list),
+        );
 
         if (response[0].status == true) {
           AppSnackbarStyles.showSuccess(
             title: 'Success',
-            message: response[0].message ?? 'ACC updated successfully',
+            message: response[0].message ?? 'ACC updated successfully!',
           );
         } else {
           final String errorMessage = response[0].error?.isNotEmpty == true
@@ -271,10 +268,7 @@ class UpdateAccFormController extends GetxController {
       }
     } catch (e, stack) {
       log('Submit Error: $e', stackTrace: stack);
-      AppSnackbarStyles.showError(
-        title: "Error",
-        message: "Something went wrong. Please try again.",
-      );
+      AppSnackbarStyles.showError(title: "Error", message: "Something went wrong. Please try again.");
     } finally {
       isLoading.value = false;
     }

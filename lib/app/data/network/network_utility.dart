@@ -111,6 +111,15 @@ class Networkutility {
   static String getMilestones = "${baseUrl + "milestones"}";
   static int getMilestonesApi = 36;
 
+    static String addAcc = "${baseUrl + "acc/set"}";
+  static int addAccApi = 37;
+  static String updateAcc = "${baseUrl + "acc/closure"}";
+  static int updateAccApi = 38;
+
+  
+
+  
+
   
 }
 
