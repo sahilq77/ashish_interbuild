@@ -471,6 +471,9 @@ class Networkcall {
         String str = "[${response.body}]";
 
         switch (requestCode) {
+            case 37:
+            final addAccc = getUpdateSubmitResponseFromJson(str);
+            return addAccc;
           case 38:
             final updateACC = getUpdateSubmitResponseFromJson(str);
             return updateACC;

@@ -1,12 +1,19 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:ashishinterbuild/app/data/models/acc/get_update_submit_response.dart';
+import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/milestone/milestone_controller.dart'
     show MilestoneController;
 import 'package:ashishinterbuild/app/modules/global_controller/package/package_name_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart'
+    show AppSnackbarStyles;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +71,7 @@ class AccFieldSet {
 }
 
 class AddAccIssueFormController extends GetxController {
+  RxBool isLoading = false.obs;
   final RxList<String> priorities = ['Critical', 'High', 'Medium', 'Low'].obs;
   final RxList<String> keyDelayOptions = ['Yes', 'No'].obs;
 
@@ -76,6 +84,7 @@ class AddAccIssueFormController extends GetxController {
   late final AccCategoryController accCategoryController;
   late final DoerRoleController doerRoleController;
   late final MilestoneController milestoneController;
+  final AccController listController = Get.put(AccController());
 
   @override
   void onInit() {
@@ -193,8 +202,8 @@ class AddAccIssueFormController extends GetxController {
   }
 
   // ========= SUBMIT FORM =========
-  void submitForm() {
-    // Check validity
+  void submitForm(BuildContext context) async {
+    // Validate all field sets
     for (int i = 0; i < fieldSets.length; i++) {
       if (!fieldSets[i].isValid) {
         Get.snackbar(
@@ -207,28 +216,119 @@ class AddAccIssueFormController extends GetxController {
       }
     }
 
-    // All good → Process data
-    for (int i = 0; i < fieldSets.length; i++) {
-      final fs = fieldSets[i];
-      log('--- Row ${i + 1} ---');
-      log('Project: ${fs.selectedProject.value}');
-      log('Package: ${fs.selectedPackage.value}');
-      log('ACC Category: ${fs.accCategory.value}');
-      log('Priority: ${fs.priority.value}');
-      log('Key Delay: ${fs.keyDelayEvents.value}');
-      log('Milestone: ${fs.affectedMilestone.value}');
-      log('Details: ${fs.briefDetails.value}');
-      log('Date: ${fs.issueOpenDate.value}');
-      log('Role: ${fs.role.value}');
-      log('File: ${fs.attachmentFileName.value}');
-    }
+    isLoading.value = true;
 
-    Get.snackbar(
-      "Success",
-      "All ${fieldSets.length} entries submitted!",
-      backgroundColor: Colors.green,
-    );
-    // TODO: Send to API here
+    try {
+      // Prepare form data and files
+      var formData = <String, String>{};
+      var fileMap = <String, File>{};
+
+      for (int i = 0; i < fieldSets.length; i++) {
+        final fs = fieldSets[i];
+
+        // Get IDs using your global controllers
+        final projectId = projectdController.getProjectIdByName(
+          fs.selectedProject.value,
+        );
+        final packageId = packageNameController.getPackageIdByName(
+          fs.selectedPackage.value,
+        );
+        final categoryId = accCategoryController.getAccCategoryIdByName(
+          fs.accCategory.value,
+        );
+        final milestoneId = milestoneController.getMilestoneIdByName(
+          fs.affectedMilestone.value,
+        );
+        final doerId = doerRoleController.getDoerRoleIdByName(fs.role.value);
+
+        if (packageId == null ||
+            categoryId == null ||
+            milestoneId == null ||
+            doerId == null) {
+          Get.snackbar(
+            "Error",
+            "Invalid selection in row ${i + 1}. Please reselect.",
+          );
+          isLoading.value = false;
+          return;
+        }
+
+        // Map fields to API keys
+        formData['acc_data[$i][project_id]'] = projectId ?? "";
+        formData['acc_data[$i][acc_packages]'] = packageId;
+        formData['acc_data[$i][acc_categories]'] = categoryId;
+        formData['acc_data[$i][priority]'] = fs.priority.value.isEmpty
+            ? 'Medium'
+            : fs.priority.value;
+        formData['acc_data[$i][details]'] = fs.briefDetails.value
+            .trim(); // Main description
+        formData['acc_data[$i][event_details]'] =
+            fs.keyDelayEvents.value == 'Yes'
+            ? '1'
+            : '0'; // Optional: better key
+        // OR if backend strictly wants "event_details" for Yes/No too:
+        // formData['acc_data[$i][event_details]'] = fs.keyDelayEvents.value; // override if needed
+
+        formData['acc_data[$i][milestones]'] = milestoneId;
+        formData['acc_data[$i][doers]'] = doerId;
+        formData['acc_data[$i][open_since]'] = fs.issueOpenDate.value
+            .toIso8601String()
+            .split('T')
+            .first;
+
+        // Add attachment if exists
+        if (fs.attachmentFile.value != null &&
+            fs.attachmentFile.value!.path != null) {
+          final file = File(fs.attachmentFile.value!.path!);
+          if (await file.exists()) {
+            fileMap['attachment_file[$i]'] = file;
+          }
+        }
+      }
+
+      // Call API
+      List<Object?>? responseList = await Networkcall().postFormDataMethod(
+        Networkutility.addAccApi,
+        Networkutility.addAcc,
+        formData,
+        fileMap, // Send null if no files
+        Get.context!,
+      );
+
+      if (responseList != null && responseList.isNotEmpty) {
+        List<GetUpdateSubmitResponse> response =
+            getUpdateSubmitResponseFromJson(jsonEncode(responseList));
+
+        if (response[0].status == true) {
+          AppSnackbarStyles.showSuccess(
+            title: 'Success',
+            message: response[0].message ?? 'ACC added successfully!',
+          );
+          Navigator.pop(context);
+          listController.fetchWFUList(context: Get.context!, reset: true);
+        } else {
+          AppSnackbarStyles.showError(
+            title: 'Failed',
+            message: response[0].error?.isNotEmpty == true
+                ? response[0].error!
+                : response[0].message ?? "Failed to submit",
+          );
+        }
+      } else {
+        AppSnackbarStyles.showError(
+          title: 'No Response',
+          message: 'Server did not respond',
+        );
+      }
+    } catch (e, stack) {
+      log('Submit Error: $e', stackTrace: stack);
+      AppSnackbarStyles.showError(
+        title: "Error",
+        message: "Failed to submit. Please try again.",
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // ========= REFRESH =========

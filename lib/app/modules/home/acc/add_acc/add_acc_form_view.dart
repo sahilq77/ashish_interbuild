@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/acc_category/acc_category_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/milestone/milestone_binding.dart';
@@ -39,6 +40,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
       appBar: _buildAppbar(),
       body: Form(
         key: _formKey,
+        autovalidateMode: AutovalidateMode.onUnfocus,
         child: RefreshIndicator(
           onRefresh: controller.onRefresh,
           child: SingleChildScrollView(
@@ -244,7 +246,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      controller.submitForm();
+                      controller.submitForm(context);
                     }
                   },
                   style: AppButtonStyles.elevatedLargeBlack(),
@@ -315,6 +317,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
         const SizedBox(height: 8),
         TextFormField(
           initialValue: initialValue,
+          inputFormatters: [SecureTextInputFormatter.deny()],
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hint,
