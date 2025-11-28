@@ -296,6 +296,18 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                     AppButtonStyles.outlinedExtraSmallBlack(),
                                                 onPressed: () => Get.toNamed(
                                                   AppRoutes.updateAccForm,
+                                                  arguments: {
+                                                    "acc_id": controller
+                                                        .getFieldValue(
+                                                      sheet,
+                                                      "acc_id",
+                                                    ),
+                                                    "project_id": controller
+                                                        .getFieldValue(
+                                                      sheet,
+                                                      "project_id",
+                                                    ),
+                                                  },
                                                 ),
                                                 child: Text(
                                                   "Update",
