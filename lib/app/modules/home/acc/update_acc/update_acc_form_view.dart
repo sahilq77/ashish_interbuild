@@ -2,6 +2,7 @@ import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_ro
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
+import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class UpdateAccFormView extends StatefulWidget {
 
 class _UpdateAccFormViewState extends State<UpdateAccFormView> {
   final doerRoleController = Get.find<DoerRoleController>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final UpdateAccFormController controller = Get.put(
@@ -26,104 +28,123 @@ class _UpdateAccFormViewState extends State<UpdateAccFormView> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
-      body: RefreshIndicator(
-        onRefresh: controller.onRefresh,
-        child: SingleChildScrollView(
-          padding: ResponsiveHelper.padding(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Priority *',
-                value: controller.priority.value,
-                items: controller.priorities,
-                onChanged: controller.onPriorityChanged,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please select a priority'
-                    : null,
-                hint: 'Select Priority',
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Role *',
-                  value: controller.role.value,
-                  items: doerRoleController.doerRoleNames,
-                  onChanged: controller.onRoleChanged,
+      body: Form(
+        key: _formKey,
+        child: RefreshIndicator(
+          onRefresh: controller.onRefresh,
+          child: SingleChildScrollView(
+            padding: ResponsiveHelper.padding(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                _buildDropdownField(
+                  label: 'Priority *',
+                  value: controller.priority.value,
+                  items: controller.priorities,
+                  onChanged: controller.onPriorityChanged,
                   validator: (value) => value == null || value.isEmpty
-                      ? 'Please select a role'
+                      ? 'Please select a priority'
                       : null,
-                  hint: 'Select Doer',
+                  hint: 'Select Priority',
                 ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDateField(
-                label: 'Issue Open Since Date *',
-                selectedDate: controller.issueOpenSinceDate.value,
-                onDateChanged: controller.onIssueOpenSinceDateChanged,
-                hint: 'Enter Date',
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Row(
-                children: [
-                  Obx(
-                    () => Transform.scale(
-                      scale: 1.1,
-                      child: Checkbox(
-                        value: controller.issueStatus.value,
-                        activeColor: AppColors.blue,
-                        onChanged: controller.issueStatusChanged,
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                Obx(
+                  () => _buildDropdownField(
+                    label: 'Role *',
+                    value: controller.role.value,
+                    items: doerRoleController.doerRoleNames,
+                    onChanged: controller.onRoleChanged,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Please select a role'
+                        : null,
+                    hint: 'Select Doer',
+                  ),
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                _buildDateField(
+                  label: 'Issue Open Since Date *',
+                  selectedDate: controller.issueOpenSinceDate.value,
+                  onDateChanged: controller.onIssueOpenSinceDateChanged,
+                  hint: 'Enter Date',
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                Row(
+                  children: [
+                    Obx(
+                      () => Transform.scale(
+                        scale: 1.1,
+                        child: Checkbox(
+                          value: controller.issueStatus.value,
+                          activeColor: AppColors.blue,
+                          onChanged: controller.issueStatusChanged,
+                          isError: controller.issueStatus.value == false,
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    "Issue Close Status *",
-                    style: AppStyle.reportCardRowCount.responsive,
-                  ),
-                ],
-              ),
-              // _buildDateField(
-              //   label: 'Issue Close Date *',
-              //   selectedDate: controller.issueCloseDate.value,
-              //   onDateChanged: controller.onIssueCloseDateChanged,
-              //   hint: 'Enter Date',
-              // ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildAttachmentField(
-                  label: 'Attachment',
-                  fileName: controller.attachmentFileName.value,
-                  onAttachmentPicked: controller.pickAttachment,
-                  hint: 'Choose File',
+                    Text(
+                      "Issue Close Status *",
+                      style: AppStyle.reportCardRowCount.responsive,
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildTextFormField(
-                label: 'Remark',
-                initialValue: controller.remark.value,
-                onChanged: controller.onRemarkChanged,
-                hint: 'Enter Remark',
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
-              Obx(() => ElevatedButton(
-                onPressed: controller.isLoading.value ? null : controller.submitForm,
-                style: AppButtonStyles.elevatedLargeBlack(),
-                child: controller.isLoading.value
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(
-                        'Update',
-                        style: AppStyle.buttonTextPoppinsWhite.responsive,
-                      ),
-              )),
-            ],
+
+                // _buildDateField(
+                //   label: 'Issue Close Date *',
+                //   selectedDate: controller.issueCloseDate.value,
+                //   onDateChanged: controller.onIssueCloseDateChanged,
+                //   hint: 'Enter Date',
+                // ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                Obx(
+                  () => _buildAttachmentField(
+                    label: 'Attachment',
+                    fileName: controller.attachmentFileName.value,
+                    onAttachmentPicked: controller.pickAttachment,
+                    hint: 'Choose File',
+                  ),
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                _buildTextFormField(
+                  label: 'Remark',
+                  initialValue: controller.remark.value,
+                  onChanged: controller.onRemarkChanged,
+                  hint: 'Enter Remark',
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
+                Obx(
+                  () => ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate() &&
+                          controller.issueStatus.value == true) {
+                        controller.submitForm(context);
+                      } else {
+                        AppSnackbarStyles.showError(
+                          title: "Failed",
+                          message: "Please fill required fields",
+                        );
+                      }
+                    },
+                    style: AppButtonStyles.elevatedLargeBlack(),
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Update',
+                            style: AppStyle.buttonTextPoppinsWhite.responsive,
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

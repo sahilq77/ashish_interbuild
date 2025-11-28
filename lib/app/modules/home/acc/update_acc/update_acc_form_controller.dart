@@ -6,6 +6,8 @@ import 'package:ashishinterbuild/app/data/models/acc/get_update_submit_response.
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/acc/acc_controller.dart'
+    show AccController;
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart' show AppUtility;
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -18,6 +20,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../data/network/networkcall.dart';
 
 class UpdateAccFormController extends GetxController {
+  final AccController listController = Get.put(AccController());
   RxBool isLoading = false.obs;
   final RxString priority = 'Low'.obs;
   var attachmentFile = Rxn<PlatformFile>();
@@ -211,7 +214,7 @@ class UpdateAccFormController extends GetxController {
     }
   }
 
-  Future<void> submitForm() async {
+  Future<void> submitForm(BuildContext context) async {
     isLoading.value = true;
     try {
       final String doerId =
@@ -255,6 +258,8 @@ class UpdateAccFormController extends GetxController {
             title: 'Success',
             message: response[0].message ?? 'ACC updated successfully',
           );
+          Navigator.pop(context);
+          listController.fetchWFUList(context: Get.context!, reset: true);
         } else {
           final String errorMessage = response[0].error?.isNotEmpty == true
               ? response[0].error!
