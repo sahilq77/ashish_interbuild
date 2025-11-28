@@ -1,3 +1,4 @@
+import 'package:ashishinterbuild/app/common/custominputformatters/securetext_input_formatter.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/doer_role/doer_role_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
@@ -202,6 +203,7 @@ class _UpdateAccFormViewState extends State<UpdateAccFormView> {
         TextFormField(
           initialValue: initialValue,
           onChanged: onChanged,
+          inputFormatters: [SecureTextInputFormatter.deny()],
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
