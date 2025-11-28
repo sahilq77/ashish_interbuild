@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-class AddAccIssueFormController extends GetxController {
+class AddCcIssueFormController extends GetxController {
   final RxString accCategory = ''.obs;
   final RxList<String> accCategories = <String>['Category A', 'Category B', 'Category C'].obs;
 

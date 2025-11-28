@@ -1,4 +1,5 @@
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_controller.dart';
+import 'package:ashishinterbuild/app/modules/home/client_commitment/edit_client_commitment/edit_client_commitment_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
@@ -12,8 +13,8 @@ class EditClientCommitmentFormView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AddAccIssueFormController controller = Get.put(
-      AddAccIssueFormController(),
+    final EditClientCommitmentController controller = Get.put(
+      EditClientCommitmentController(),
     );
     ResponsiveHelper.init(context);
     return Scaffold(
@@ -78,8 +79,8 @@ class EditClientCommitmentFormView extends StatelessWidget {
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDropdownField(
                 label: 'Category*',
-                value: controller.category.value,
-                items: controller.categories,
+                value: controller.accCategory.value,
+                items: controller.accCategories,
                 onChanged: controller.onPriorityChanged,
                 validator: (value) => value == null || value.isEmpty
                     ? 'Please select a category'

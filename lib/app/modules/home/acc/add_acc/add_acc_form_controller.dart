@@ -24,7 +24,7 @@ class AddAccIssueFormController extends GetxController {
   //   'Alpha Package',
   // ].obs;
   final RxString accCategory = ''.obs;
-  final RxList<String> accCategories = <String>['Amit', 'Ganesh', 'Sumit'].obs;
+ 
 
   final RxString priority = ''.obs;
   final RxList<String> priorities = <String>[
