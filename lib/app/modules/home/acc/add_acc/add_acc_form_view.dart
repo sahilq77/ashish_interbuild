@@ -26,6 +26,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
   final accCategoryController = Get.find<AccCategoryController>();
   final doerRoleController = Get.find<DoerRoleController>();
   final milestoneController = Get.find<MilestoneController>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,190 +37,224 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: _buildAppbar(),
-      body: RefreshIndicator(
-        onRefresh: controller.onRefresh,
-        child: SingleChildScrollView(
-          padding: ResponsiveHelper.padding(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Dynamic Field Sets
-              Obx(
-                () => ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.fieldSets.length,
-                  itemBuilder: (ctx, index) {
-                    final fs = controller.fieldSets[index];
-                    return Column(
-                      children: [
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Project *',
-                            value: fs.selectedProject.value,
-                            items: projectdController.projectNames,
+      body: Form(
+        key: _formKey,
+        child: RefreshIndicator(
+          onRefresh: controller.onRefresh,
+          child: SingleChildScrollView(
+            padding: ResponsiveHelper.padding(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Dynamic Field Sets
+                Obx(
+                  () => ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.fieldSets.length,
+                    itemBuilder: (ctx, index) {
+                      final fs = controller.fieldSets[index];
+                      return Column(
+                        children: [
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Project *',
+                              value: fs.selectedProject.value,
+                              items: projectdController.projectNames,
+                              onChanged: (v) =>
+                                  controller.onProjectChanged(index, v),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select a Project'
+                                  : null,
+                              hint: 'Select Project',
+                            ),
+                          ),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Package *',
+                              value: fs.selectedPackage.value,
+                              items: packageNameController.packageNames,
+                              onChanged: (v) =>
+                                  controller.onPackageChanged(index, v),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select a Package'
+                                  : null,
+                              hint: 'Select Package',
+                            ),
+                          ),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'ACC Category *',
+                              value: fs.accCategory.value,
+                              items: accCategoryController.accCategoryNames,
+                              onChanged: (v) =>
+                                  controller.onAccCategoryChanged(index, v),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select an ACC category'
+                                  : null,
+                              hint: 'Select Category',
+                            ),
+                          ),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+
+                          _buildDropdownField(
+                            label: 'Priority',
+                            value: fs.priority.value,
+                            items: controller.priorities,
                             onChanged: (v) =>
-                                controller.onProjectChanged(index, v),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select a Project'
-                                : null,
-                            hint: 'Select Project',
+                                controller.onPriorityChanged(index, v),
+                            hint: 'Select Priority',
                           ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
 
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Package *',
-                            value: fs.selectedPackage.value,
-                            items: packageNameController.packageNames,
+                          _buildDropdownField(
+                            label: 'Key Delay Events',
+                            value: fs.keyDelayEvents.value,
+                            items: controller.keyDelayOptions,
                             onChanged: (v) =>
-                                controller.onPackageChanged(index, v),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select a Package'
-                                : null,
-                            hint: 'Select Package',
+                                controller.onKeyDelayEventsChanged(index, v),
+                            hint: 'Yes',
                           ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
 
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'ACC Category *',
-                            value: fs.accCategory.value,
-                            items: accCategoryController.accCategoryNames,
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Affected Milestone *',
+                              value: fs.affectedMilestone.value,
+                              items: milestoneController.milestoneNames,
+                              onChanged: (v) => controller
+                                  .onAffectedMilestoneChanged(index, v),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select an affected milestone'
+                                  : null,
+                              hint: 'Select Milestone',
+                            ),
+                          ),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+
+                          _buildTextFormField(
+                            label: 'Brief Details *',
+                            initialValue: fs.briefDetails.value,
                             onChanged: (v) =>
-                                controller.onAccCategoryChanged(index, v),
+                                controller.onBriefDetailsChanged(index, v),
+                            hint: 'Detail',
                             validator: (value) => value == null || value.isEmpty
-                                ? 'Please select an ACC category'
+                                ? 'Please enter brief details'
                                 : null,
-                            hint: 'Select Category',
                           ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-                        _buildDropdownField(
-                          label: 'Priority',
-                          value: fs.priority.value,
-                          items: controller.priorities,
-                          onChanged: (v) =>
-                              controller.onPriorityChanged(index, v),
-                          hint: 'Select Priority',
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-                        _buildDropdownField(
-                          label: 'Key Delay Events',
-                          value: fs.keyDelayEvents.value,
-                          items: controller.keyDelayOptions,
-                          onChanged: (v) =>
-                              controller.onKeyDelayEventsChanged(index, v),
-                          hint: 'Yes',
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Affected Milestone *',
-                            value: fs.affectedMilestone.value,
-                            items: milestoneController.milestoneNames,
-                            onChanged: (v) =>
-                                controller.onAffectedMilestoneChanged(index, v),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select an affected milestone'
-                                : null,
-                            hint: 'Select Milestone',
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
                           ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
 
-                        _buildTextFormField(
-                          label: 'Brief Details *',
-                          initialValue: fs.briefDetails.value,
-                          onChanged: (v) =>
-                              controller.onBriefDetailsChanged(index, v),
-                          hint: 'Detail',
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Please enter brief details'
-                              : null,
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-                        _buildDateField(
-                          label: 'Issue Open Date *',
-                          selectedDate: fs.issueOpenDate.value,
-                          onDateChanged: (date) =>
-                              controller.onIssueOpenDateChanged(index, date),
-                          hint: 'Enter Date',
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-                        Obx(
-                          () => _buildDropdownField(
-                            label: 'Role *',
-                            value: fs.role.value,
-                            items: doerRoleController.doerRoleNames,
-                            onChanged: (v) =>
-                                controller.onRoleChanged(index, v),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select a role'
-                                : null,
-                            hint: 'Select Doer',
+                          _buildDateField(
+                            label: 'Issue Open Date *',
+                            selectedDate: fs.issueOpenDate.value,
+                            onDateChanged: (date) =>
+                                controller.onIssueOpenDateChanged(index, date),
+                            hint: 'Enter Date',
                           ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-                        Obx(
-                          () => _buildAttachmentField(
-                            label: 'Attachment',
-                            fileName: fs.attachmentFileName.value,
-                            onAttachmentPicked: () =>
-                                controller.pickAttachment(index),
-                            hint: 'Choose File',
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
                           ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
 
-                        // Delete Button
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => controller.removeFieldSet(index),
-                            tooltip: 'Delete row',
+                          Obx(
+                            () => _buildDropdownField(
+                              label: 'Role *',
+                              value: fs.role.value,
+                              items: doerRoleController.doerRoleNames,
+                              onChanged: (v) =>
+                                  controller.onRoleChanged(index, v),
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Please select a role'
+                                  : null,
+                              hint: 'Select Doer',
+                            ),
                           ),
-                        ),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
 
-                        if (index < controller.fieldSets.length - 1)
-                          Divider(color: AppColors.grey, thickness: 1),
-                        SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-                      ],
-                    );
+                          Obx(
+                            () => _buildAttachmentField(
+                              label: 'Attachment',
+                              fileName: fs.attachmentFileName.value,
+                              onAttachmentPicked: () =>
+                                  controller.pickAttachment(index),
+                              hint: 'Choose File',
+                            ),
+                          ),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+
+                          // Delete Button
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => controller.removeFieldSet(index),
+                              tooltip: 'Delete row',
+                            ),
+                          ),
+
+                          if (index < controller.fieldSets.length - 1)
+                            Divider(color: AppColors.grey, thickness: 1),
+                          SizedBox(
+                            height: ResponsiveHelper.screenHeight * 0.02,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+
+                // Add More Button
+                ElevatedButton(
+                  onPressed: controller.addFieldSet,
+                  style: AppButtonStyles.elevatedLargeBlack(),
+                  child: Text(
+                    'Add More',
+                    style: AppStyle.buttonTextPoppinsWhite.responsive,
+                  ),
+                ),
+                SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+
+                // Submit Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      controller.submitForm();
+                    }
                   },
+                  style: AppButtonStyles.elevatedLargeBlack(),
+                  child: Text(
+                    'Submit',
+                    style: AppStyle.buttonTextPoppinsWhite.responsive,
+                  ),
                 ),
-              ),
-
-              // Add More Button
-              ElevatedButton(
-                onPressed: controller.addFieldSet,
-                style: AppButtonStyles.elevatedLargeBlack(),
-                child: Text(
-                  'Add More',
-                  style: AppStyle.buttonTextPoppinsWhite.responsive,
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-
-              // Submit Button
-              ElevatedButton(
-                onPressed: controller.submitForm,
-                style: AppButtonStyles.elevatedLargeBlack(),
-                child: Text(
-                  'Submit',
-                  style: AppStyle.buttonTextPoppinsWhite.responsive,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
