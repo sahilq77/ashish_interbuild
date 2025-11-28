@@ -7,6 +7,8 @@ import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/modules/global_controller/weekly_period/weekly_period_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone/zone_controller.dart';
+import 'package:ashishinterbuild/app/modules/global_controller/zone_locations/zone_locations_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/weekly_work_inspection/weekly_inspection/weekly_inspection_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart';
@@ -81,6 +83,8 @@ class UpdateWeeklyInspectionController extends GetxController {
   RxString startDate = "".obs;
   RxString endDate = "".obs;
   final WeeklyPeriodController weeklypController = Get.find();
+  final zoneController = Get.put(ZoneController());
+  final zoneLocationController = Get.put(ZoneLocationController());
   @override
   void onClose() {
     searchController.dispose();
@@ -139,6 +143,10 @@ class UpdateWeeklyInspectionController extends GetxController {
     final String dateFilter = selectedDate.value != null
         ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
         : DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final zoneId = zoneController.getZoneIdByName(selectedZone.value);
+    final zoneLocationId = zoneLocationController.getZoneLocationIdByName(
+      selectedZoneLocation.value,
+    );
 
     final parts = <String>[
       'project_id=${wiController.projectId.value}',
@@ -147,6 +155,8 @@ class UpdateWeeklyInspectionController extends GetxController {
       'selected_system_id=${systemId.value}',
       'filter_inspection_from_date=${filterInspectionFromDate.value}',
       'filter_inspection_to_date=${filterInspectionToDate.value}',
+      'filter_zone=${selectedZone.value}',
+      'filter_zone_location=${zoneLocationId}',
     ];
 
     if (selectedZone.value.isNotEmpty) {
