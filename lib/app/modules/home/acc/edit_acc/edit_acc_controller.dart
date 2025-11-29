@@ -66,18 +66,18 @@ class EditAccController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (Get.context != null) {
-        projectdController.fetchProjects(context: Get.context!);
-        accCategoryController.fetchAccCategories(context: Get.context!);
-        doerRoleController.fetchDoerRoles(context: Get.context!);
-        milestoneController.fetchMilestones(context: Get.context!);
-        _bindFormData();
+        await projectdController.fetchProjects(context: Get.context!);
+        await accCategoryController.fetchAccCategories(context: Get.context!);
+        await doerRoleController.fetchDoerRoles(context: Get.context!);
+        await milestoneController.fetchMilestones(context: Get.context!);
+        await _bindFormData();
       }
     });
   }
 
-  void _bindFormData() async {
+  Future<void> _bindFormData() async {
     final args = Get.arguments as Map<String, dynamic>?;
     isLoadingArg.value = true;
     // Log the raw arguments first
