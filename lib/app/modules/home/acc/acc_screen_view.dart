@@ -307,6 +307,33 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                           sheet,
                                                           "project_id",
                                                         ),
+
+                                                    "issue_status": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "close_date_status",
+                                                        ),
+                                                    "role": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "doer_role_id",
+                                                        ),
+                                                    "issue_open_date":
+                                                        controller
+                                                            .getFieldValue(
+                                                              sheet,
+                                                              "Issue Open Date",
+                                                            ),
+                                                    "attachment": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "Attachment",
+                                                        ),
+                                                    "remark": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "Remark",
+                                                        ),
                                                   },
                                                 ),
                                                 child: Text(
@@ -395,7 +422,7 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                           sheet,
                                                           "doer_role_id",
                                                         ),
-                                                         "attachment": controller
+                                                    "attachment": controller
                                                         .getFieldValue(
                                                           sheet,
                                                           "Attachment",

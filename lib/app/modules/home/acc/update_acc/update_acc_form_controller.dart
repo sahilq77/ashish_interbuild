@@ -33,7 +33,7 @@ class UpdateAccFormController extends GetxController {
   RxBool issueStatus = false.obs;
   final RxString role = ''.obs;
 
-  final Rx<DateTime> issueOpenSinceDate = DateTime(2025, 10, 19).obs;
+  final Rx<DateTime> issueOpenSinceDate = DateTime.now().obs;
   final Rx<DateTime> issueCloseDate = DateTime.now().obs;
 
   final RxString attachmentFileName = 'No file chosen'.obs;
@@ -89,7 +89,7 @@ class UpdateAccFormController extends GetxController {
   Future<void> onRefresh() async {
     priority.value = 'Low';
     role.value = 'Production PMS PC';
-    issueOpenSinceDate.value = DateTime(2025, 10, 19);
+    issueOpenSinceDate.value = DateTime.now();
     issueCloseDate.value = DateTime.now();
     attachmentFileName.value = 'No file chosen';
     remark.value = '';
