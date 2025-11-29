@@ -395,6 +395,11 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                           sheet,
                                                           "doer_role_id",
                                                         ),
+                                                         "attachment": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "Attachment",
+                                                        ),
                                                   },
                                                 ),
                                                 child: Icon(Icons.edit),

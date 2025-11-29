@@ -263,9 +263,7 @@ class AddAccIssueFormController extends GetxController {
         formData['acc_data[$i][details]'] = fs.briefDetails.value
             .trim(); // Main description
         formData['acc_data[$i][event_details]'] =
-            fs.keyDelayEvents.value == 'Yes'
-            ? '1'
-            : '0'; // Optional: better key
+            fs.keyDelayEvents.value; // Optional: better key
         // OR if backend strictly wants "event_details" for Yes/No too:
         // formData['acc_data[$i][event_details]'] = fs.keyDelayEvents.value; // override if needed
 

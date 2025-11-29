@@ -7,6 +7,7 @@ import 'package:ashishinterbuild/app/modules/global_controller/package/package_n
 import 'package:ashishinterbuild/app/modules/global_controller/project_name/project_name_dropdown_controller.dart';
 import 'package:ashishinterbuild/app/modules/home/acc/add_acc/add_acc_form_controller.dart';
 import 'package:ashishinterbuild/app/utils/app_colors.dart';
+import 'package:ashishinterbuild/app/utils/date_formater.dart';
 import 'package:ashishinterbuild/app/utils/responsive_utils.dart';
 import 'package:ashishinterbuild/app/widgets/app_button_style.dart';
 import 'package:ashishinterbuild/app/widgets/app_style.dart';
@@ -359,7 +360,7 @@ class _AddAccIssueFormViewState extends State<AddAccIssueFormView> {
           child: AbsorbPointer(
             child: TextFormField(
               controller: TextEditingController(
-                text: selectedDate.toLocal().toString().split(' ')[0],
+                text: DateFormater.formatDate(selectedDate.toString()),
               ),
               decoration: InputDecoration(
                 hintText: hint,
