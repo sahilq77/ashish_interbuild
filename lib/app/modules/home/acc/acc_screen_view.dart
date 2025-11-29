@@ -299,14 +299,14 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                   arguments: {
                                                     "acc_id": controller
                                                         .getFieldValue(
-                                                      sheet,
-                                                      "acc_id",
-                                                    ),
+                                                          sheet,
+                                                          "acc_id",
+                                                        ),
                                                     "project_id": controller
                                                         .getFieldValue(
-                                                      sheet,
-                                                      "project_id",
-                                                    ),
+                                                          sheet,
+                                                          "project_id",
+                                                        ),
                                                   },
                                                 ),
                                                 child: Text(
@@ -343,6 +343,59 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                     AppButtonStyles.outlinedExtraSmallBlack(),
                                                 onPressed: () => Get.toNamed(
                                                   AppRoutes.editAccForm,
+                                                  arguments: {
+                                                    "acc_id": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "acc_id",
+                                                        ),
+                                                    "project_id": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "project_id",
+                                                        ),
+                                                    "package_id": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "package_id",
+                                                        ),
+                                                    "acc_category": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "acc_category_id",
+                                                        ),
+                                                    "priority": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "Priority",
+                                                        ),
+                                                    "key_delay_events":
+                                                        controller.getFieldValue(
+                                                          sheet,
+                                                          "Key Delay Events",
+                                                        ),
+                                                    "milestone_id": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "milestone_id",
+                                                        ),
+                                                    "brief_detail": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "Brief Detail about Issue",
+                                                        ),
+                                                    "issue_open_date":
+                                                        controller
+                                                            .getFieldValue(
+                                                              sheet,
+                                                              "Issue Open Date",
+                                                            ),
+                                                    "role": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "doer_role_id",
+                                                        ),
+                                                  },
                                                 ),
                                                 child: Icon(Icons.edit),
                                               ),

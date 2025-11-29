@@ -79,20 +79,24 @@ class _EditAccFormViewState extends State<EditAccFormView> {
                 ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Priority',
-                value: controller.priority.value,
-                items: controller.priorities,
-                onChanged: controller.onPriorityChanged,
-                hint: 'Select Priority',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Priority',
+                  value: controller.priority.value,
+                  items: controller.priorities,
+                  onChanged: controller.onPriorityChanged,
+                  hint: 'Select Priority',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDropdownField(
-                label: 'Key Delay Events',
-                value: controller.keyDelayEvents.value,
-                items: controller.keyDelayOptions,
-                onChanged: controller.onKeyDelayEventsChanged,
-                hint: 'Yes',
+              Obx(
+                () => _buildDropdownField(
+                  label: 'Key Delay Events',
+                  value: controller.keyDelayEvents.value,
+                  items: controller.keyDelayOptions,
+                  onChanged: controller.onKeyDelayEventsChanged,
+                  hint: 'Plese Select Yes/No',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               Obx(
@@ -110,13 +114,14 @@ class _EditAccFormViewState extends State<EditAccFormView> {
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildTextFormField(
                 label: 'Brief Details *',
-                initialValue: controller.briefDetails.value,
+                controller: controller.briefDetails,
                 onChanged: controller.onBriefDetailsChanged,
                 hint: 'Detail',
                 validator: (value) => value == null || value.isEmpty
                     ? 'Please enter brief details'
                     : null,
               ),
+
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               _buildDateField(
                 label: 'Issue Open Date *',
@@ -193,7 +198,10 @@ class _EditAccFormViewState extends State<EditAccFormView> {
               ),
             ),
           ),
-          popupProps: const PopupProps.menu(showSearchBox: true),
+          popupProps: const PopupProps.menu(
+            showSearchBox: true,
+            showSelectedItems: true,
+          ),
         ),
       ],
     );
@@ -201,10 +209,10 @@ class _EditAccFormViewState extends State<EditAccFormView> {
 
   Widget _buildTextFormField({
     required String label,
-    required String initialValue,
     required Function(String)? onChanged,
     required String hint,
     String? Function(String?)? validator,
+    required TextEditingController? controller,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +220,7 @@ class _EditAccFormViewState extends State<EditAccFormView> {
         Text(label, style: AppStyle.reportCardRowCount.responsive),
         const SizedBox(height: 8),
         TextFormField(
-          initialValue: initialValue,
+          controller: controller,
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hint,
