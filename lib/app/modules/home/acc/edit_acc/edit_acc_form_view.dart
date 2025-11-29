@@ -155,7 +155,7 @@ class _EditAccFormViewState extends State<EditAccFormView> {
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
               ElevatedButton(
-                onPressed: controller.submitForm,
+                onPressed: () => controller.submitForm(context),
                 style: AppButtonStyles.elevatedLargeBlack(),
                 child: Text(
                   'Submit',
