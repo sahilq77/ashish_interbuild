@@ -51,6 +51,7 @@ class EditAccController extends GetxController {
 
   final RxString role = ''.obs;
   final RxString accId = ''.obs;
+  final RxString attchmentLink = ''.obs;
 
   var attachmentFile = Rxn<PlatformFile>();
   final RxString attachmentFileName = 'No file chosen'.obs;
@@ -93,8 +94,9 @@ ${args.entries.map((e) => '   • ${e.key}: ${e.value}').join('\n')}
 
     try {
       // 1. Project Binding
-      accId.value = args['acc_id'].toString();
 
+      accId.value = args['acc_id'].toString();
+      attchmentLink.value = args['attachment'].toString();
       developer.log('📂 ACC Card → ID: $accId');
       if (args['project_id'] != null) {
         final projectId = args['project_id'].toString();
