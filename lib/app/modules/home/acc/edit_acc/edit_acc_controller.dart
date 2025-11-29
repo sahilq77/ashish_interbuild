@@ -186,16 +186,28 @@ ${args.entries.map((e) => '   • ${e.key}: ${e.value}').join('\n')}
 
       // 8. Issue Open Date
       if (args['issue_open_date'] != null) {
+        final dateStr = args['issue_open_date'].toString().trim();
         try {
-          final parsedDate = DateTime.parse(args['issue_open_date']);
-          issueOpenDate.value = parsedDate;
-          developer.log('📅 Issue Open Date → $parsedDate');
+          final parts = dateStr.split('-');
+          if (parts.length == 3) {
+            final day = int.parse(parts[0]);
+            final month = int.parse(parts[1]);
+            final year = int.parse(parts[2]);
+
+            final parsedDate = DateTime(year, month, day);
+            issueOpenDate.value = parsedDate;
+            developer.log(
+              'Issue Open Date → $parsedDate (parsed from DD-MM-YYYY)',
+            );
+          } else {
+            throw FormatException('Invalid date format');
+          }
         } catch (e) {
-          issueOpenDate.value = DateTime.now();
           developer.log(
-            '⚠️ Failed to parse issue_open_date: ${args['issue_open_date']} → fallback to now',
+            'Failed to parse issue_open_date: "$dateStr" → using current date',
             error: e,
           );
+          issueOpenDate.value = DateTime.now();
         }
       }
 
@@ -283,7 +295,7 @@ ${args.entries.map((e) => '   • ${e.key}: ${e.value}').join('\n')}
     priority.value = '';
     keyDelayEvents.value = '';
     affectedMilestone.value = '';
-    briefDetails.text= '';
+    briefDetails.text = '';
     issueOpenDate.value = DateTime.now();
     role.value = '';
     attachmentFileName.value = 'No file chosen';

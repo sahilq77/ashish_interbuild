@@ -123,11 +123,13 @@ class _EditAccFormViewState extends State<EditAccFormView> {
               ),
 
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildDateField(
-                label: 'Issue Open Date *',
-                selectedDate: controller.issueOpenDate.value,
-                onDateChanged: controller.onIssueOpenDateChanged,
-                hint: 'Enter Date',
+              Obx(
+                () => _buildDateField(
+                  label: 'Issue Open Date *',
+                  selectedDate: controller.issueOpenDate.value,
+                  onDateChanged: controller.onIssueOpenDateChanged,
+                  hint: 'Enter Date',
+                ),
               ),
               SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
               Obx(
