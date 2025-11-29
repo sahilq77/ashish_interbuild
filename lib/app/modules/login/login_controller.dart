@@ -5,6 +5,7 @@ import 'package:ashishinterbuild/app/data/models/login/get_login_response.dart';
 import 'package:ashishinterbuild/app/data/network/exceptions.dart';
 import 'package:ashishinterbuild/app/data/network/networkcall.dart';
 import 'package:ashishinterbuild/app/data/network/network_utility.dart';
+import 'package:ashishinterbuild/app/data/service/notfication_services.dart';
 import 'package:ashishinterbuild/app/routes/app_routes.dart';
 import 'package:ashishinterbuild/app/utils/app_utility.dart';
 import 'package:ashishinterbuild/app/widgets/app_snackbar_styles.dart'; // <-- Added
@@ -21,14 +22,23 @@ class LoginController extends GetxController {
   final GlobalKey emailFieldKey = GlobalKey();
   final GlobalKey passwordFieldKey = GlobalKey();
   RxBool isLoading = false.obs;
-
+  RxString deviceToken = ''.obs;
+ NotificationServices notificationServices = NotificationServices();
   @override
   void onInit() {
     super.onInit();
+    notificationServices.firebaseInit(Get.context!);
+    notificationServices.setInteractMessage(Get.context!);
+    notificationServices.getDevicetoken().then((value) {
+      deviceToken.value=value;
+      log('Device Token ${value}');
+      // pushtoken = value;
+    });
     emailFocusNode = FocusNode();
     passwordFocusNode = FocusNode();
     emailFocusNode.addListener(_onUsernameFocusChange);
     passwordFocusNode.addListener(_onPasswordFocusChange);
+
   }
 
   void _onUsernameFocusChange() {
@@ -75,7 +85,7 @@ class LoginController extends GetxController {
     BuildContext? context,
     required String? mobile,
     required String? password,
-    required String? deviceToken,
+    // required String? deviceToken,
   }) async {
     log(AppUtility.authToken.toString());
 
@@ -83,6 +93,7 @@ class LoginController extends GetxController {
       final jsonBody = {
         "email": emailController.text.trim(),
         "password": passwordController.text.trim(),
+        "fcm_token":deviceToken.value
       };
 
       isLoading.value = true;

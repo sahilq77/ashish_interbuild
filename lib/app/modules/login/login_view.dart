@@ -133,7 +133,7 @@ class _LoginViewState extends State<LoginView> {
                           controller.login(
                             mobile: controller.emailController.text.trim(),
                             password: controller.passwordController.text,
-                            deviceToken: "",
+                            
                           );
                         }
                       }, // disabled when invalid
