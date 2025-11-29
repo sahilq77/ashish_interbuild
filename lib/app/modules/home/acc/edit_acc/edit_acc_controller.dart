@@ -359,6 +359,7 @@ ${args.entries.map((e) => '   • ${e.key}: ${e.value}').join('\n')}
           );
           Navigator.pop(context);
           listController.fetchWFUList(context: Get.context!, reset: true);
+          onRefresh();
         } else {
           AppSnackbarStyles.showError(
             title: 'Failed',
