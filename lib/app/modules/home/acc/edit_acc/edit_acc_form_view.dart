@@ -50,7 +50,9 @@ class _EditAccFormViewState extends State<EditAccFormView> {
         backgroundColor: AppColors.white,
         appBar: _buildAppbar(),
         body: RefreshIndicator(
-          onRefresh: controller.onRefresh,
+          onRefresh: () {
+            return Future.delayed(Duration(seconds: 1));
+          },
           child: SingleChildScrollView(
             padding: ResponsiveHelper.padding(16),
             child: Obx(

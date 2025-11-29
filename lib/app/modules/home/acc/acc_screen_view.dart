@@ -307,7 +307,11 @@ class _AccScreenViewState extends State<AccScreenView> {
                                                           sheet,
                                                           "project_id",
                                                         ),
-
+                                                    "priority": controller
+                                                        .getFieldValue(
+                                                          sheet,
+                                                          "Priority",
+                                                        ),
                                                     "issue_status": controller
                                                         .getFieldValue(
                                                           sheet,
