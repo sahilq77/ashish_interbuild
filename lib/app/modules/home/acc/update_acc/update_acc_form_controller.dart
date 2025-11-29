@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:ashishinterbuild/app/data/models/acc/get_update_submit_response.dart';
@@ -22,7 +23,7 @@ import '../../../../data/network/networkcall.dart';
 class UpdateAccFormController extends GetxController {
   final AccController listController = Get.put(AccController());
   RxBool isLoading = false.obs;
-  final RxString priority = 'Low'.obs;
+  final RxString priority = ''.obs;
   var attachmentFile = Rxn<PlatformFile>();
   final RxList<String> priorities = <String>[
     'Low',
@@ -38,32 +39,123 @@ class UpdateAccFormController extends GetxController {
 
   final RxString attachmentFileName = 'No file chosen'.obs;
 
-  final RxString remark = ''.obs;
+  final remark = TextEditingController();
+
   final doerRoleController = Get.find<DoerRoleController>();
   RxString accID = ''.obs;
   RxString projectID = ''.obs;
+  final RxString attchmentLink = ''.obs;
+
+  RxBool isLoadingArg = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>?;
-    if (args != null) {
-      accID.value = args["acc_id"] ?? "";
-      projectID.value = args["project_id"] ?? "";
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (Get.context != null) {
-        doerRoleController.fetchDoerRoles(context: Get.context!);
+        await doerRoleController.fetchDoerRoles(context: Get.context!);
+        await _bindFormData();
       }
     });
   }
 
+  Future<void> _bindFormData() async {
+    final args = Get.arguments as Map<String, dynamic>?;
+    isLoadingArg.value = true;
+    // Log the raw arguments first
+    if (args == null) {
+      developer.log(
+        '🔴 _bindFormData: No arguments passed (Get.arguments is null)',
+      );
+      return;
+    }
+
+    developer.log('''
+🟢 _bindFormData called with arguments:
+${args.entries.map((e) => '   • ${e.key}: ${e.value}').join('\n')}
+  ''');
+
+    try {
+      // 1. Project Binding
+
+      accID.value = args["acc_id"] ?? "";
+      projectID.value = args["project_id"] ?? "";
+      attchmentLink.value = args['attachment'] ?? "";
+      developer.log('📂 ACC Card → ID: ${accID.value}');
+
+      // 3. Priority
+      final priorityValue = args['priority']?.toString() ?? '';
+      priority.value = priorityValue;
+      developer.log('🔥 Priority → "$priorityValue"');
+      final issueStatuss = args['issue_status']?.toString() ?? '';
+      if (issueStatuss == "1") {
+        issueStatus.value = true;
+      }
+
+      // 6. Role (Doer Role)
+      if (args['role'] != null) {
+        final roleId = args['role'].toString();
+        final roleName = doerRoleController.getDoerRoleNameById(roleId);
+        developer.log('👤 Binding Role → ID: $roleId, Name: $roleName');
+        if (roleName != null) {
+          role.value = roleName;
+          developer.log('✅ Role set to: $roleName');
+        }
+      }
+
+      // 7. Brief Details
+      final brief = args['remark']?.toString() ?? '';
+      remark.text = brief;
+      developer.log('📝 Brief Details → "${brief.replaceAll('\n', '\\n')}"');
+
+      // 8. Issue Open Date
+      if (args['issue_open_date'] != null) {
+        final dateStr = args['issue_open_date'].toString().trim();
+        try {
+          final parts = dateStr.split('-');
+          if (parts.length == 3) {
+            final day = int.parse(parts[0]);
+            final month = int.parse(parts[1]);
+            final year = int.parse(parts[2]);
+
+            final parsedDate = DateTime(year, month, day);
+            issueOpenSinceDate.value = parsedDate;
+            developer.log(
+              'Issue Open Date → $parsedDate (parsed from DD-MM-YYYY)',
+            );
+          } else {
+            throw FormatException('Invalid date format');
+          }
+        } catch (e) {
+          developer.log(
+            'Failed to parse issue_open_date: "$dateStr" → using current date',
+            error: e,
+          );
+          issueOpenSinceDate.value = DateTime.now();
+        }
+      }
+
+      // Final summary
+      developer.log(
+        '🎉 _bindFormData completed successfully! Form pre-filled.',
+      );
+    } catch (e, stackTrace) {
+      developer.log(
+        '💥 Error in _bindFormData',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    } finally {
+      isLoadingArg.value = false;
+    }
+  }
+
   void onPriorityChanged(String? value) {
-    priority.value = value ?? 'Low';
+    priority.value = value ?? '';
   }
 
   void onRoleChanged(String? value) {
-    role.value = value ?? 'Production PMS PC';
+    role.value = value ?? '';
   }
 
   void onIssueOpenSinceDateChanged(DateTime date) {
@@ -83,16 +175,21 @@ class UpdateAccFormController extends GetxController {
   }
 
   void onRemarkChanged(String value) {
-    remark.value = value;
+    remark.text = value;
   }
 
   Future<void> onRefresh() async {
-    priority.value = 'Low';
-    role.value = 'Production PMS PC';
-    issueOpenSinceDate.value = DateTime.now();
-    issueCloseDate.value = DateTime.now();
-    attachmentFileName.value = 'No file chosen';
-    remark.value = '';
+    // priority.value = 'Low';
+    // role.value = '';
+    // issueOpenSinceDate.value = DateTime.now();
+
+    // attachmentFileName.value = 'No file chosen';
+    // remark.text = '';
+    // await doerRoleController.fetchDoerRoles(
+    //   context: Get.context!,
+    //   forceFetch: true,
+    // );
+    await _bindFormData();
   }
 
   Future<bool> _requestStoragePermission() async {
@@ -230,7 +327,7 @@ class UpdateAccFormController extends GetxController {
             .split('T')
             .first,
         'close_date_status': issueStatus.value ? '1' : '0',
-        if (remark.value.trim().isNotEmpty) 'remark': remark.value.trim(),
+        if (remark.text.trim().isNotEmpty) 'remark': remark.text.trim(),
       };
 
       final Map<String, File> fileMap = {};
