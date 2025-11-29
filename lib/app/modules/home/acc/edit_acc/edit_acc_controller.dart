@@ -52,6 +52,7 @@ class EditAccController extends GetxController {
   final RxString role = ''.obs;
   final RxString accId = ''.obs;
   final RxString attchmentLink = ''.obs;
+  final isLoadingArg = false.obs;
 
   var attachmentFile = Rxn<PlatformFile>();
   final RxString attachmentFileName = 'No file chosen'.obs;
@@ -78,7 +79,7 @@ class EditAccController extends GetxController {
 
   void _bindFormData() async {
     final args = Get.arguments as Map<String, dynamic>?;
-
+    isLoadingArg.value = true;
     // Log the raw arguments first
     if (args == null) {
       developer.log(
@@ -233,6 +234,8 @@ ${args.entries.map((e) => '   • ${e.key}: ${e.value}').join('\n')}
         error: e,
         stackTrace: stackTrace,
       );
+    } finally {
+      isLoadingArg.value = false;
     }
   }
 

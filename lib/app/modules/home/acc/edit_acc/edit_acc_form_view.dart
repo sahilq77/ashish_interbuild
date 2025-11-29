@@ -48,133 +48,137 @@ class _EditAccFormViewState extends State<EditAccFormView> {
         onRefresh: controller.onRefresh,
         child: SingleChildScrollView(
           padding: ResponsiveHelper.padding(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Project *',
-                  value: controller.selectedProject.value,
-                  items: projectdController.projectNames,
-                  onChanged: controller.onProjectChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select an Project'
-                      : null,
-                  hint: 'Select Project',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Package *',
-                  value: controller.selectedPackage.value,
-                  items: packageNameController.packageNames,
-                  onChanged: controller.onPackageChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select an Package'
-                      : null,
-                  hint: 'Select Package',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'ACC Category *',
-                  value: controller.accCategory.value,
-                  items: accCategoryController.accCategoryNames,
-                  onChanged: controller.onAccCategoryChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select an ACC category'
-                      : null,
-                  hint: 'Select Category',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Priority',
-                  value: controller.priority.value,
-                  items: controller.priorities,
-                  onChanged: controller.onPriorityChanged,
-                  hint: 'Select Priority',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Key Delay Events',
-                  value: controller.keyDelayEvents.value,
-                  items: controller.keyDelayOptions,
-                  onChanged: controller.onKeyDelayEventsChanged,
-                  hint: 'Plese Select Yes/No',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Affected Milestone *',
-                  value: controller.affectedMilestone.value,
-                  items: milestoneController.milestoneNames,
-                  onChanged: controller.onAffectedMilestoneChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select an affected milestone'
-                      : null,
-                  hint: 'Select Milestone',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              _buildTextFormField(
-                label: 'Brief Details *',
-                controller: controller.briefDetails,
-                onChanged: controller.onBriefDetailsChanged,
-                hint: 'Detail',
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please enter brief details'
-                    : null,
-              ),
+          child: Obx(
+            () => controller.isLoadingArg.value
+                ? Center(child: CircularProgressIndicator())
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'Project *',
+                          value: controller.selectedProject.value,
+                          items: projectdController.projectNames,
+                          onChanged: controller.onProjectChanged,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select an Project'
+                              : null,
+                          hint: 'Select Project',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'Package *',
+                          value: controller.selectedPackage.value,
+                          items: packageNameController.packageNames,
+                          onChanged: controller.onPackageChanged,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select an Package'
+                              : null,
+                          hint: 'Select Package',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'ACC Category *',
+                          value: controller.accCategory.value,
+                          items: accCategoryController.accCategoryNames,
+                          onChanged: controller.onAccCategoryChanged,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select an ACC category'
+                              : null,
+                          hint: 'Select Category',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'Priority',
+                          value: controller.priority.value,
+                          items: controller.priorities,
+                          onChanged: controller.onPriorityChanged,
+                          hint: 'Select Priority',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'Key Delay Events',
+                          value: controller.keyDelayEvents.value,
+                          items: controller.keyDelayOptions,
+                          onChanged: controller.onKeyDelayEventsChanged,
+                          hint: 'Plese Select Yes/No',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'Affected Milestone *',
+                          value: controller.affectedMilestone.value,
+                          items: milestoneController.milestoneNames,
+                          onChanged: controller.onAffectedMilestoneChanged,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select an affected milestone'
+                              : null,
+                          hint: 'Select Milestone',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      _buildTextFormField(
+                        label: 'Brief Details *',
+                        controller: controller.briefDetails,
+                        onChanged: controller.onBriefDetailsChanged,
+                        hint: 'Detail',
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter brief details'
+                            : null,
+                      ),
 
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDateField(
-                  label: 'Issue Open Date *',
-                  selectedDate: controller.issueOpenDate.value,
-                  onDateChanged: controller.onIssueOpenDateChanged,
-                  hint: 'Enter Date',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildDropdownField(
-                  label: 'Role *',
-                  value: controller.role.value,
-                  items: doerRoleController.doerRoleNames,
-                  onChanged: controller.onRoleChanged,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please select a role'
-                      : null,
-                  hint: 'Select Doer',
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
-              Obx(
-                () => _buildAttachmentField(
-                  label: 'Attachment',
-                  fileName: controller.attachmentFileName.value,
-                  onAttachmentPicked: controller.pickAttachment,
-                  hint: 'Choose File',
-                  attachmentLink: controller.attchmentLink.value,
-                ),
-              ),
-              SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
-              ElevatedButton(
-                onPressed: () => controller.submitForm(context),
-                style: AppButtonStyles.elevatedLargeBlack(),
-                child: Text(
-                  'Submit',
-                  style: AppStyle.buttonTextPoppinsWhite.responsive,
-                ),
-              ),
-            ],
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDateField(
+                          label: 'Issue Open Date *',
+                          selectedDate: controller.issueOpenDate.value,
+                          onDateChanged: controller.onIssueOpenDateChanged,
+                          hint: 'Enter Date',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildDropdownField(
+                          label: 'Role *',
+                          value: controller.role.value,
+                          items: doerRoleController.doerRoleNames,
+                          onChanged: controller.onRoleChanged,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Please select a role'
+                              : null,
+                          hint: 'Select Doer',
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.02),
+                      Obx(
+                        () => _buildAttachmentField(
+                          label: 'Attachment',
+                          fileName: controller.attachmentFileName.value,
+                          onAttachmentPicked: controller.pickAttachment,
+                          hint: 'Choose File',
+                          attachmentLink: controller.attchmentLink.value,
+                        ),
+                      ),
+                      SizedBox(height: ResponsiveHelper.screenHeight * 0.05),
+                      ElevatedButton(
+                        onPressed: () => controller.submitForm(context),
+                        style: AppButtonStyles.elevatedLargeBlack(),
+                        child: Text(
+                          'Submit',
+                          style: AppStyle.buttonTextPoppinsWhite.responsive,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
